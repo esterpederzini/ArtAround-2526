@@ -1,7 +1,7 @@
 import React from "react";
 import NavigatorHome from "./NavigatorHome";
 import NavigatorSideBar from "./NavigatorSideBar";
-import NavigatorBottomNav from "./NavigatorBottomNav";
+import { Outlet } from "react-router-dom";
 import "../CSS/NavigatorLayout.css";
 
 const NavigatorLayout = () => {
@@ -9,7 +9,7 @@ const NavigatorLayout = () => {
     <div className="navigator-wrapper">
       <NavigatorSideBar />
       <main className="main-content">
-        <NavigatorHome />
+        <Outlet>{console.log("va")}</Outlet>
       </main>
     </div>
   );

@@ -1,15 +1,19 @@
 import { React, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../CSS/NavigatorHome.css";
+import mockData from "../mockData.json";
 
 const NavigatorHome = () => {
+  const [selectedVisitId, setSelectedVisitId] = useState("");
+  const navigate = useNavigate();
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (selectedVisitId) {
+      navigate(`/visit/${selectedVisitId}`);
+      console.log("agaha");
+    }
   };
-
-  const options = [
-    { value: "Visita 1", label: "Museo 1" },
-    { value: "Visita 2", label: "Museo 2" },
-  ];
 
   return (
     <div className="home-container">
@@ -17,36 +21,25 @@ const NavigatorHome = () => {
         <h1 className="txt">Art Around</h1>
         <span id="motto">Anywhere. Anytime. Everyone.</span>
         <form className="sel-museum" onSubmit={handleSubmit}>
-          {/* <div
+          <select
             className="museum-select"
-            onClick={() => setShowOptions(!showOptions)}
+            onChange={(e) => setSelectedVisitId(e.target.value)}
+            defaultValue=""
           >
-            {selected}
-            {showOptions && (
-              <div className="options-box">
-                {options.map((opt) => (
-                  <div
-                    key={opt.value}
-                    className="single-option"
-                    onClick={() => setSelected(opt.label)}
-                  >
-                    {opt.label}
-                  </div>
-                ))}
-              </div>
-            )} 
-          </div> */}
-          <select className="museum-select" defaultValue="">
             <option value="" disabled>
               Scegli una visita...
             </option>
-            {options.map((option) => (
-              <option
-                key={option.label}
-              >{`${option.value} - ${option.label}`}</option>
+            {mockData.visite.map((visita) => (
+              <option key={visita.id} value={visita.id}>
+                {visita.titolo}
+              </option>
             ))}
           </select>
-          <button type="submit" className="submit-btn">
+          <button
+            type="submit"
+            className="submit-btn"
+            disabled={!selectedVisitId}
+          >
             Avvia
           </button>
         </form>

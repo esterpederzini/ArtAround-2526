@@ -1,0 +1,51 @@
+{
+  "visite": [
+    {
+      "id": "visita_001",
+      "titolo": "Capolavori della Pinacoteca",
+      "logistica_iniziale": "L'entrata è in via Belle Arti 56. Disponibile guardaroba gratuito.",
+      "oggetti": [
+        {
+          "id_opera": "Q126599960",
+          "titolo_opera": "Ritratto di frate",
+          "immagine_riconoscimento": "url_immagine_frate.jpg",
+          "logistica_prossimo": "Proseguire a sinistra verso la sala 12.",
+          "items": [
+            {
+              "durata": "3s",
+              "linguaggio": "medio",
+              "testo": "Ritratto di frate in veste di San Tommaso d'Aquino di Girolamo Mazzola Bedoli.",
+              "audio_src": "audio_3s_medio.mp3"
+            },
+            {
+              "durata": "15s",
+              "linguaggio": "medio",
+              "testo": "Un frate domenicano in un'atmosfera raccolta e severa. La figura riflette il Manierismo.",
+              "audio_src": "audio_15s_medio.mp3"
+            },
+            {
+              "durata": "15s",
+              "linguaggio": "semplice",
+              "testo": "Questo quadro mostra un frate seduto al tavolo, illuminato da una luce calma.",
+              "audio_src": "audio_15s_semplice.mp3"
+            }
+          ]
+        },
+        {
+          "id_opera": "Q987654321",
+          "titolo_opera": "Seconda Opera",
+          "immagine_riconoscimento": "url_opera_2.jpg",
+          "logistica_prossimo": "L'uscita si trova in fondo al corridoio.",
+          "items": [
+            {
+              "durata": "3s",
+              "linguaggio": "medio",
+              "testo": "Descrizione breve della seconda opera.",
+              "audio_src": "audio_2_3s.mp3"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
