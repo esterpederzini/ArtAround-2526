@@ -9,7 +9,7 @@ const NavigatorLayout = () => {
     <div className="navigator-wrapper">
       <NavigatorSideBar />
       <main className="main-content">
-        <Outlet>{console.log("va")}</Outlet>
+        <Outlet></Outlet>
       </main>
     </div>
   );

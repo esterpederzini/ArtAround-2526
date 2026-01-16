@@ -11,7 +11,6 @@ const NavigatorHome = () => {
     e.preventDefault();
     if (selectedVisitId) {
       navigate(`/visit/${selectedVisitId}`);
-      console.log("agaha");
     }
   };
 
