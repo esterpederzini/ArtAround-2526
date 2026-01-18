@@ -10,6 +10,10 @@
     hsla(40, 63%, 85%, 1) 0%,
     hsla(22, 94%, 79%, 1) 100%
   );
+  /* background-image: url("./Img/bg-intro.jpg");
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat; */
 }
 
 .bounce-text {

@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import mockData from "../mockData.json";
-import { Button, Container, Row, Col, Card } from "react-bootstrap";
+import {
+  Button,
+  Container,
+  Row,
+  Col,
+  Card,
+  Nav,
+  Navbar,
+} from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import "../CSS/NavigatorVisitViewer.css";
 
@@ -9,6 +17,7 @@ export default function NavigatorVisitViewer() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prefDurata, setPrefDurata] = useState("3s");
   const [prefLingua, setPrefLingua] = useState("medio");
+  const [isPlaying, setIsPlaying] = useState(true);
 
   const visit = mockData.visite.find((v) => v.id === id);
 
@@ -40,30 +49,73 @@ export default function NavigatorVisitViewer() {
           </Col>
         </Row>
 
-        {/* Footer fisso */}
-        <div className="fixed-bottom p-3 bg-light d-flex justify-content-between border-top">
-          <Button
-            variant="secondary"
-            onClick={() => setCurrentIndex((prev) => prev - 1)}
-            disabled={currentIndex === 0}
-          >
-            Precedente
-          </Button>
-          <Button
-            variant="primary"
-            onClick={() => setPrefDurata(prefDurata === "3s" ? "15s" : "3s")}
-          >
-            {prefDurata === "3s" ? "Approfondisci" : "Riduci"}
-          </Button>
+        <Navbar fixed="bottom" className="bg-transparent mb-3">
+          <Container className="bg-white shadow-lg rounded-pill p-1 border">
+            <Nav className="w-100 d-flex justify-content-around align-items-center">
+              <Nav.Link
+                onClick={() => navigate("/")}
+                className="text-dark d-flex flex-column align-items-center"
+              >
+                <span>
+                  <i class="bi bi-list"></i>
+                </span>
+                <span style={{ fontSize: "10px" }}>Menù</span>
+              </Nav.Link>
+              <Nav.Link
+                onClick={() => setCurrentIndex((prev) => prev - 1)}
+                disabled={currentIndex === 0}
+                className="text-dark d-flex flex-column align-items-center back"
+              >
+                <span className="back">
+                  <i class="bi bi-caret-left-fill"></i>
+                </span>
+                <span style={{ fontSize: "10px" }}>Indietro</span>
+              </Nav.Link>
 
-          <Button
-            variant="success"
-            onClick={() => setCurrentIndex((prev) => prev + 1)}
-            disabled={currentIndex === visit.oggetti.length - 1}
-          >
-            Prossimo
-          </Button>
-        </div>
+              {/* Tasto Centrale: Approfondisci (stile rosso Messages) */}
+              <div
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="d-flex flex-column align-items-center justify-content-center"
+                style={{
+                  cursor: "pointer",
+                  width: "60px",
+                }}
+              >
+                <div className="rounded-circle d-flex align-items-center justify-content-center shadow-sm player">
+                  <i
+                    className={`bi ${
+                      isPlaying ? "bi-pause-fill" : "bi-play-fill"
+                    }`}
+                  ></i>
+                </div>
+                {/* <span
+                  style={{ fontSize: "10px", color: "black", marginTop: "2px" }}
+                >
+                  {isPlaying ? "Pausa" : "Riproduci"}
+                </span> */}
+              </div>
+              <Nav.Link
+                onClick={() => setCurrentIndex((prev) => prev + 1)}
+                disabled={currentIndex === visit.oggetti.length - 1}
+                className="text-dark d-flex flex-column align-items-center"
+              >
+                <span>
+                  <i class="bi bi-caret-right-fill"></i>
+                </span>
+                <span style={{ fontSize: "10px" }}>Avanti</span>
+              </Nav.Link>
+
+              {/* Logout/Esci */}
+              <Nav.Link
+                onClick={() => navigate("/")}
+                className="text-dark d-flex flex-column align-items-center"
+              >
+                <span className="fs-5">👤</span>
+                <span style={{ fontSize: "10px" }}>Profilo</span>
+              </Nav.Link>
+            </Nav>
+          </Container>
+        </Navbar>
       </Container>
     </>
   );

@@ -4,10 +4,10 @@ import NavigatorSideBar from "./NavigatorSideBar";
 import { Outlet } from "react-router-dom";
 import "../CSS/NavigatorLayout.css";
 
-const NavigatorLayout = () => {
+const NavigatorLayout = ({ isMobile }) => {
   return (
     <div className="navigator-wrapper">
-      <NavigatorSideBar />
+      {!isMobile && <NavigatorSideBar />}
       <main className="main-content">
         <Outlet></Outlet>
       </main>

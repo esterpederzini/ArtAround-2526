@@ -55,8 +55,8 @@ function App() {
         <NavigatorProvider>
           <BrowserRouter>
             <Routes>
-              <Route element={<NavigatorLayout />}>
-                <Route path="/" element={<NavigatorHome />} />
+              <Route element={<NavigatorLayout isMobile={isMobile}/>}>
+                <Route path="/home" element={<NavigatorHome />} />
                 <Route path="/visit/:id" element={<NavigatorVisitViewer />} />
               </Route>
             </Routes>
