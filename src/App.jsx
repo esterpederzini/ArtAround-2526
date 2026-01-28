@@ -8,8 +8,9 @@ import {
 import "./App.css";
 import { NavigatorProvider } from "./context/NavigatorContext";
 import NavigatorLayout from "./components/NavigatorLayout";
-import NavigatorVisitViewer from "./components/NavigatorVisitViewer";
+import NavigatorItemViewer from "./components/NavigatorItemViewer";
 import NavigatorHome from "./components/NavigatorHome";
+import NavigatorVisitOverview from "./components/NavigatorVisitOverview";
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -55,10 +56,14 @@ function App() {
         <NavigatorProvider>
           <BrowserRouter>
             <Routes>
-              <Route element={<NavigatorLayout isMobile={isMobile}/>}>
-                <Route path="/home" element={<NavigatorHome />} />
-                <Route path="/visit/:id" element={<NavigatorVisitViewer />} />
-              </Route>
+              <Route element={<NavigatorLayout isMobile={isMobile} />} />
+              <Route path="/" element={<NavigatorHome />} />
+              <Route path="/home" element={<NavigatorHome />} />
+              <Route path="/visit/:id" element={<NavigatorVisitOverview />} />
+              <Route
+                path="/visit/:id/:operaIndex"
+                element={<NavigatorItemViewer />}
+              />
             </Routes>
           </BrowserRouter>
         </NavigatorProvider>

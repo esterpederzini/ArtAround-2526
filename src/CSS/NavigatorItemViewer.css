@@ -1,0 +1,140 @@
+.card-container {
+  min-height: 100vh !important;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  height: auto;
+  background-color: #1a1a1d;
+}
+
+.card-viewer {
+  background-color: #242326 !important;
+  border: none !important;
+  width: 100% !important;
+  color: #e0e0e0 !important;
+  border-radius: 0 !important;
+}
+
+.card-viewer h2 {
+  color: #ffffff;
+}
+
+.card-viewer .text-muted {
+  color: #a0a0a0 !important;
+}
+
+.img-container {
+  width: 100%;
+  height: 40vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  max-height: 45vh;
+  background-color: #000;
+  border-bottom: 1px solid #333;
+}
+
+.img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.player {
+  width: 55px;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50% !important;
+  cursor: pointer;
+  background: transparent !important;
+  border: 1px solid #444 !important;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+}
+
+.player i {
+  background: linear-gradient(135deg, #e6a157 0%, #fdbd7d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 2rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player:hover {
+  border-color: #fdbd7d !important;
+  box-shadow: 0 0 10px rgba(230, 161, 87, 0.4);
+}
+
+.player:active {
+  transform: scale(0.9);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #333333 0%, #dd1818 100%);
+  border-radius: 2px;
+}
+
+.item-text-content {
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.logistic {
+  min-height: 25vh;
+}
+
+.player-container {
+  background: #19181b !important; /* Effetto glass scuro */
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #444 !important; /* Bordo più visibile per separare */
+}
+
+.timer-text {
+  color: #b0b0b0 !important;
+  font-size: 0.8rem;
+}
+
+.arrow {
+  color: #ffffff !important;
+  transition: opacity 0.2s;
+}
+
+/* Box Logistica */
+.logistic .bg-light {
+  background-color: #333237 !important; /* Grigio leggermente più chiaro del fondo */
+  border-left-color: #dd1818 !important; /* Manteniamo il rosso come accento */
+  color: #e0e0e0;
+}
+
+@media (min-width: 992px) {
+  .viewer-card {
+    max-height: 75vh;
+  }
+
+  .viewer-img-container {
+    height: 250px;
+  }
+
+  .card-container {
+    margin-top: 7vh;
+  }
+
+  .viewer-card .card-title {
+    font-size: 1.5rem;
+  }
+
+  .viewer-card .card-text {
+    font-size: 1rem;
+    max-height: 120px;
+    overflow-y: auto;
+  }
+}
