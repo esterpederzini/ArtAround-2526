@@ -1,22 +1,77 @@
 @import url("https://fonts.googleapis.com/css2?family=Gravitas+One&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap");
-.card {
-  border: none !important;
-  box-shadow: none !important;
-  margin-left: 1rem;
-  background-color: #242326 !important;
-  border: 1px solid red;
-}
 
+/* --- CONTAINER GENERALE --- */
 .full-container {
   min-height: 100vh;
-  background-color: #242326;
+  background-color: #242326; /* Mantenuto il tuo colore */
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  padding-bottom: 10vh; /* Spazio per non finire sotto eventuali menu */
 }
 
+/* --- LOGICA TIMELINE (Numeri e Linea) --- */
+.itinerary-row {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.itinerary-row:active {
+  opacity: 0.7;
+}
+
+.list-num-circle {
+  background-color: #3a3a3c; /* Grigio scuro per i passi non attivi */
+  width: 10vw; /* Responsive */
+  height: 10vw; /* Responsive */
+  max-width: 40px;
+  max-height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Gravitas One", serif;
+  font-weight: 400;
+  color: white;
+  border-radius: 50% !important; /* Trasformati in tondi perfetti */
+  z-index: 2;
+  position: relative;
+}
+
+/* Classe per evidenziare il numero attivo/corrente */
+.list-num-circle.active {
+  background-color: #e18f37; /* Il tuo arancio */
+}
+
+/* La linea verticale che collega i numeri */
+.timeline-line {
+  position: absolute;
+  top: 47px; /* Inizia sotto il cerchio */
+  bottom: 10px; /* Si allunga verso il basso */
+  width: 2px;
+  background-color: #3a3a3c;
+  z-index: 1;
+}
+
+/* --- CARD ITINERARIO --- */
+.itinerary-card {
+  background-color: #2c2c2e !important; /* Leggermente più chiaro dello sfondo per profondità */
+  border-radius: 15px !important;
+  margin-left: 0.5rem;
+  overflow: hidden;
+  border: 1px solid #3a3a3c !important;
+}
+
+/* --- IMMAGINI --- */
+.img-list-new {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* Mantenuta la tua originale per compatibilità */
 .img-list {
   width: 27vh !important;
   aspect-ratio: 1 / 1;
@@ -25,33 +80,81 @@
   display: block;
 }
 
-.list-num-circle {
-  background-color: #e18f37;
-  width: 4vh;
-  height: 4vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: "Gravitas One", serif;
-  font-weight: 400;
-  font-style: normal;
-  color: white;
-  border-radius: 5px;
-}
-
+/* --- TESTI --- */
 .author {
   font-family: "Rubik", sans-serif;
-  font-optical-sizing: auto;
   font-weight: 400;
-  font-style: normal;
-  font-size: 1.2rem !important;
+  font-size: 0.8rem !important;
   margin: 0 !important;
-  color: #e49c4e !important;
+  color: black !important;
 }
 
 .title {
   font-family: "Raleway", sans-serif;
-  font-optical-sizing: auto;
   font-style: normal;
+  font-size: 0.9rem;
   color: #e0e0e0 !important;
+}
+
+/* Nuove classi per testi più simili allo screenshot */
+.opera-title {
+  color: #faf7f1 !important;
+  font-weight: 700;
+  font-size: 1.2rem !important;
+  margin-bottom: 2px;
+}
+
+.audio-info {
+  font-size: 0.75rem;
+  color: #e18f37;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+/* Header della sezione itinerario */
+.itinerary-header {
+  padding-left: 1vw;
+  margin-bottom: 2vh;
+}
+
+.itinerary-header h3 {
+  color: white;
+  font-family: "Rubik", sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+/* --- TASTO START VISIT --- */
+.start-visit-btn {
+  background-color: #5b252d !important;
+  border: none !important;
+  border-radius: 15px !important;
+  padding: 15px !important;
+  font-family: "Rubik", sans-serif;
+  letter-spacing: 1px;
+  font-size: 0.9rem;
+  transition: transform 0.2s ease;
+}
+
+.start-visit-btn:active {
+  transform: scale(0.96);
+  background-color: #5c2d34 !important;
+}
+
+/* Cerchio bianco intorno all'icona play */
+.play-icon-circle {
+  background-color: white;
+  color: #5b252d;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.play-icon-circle i {
+  font-size: 1.2rem;
+  margin-left: 2px; /* Allineamento ottico dell'icona play */
 }

@@ -27,10 +27,11 @@ function NavigatorVisitOverview() {
   return (
     <>
       <Navbar
-        className="align-items-center justify-content-center"
+        className="align-items-center justify-content-center border-0 shadow-none"
         style={{
           height: "6vh",
           backgroundColor: "#242326",
+          borderBottom: "none",
         }}
       >
         <div className="ms-3 position-absolute start-0">
@@ -50,35 +51,70 @@ function NavigatorVisitOverview() {
             className="fw-bold"
             style={{ fontSize: "1.2rem", color: "#FAF7F1" }}
           >
-            Opere da visitare
+            Tour preview
           </span>
         </div>
       </Navbar>
-      <Container fluid className=" full-container">
+      <Container fluid className="full-container px-4">
+        <div className="itinerary-header mt-4 mb-3">
+          <h3 className="text-white fw-bold">Itenerario visita</h3>
+        </div>
+
+        <div className="d-grid mb-4">
+          <Button
+            className="start-visit-btn d-flex align-items-center justify-content-center gap-3"
+            onClick={() => navigate(`/visit/${id}/0`)} // Parte sempre dalla prima opera (0)
+          >
+            <div className="play-icon-circle">
+              <i className="bi bi-play-fill"></i>
+            </div>
+            <span className="fw-bold">Inizia la visita</span>
+          </Button>
+        </div>
+
         {visit.oggetti.map((opera, index) => (
-          <Row key={index} className="justify-content-center mb-3 mt-3">
+          <Row
+            key={index}
+            className="g-0 mb-0 itinerary-row"
+            onClick={() => navigate(`/visit/${id}/${index}`)}
+            style={{ cursor: "pointer" }}
+          >
+            {/* Colonna Timeline (Numero e Linea) */}
             <Col
-              xs={1}
-              className="justify-content-center align-items-center mt-3"
+              xs={2}
+              className="d-flex flex-column align-items-center position-relative"
             >
-              <div className="list-num-circle">{index + 1}</div>
+              <div className={`list-num-circle ${index === 0 ? "active" : ""}`}>
+                {index + 1}
+              </div>
+              {/* Non mostriamo la linea dopo l'ultimo elemento */}
+              {index < visit.oggetti.length - 1 && (
+                <div className="timeline-line"></div>
+              )}
             </Col>
-            <Col xs={11} md={6} className="mt-2">
-              <Card className="card">
+
+            {/* Colonna Card Opera */}
+            <Col xs={10} className="pb-4">
+              <Card className="itinerary-card shadow-none">
                 <Row className="g-0 align-items-center">
-                  <Card.Img
-                    src={opera.immagine_riconoscimento}
-                    className="img-list"
-                  />
+                  <Col xs={4} className="p-2">
+                    <Card.Img
+                      src={opera.immagine_riconoscimento}
+                      className="img-list-new"
+                    />
+                  </Col>
                   <Col xs={8}>
-                    <Card.Body
-                      className="text-start mt-1"
-                      style={{ padding: 0 }}
-                    >
-                      <Card.Title className="author">{opera.autore}</Card.Title>
-                      <CardSubtitle className="title mt-1">
+                    <Card.Body className="py-2 px-3">
+                      <Card.Title className="opera-title">
                         {opera.titolo_opera}
+                      </Card.Title>
+                      <CardSubtitle className="author">
+                        {opera.autore}
                       </CardSubtitle>
+                      <div className="audio-info mt-2">
+                        <i className="bi bi-headphones me-2"></i>
+                        <span>04:20</span>
+                      </div>
                     </Card.Body>
                   </Col>
                 </Row>
