@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react";
 import mockData from "../mockData.json";
-import { Container, Row, Col, Card, Nav, Navbar } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Nav,
+  Navbar,
+  Modal,
+  Button,
+} from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom"; // Aggiunto useNavigate
 import "../CSS/NavigatorItemViewer.css";
 
@@ -16,6 +25,12 @@ export default function NavigatorItemViewer() {
   const [prefDurata, setPrefDurata] = useState("3s");
   const [prefLingua, setPrefLingua] = useState("medio");
   const [isPlaying, setIsPlaying] = useState(true);
+
+  // --- LOGICA MODAL ---
+  const [showExitModal, setShowExitModal] = useState(false);
+  const handleClose = () => setShowExitModal(false);
+  const handleShow = () => setShowExitModal(true);
+  const handleConfirmExit = () => navigate(`/visit/${safeId}`);
 
   const visit = mockData.visite.find((v) => String(v.id) === String(safeId));
   console.log(visit);
@@ -36,7 +51,16 @@ export default function NavigatorItemViewer() {
   return (
     <>
       <Container fluid className="card-container">
-        <Row className="justify-content-center">
+        <div className="top-nav-viewer">
+          <button className="top-nav-btn" onClick={handleShow}>
+            <i className="bi bi-chevron-left"></i>
+          </button>
+
+          <div className="top-nav-center">
+            <span className="top-nav-title">GALLERY TOUR</span>
+          </div>
+        </div>
+        <Row className="justify-content-center g-0">
           <Col xs={12} md={8} lg={6} className="p-0">
             <div className="img-container">
               <img
@@ -89,7 +113,7 @@ export default function NavigatorItemViewer() {
                   </Card.Text>
                 </div>
 
-                <div className="mt-4 mx-2 logistic mb-3">
+                <div className="mt-4 mx-2 logistic mb-5">
                   <div className="text-start bg-light rounded border-danger border-start border-3 p-2">
                     <p className="d-block text-muted text-start m-0">
                       Prossima tappa:
@@ -103,57 +127,96 @@ export default function NavigatorItemViewer() {
         </Row>
       </Container>
 
-      <Navbar fixed="bottom" className="audio-player-fixed p-0 border-top">
-        <Container fluid className="p-3 shadow-lg player-container">
-          <div className="w-100 px-2">
-            <div className="d-flex align-items-center mb-2">
-              <span className="timer-text me-2" style={{ color: "#333333" }}>
-                00:00
-              </span>
-              <div className="progress-bar-container flex-grow-1">
-                <div
-                  className="progress-bar-fill"
-                  style={{ width: "40%" }}
-                ></div>
+      <Navbar fixed="bottom" className="audio-player-fixed p-0 border-0">
+        <Container fluid className="player-container">
+          {/* Progress Area */}
+          <div className="progress-section">
+            <div className="progress-bar-container">
+              <div className="progress-bar-fill mt-2" style={{ width: "40%" }}>
+                <div className="progress-cursor"></div>
               </div>
-              <span className="timer-text ms-2" style={{ color: "#333333" }}>
-                03:00
-              </span>
+            </div>
+            <div className="timer-row">
+              <span>01:42</span>
+              <span>04:55</span>
+            </div>
+          </div>
+
+          {/* Main Controls */}
+          <div className="controls-row">
+            <button className="btn-seek">
+              <i className="bi bi-arrow-counterclockwise"></i>
+              <span className="seek-val">10</span>
+            </button>
+
+            <button
+              className="btn-skip-step"
+              onClick={() => cambiaOpera(safeIndex - 1)}
+            >
+              <i className="bi bi-skip-start-fill"></i>
+            </button>
+
+            <div
+              className="play-btn-sphere"
+              onClick={() => setIsPlaying(!isPlaying)}
+            >
+              <i
+                className={`bi ${isPlaying ? "bi-pause-fill" : "bi-play-fill"}`}
+              ></i>
             </div>
 
-            <Nav className="w-100 d-flex justify-content-around align-items-center">
-              <Nav.Link
-                onClick={() => cambiaOpera(safeIndex - 1)}
-                disabled={safeIndex === 0}
-                className={`arrow d-flex flex-column align-items-center p-0 ${safeIndex === 0 ? "opacity-25" : ""}`}
-              >
-                <i className="bi bi-caret-left-fill fs-5"></i>
-                <span style={{ fontSize: "10px" }}>Indietro</span>
-              </Nav.Link>
+            <button
+              className="btn-skip-step"
+              onClick={() => cambiaOpera(safeIndex + 1)}
+            >
+              <i className="bi bi-skip-end-fill"></i>
+            </button>
 
-              <div
-                onClick={() => setIsPlaying(!isPlaying)}
-                style={{ cursor: "pointer" }}
-              >
-                <div className="d-flex align-items-center justify-content-center shadow-sm player">
-                  <i
-                    className={`bi ${isPlaying ? "bi-pause-fill" : "bi-play-fill"}`}
-                  ></i>
-                </div>
-              </div>
-
-              <Nav.Link
-                onClick={() => cambiaOpera(safeIndex + 1)}
-                disabled={safeIndex === visit.oggetti.length - 1}
-                className={`arrow d-flex flex-column align-items-center p-0 ${safeIndex === visit.oggetti.length - 1 ? "opacity-25" : ""}`}
-              >
-                <i className="bi bi-caret-right-fill fs-5"></i>
-                <span style={{ fontSize: "10px" }}>Avanti</span>
-              </Nav.Link>
-            </Nav>
+            <button className="btn-seek">
+              <i className="bi bi-arrow-clockwise"></i>
+              <span className="seek-val">10</span>
+            </button>
           </div>
         </Container>
       </Navbar>
+
+      {/* MODAL DI CONFERMA */}
+      <Modal
+        show={showExitModal}
+        onHide={handleClose}
+        centered
+        className="exit-modal"
+      >
+        <Modal.Header closeButton className="border-0">
+          <Modal.Title className="fw-bold" style={{ color: "#1a1a1d" }}>
+            Interrompere la visita?
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-muted">
+          Sei sicuro di voler interrompere l'ascolto e tornare alla lista delle
+          opere?
+        </Modal.Body>
+        <Modal.Footer className="border-0">
+          <Button
+            variant="link"
+            className="text-decoration-none text-muted"
+            onClick={handleClose}
+          >
+            Annulla
+          </Button>
+          <Button
+            style={{
+              backgroundColor: "#e18f37",
+              border: "none",
+              borderRadius: "10px",
+              padding: "10px 25px",
+            }}
+            onClick={handleConfirmExit}
+          >
+            Conferma
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 }

@@ -1,3 +1,45 @@
+.top-nav-viewer {
+  left: 0;
+  width: 100vw;
+  height: 7vh;
+  display: flex;
+  align-items: center;
+  padding: 0 5vw;
+  background-color: #1a1a1d;
+  z-index: 1000;
+  /* border-bottom: 1px solid #333; */ /* Opzionale: una linea sottile per separare */
+}
+
+.top-nav-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.top-nav-title {
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.top-nav-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 1001; /* Sopra il titolo se dovessero sovrapporsi */
+}
+/* --- STRUTTURA CARD E CONTENUTI (Invariati come richiesto) --- */
 .card-container {
   min-height: 100vh !important;
   width: 100vw;
@@ -9,7 +51,7 @@
 }
 
 .card-viewer {
-  background-color: #242326 !important;
+  background-color: #1a1a1d !important;
   border: none !important;
   width: 100% !important;
   color: #e0e0e0 !important;
@@ -26,14 +68,14 @@
 
 .img-container {
   width: 100%;
-  height: 40vh;
+  height: 45vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 2vh 5vw;
+  background-color: transparent;
   overflow: hidden;
-  max-height: 45vh;
-  background-color: #000;
-  border-bottom: 1px solid #333;
+  border: none !important;
 }
 
 .img-container img {
@@ -41,46 +83,8 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
-}
-
-.player {
-  width: 55px;
-  height: 55px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50% !important;
-  cursor: pointer;
-  background: transparent !important;
-  border: 1px solid #444 !important;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-  transition: all 0.2s ease;
-}
-
-.player i {
-  background: linear-gradient(135deg, #e6a157 0%, #fdbd7d 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: 2rem !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.player:hover {
-  border-color: #fdbd7d !important;
-  box-shadow: 0 0 10px rgba(230, 161, 87, 0.4);
-}
-
-.player:active {
-  transform: scale(0.9);
-}
-
-.progress-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #333333 0%, #dd1818 100%);
-  border-radius: 2px;
+  border-radius: 25px;
+  box-shadow: 0 8px 10px rgba(0, 0, 0, 0.5);
 }
 
 .item-text-content {
@@ -92,46 +96,173 @@
   min-height: 25vh;
 }
 
-.player-container {
-  background: #19181b !important; /* Effetto glass scuro */
-  backdrop-filter: blur(10px);
-  border-top: 1px solid #444 !important; /* Bordo più visibile per separare */
-}
-
-.timer-text {
-  color: #b0b0b0 !important;
-  font-size: 0.8rem;
-}
-
-.arrow {
-  color: #ffffff !important;
-  transition: opacity 0.2s;
-}
-
-/* Box Logistica */
 .logistic .bg-light {
-  background-color: #333237 !important; /* Grigio leggermente più chiaro del fondo */
-  border-left-color: #dd1818 !important; /* Manteniamo il rosso come accento */
+  background-color: #333237 !important;
+  border-left-color: #dd1818 !important;
   color: #e0e0e0;
 }
 
+/* --- NUOVO PLAYER RESPONSIVE (Aggiornato in vh/vw) --- */
+.audio-player-fixed {
+  border: 1px solid red !important;
+}
+
+.player-container {
+  background: #1c1c1e !important;
+  padding: 2vh 5vw !important;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 20vh;
+  border-top: none !important;
+}
+
+/* Area Barra Progresso */
+.progress-section {
+  width: 100%;
+}
+
+.progress-bar-container {
+  height: 0.6vh;
+  background: #333;
+  border-radius: 1vh;
+  position: relative;
+  width: 100%;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #e18f37 !important;
+  border-radius: 1vh;
+  position: relative;
+}
+
+.progress-cursor {
+  position: absolute;
+  right: -1.2vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3.5vw;
+  height: 3.5vw;
+  max-width: 15px;
+  max-height: 15px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.timer-row {
+  display: flex;
+  justify-content: space-between;
+  color: #888;
+  font-size: 0.85rem;
+  margin-top: 1vh;
+}
+
+/* Riga Controlli (Play, Seek, Skip) */
+.controls-row {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 2.5vh;
+  width: 100%;
+}
+
+.play-btn-sphere {
+  width: 16vw;
+  height: 16vw;
+  max-width: 70px;
+  max-height: 70px;
+  background: #e18f37;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1vh 3vh rgba(228, 156, 78, 0.3);
+  cursor: pointer;
+}
+
+.play-btn-sphere i {
+  color: white !important;
+  -webkit-text-fill-color: white !important; /* Sovrascrive il vecchio gradiente */
+  font-size: 8vw !important;
+  max-font-size: 40px;
+  display: flex;
+}
+
+.btn-seek,
+.btn-skip-step {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 8.5vw;
+  max-font-size: 32px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.seek-val {
+  position: absolute;
+  font-size: 0.65rem;
+  font-weight: 800;
+  top: 55%;
+  transform: translateY(-55%);
+}
+
+/* Riga Footer (Previous/Next) */
+.footer-nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1vh;
+}
+
+.nav-label {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05vw;
+  display: flex;
+  align-items: center;
+  gap: 1.5vw;
+}
+
+.dot-indicator {
+  display: flex;
+  gap: 2.5vw;
+}
+
+.dot {
+  width: 1.5vw;
+  height: 1.5vw;
+  max-width: 6px;
+  max-height: 6px;
+  background: #333;
+  border-radius: 50%;
+}
+
+.dot.active {
+  background: #3c78e6;
+}
+
+/* --- MEDIA QUERIES (Mantengo le tue originali) --- */
 @media (min-width: 992px) {
   .viewer-card {
     max-height: 75vh;
   }
-
   .viewer-img-container {
     height: 250px;
   }
-
   .card-container {
     margin-top: 7vh;
   }
-
   .viewer-card .card-title {
     font-size: 1.5rem;
   }
-
   .viewer-card .card-text {
     font-size: 1rem;
     max-height: 120px;
