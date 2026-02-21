@@ -6,11 +6,11 @@ import {
   BrowserRouter,
 } from "react-router-dom";
 import "./App.css";
-import { NavigatorProvider } from "./context/NavigatorContext";
-import NavigatorLayout from "./components/NavigatorLayout";
-import NavigatorItemViewer from "./components/NavigatorItemViewer";
-import NavigatorHome from "./components/NavigatorHome";
-import NavigatorVisitOverview from "./components/NavigatorVisitOverview";
+import { NavigatorProvider } from "./navigator/context/NavigatorContext";
+import NavigatorLayout from "./navigator/components/NavigatorLayout";
+import NavigatorItemViewer from "./navigator/components/NavigatorItemViewer";
+import NavigatorHome from "./navigator/components/NavigatorHome";
+import NavigatorVisitOverview from "./navigator/components/NavigatorVisitOverview";
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -36,6 +36,12 @@ function App() {
 
   return (
     <>
+    {/**In questo file andrà la logica di gestione per determinare se
+      la vista dovrà essere quella della mobile app o della spa (la pagina web).
+      Cerco di scriverla il prima possibile in modo che intanto non compaia sempre l'intro e
+      poi la mia home, poi quando hai anche la tua home la aggiorniamo con le route.
+      Se ti dà fastidio commentala pure, tanto io sviluppo in locale quindi a me non cambia finchè
+      non faccio pull da git con anche la tua parte.*/}
       {showIntro ? (
         <div className="intro-wrapper">
           <h1 className="bounce-text">

@@ -10,7 +10,7 @@ import {
   Button,
   Modal,
 } from "react-bootstrap";
-import mockData from "../mockData.json";
+import mockData from "../../mockData.json";
 import "../CSS/NavigatorVisitOverview.css";
 
 function NavigatorVisitOverview() {
