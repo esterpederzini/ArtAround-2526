@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editor Visita – ArtAround</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav class="navbar navbar-expand-lg aa-navbar">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">Art<span>Around</span></a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/editor-visita">Editor Visita</a></li>
+        <li class="nav-item"><a class="nav-link" href="/editor-item">Nuovo Item</a></li>
+      </ul>
+      <span id="utenteInfo" class="text-white-50 small me-3"></span>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid py-4 px-4 flex-grow-1">
+  <div class="row g-4">
+
+    <!-- PANNELLO SINISTRO: FORM VISITA -->
+    <div class="col-lg-5 col-xl-4">
+      <div class="aa-card">
+        <div class="aa-card-header">
+          <i class="bi bi-pencil-square"></i>
+          <span id="editorTitolo">Nuova Visita</span>
+        </div>
+        <div class="aa-card-body">
+
+          <!-- Info base -->
+          <div class="aa-form-group">
+            <label class="aa-label">Titolo Visita <span class="required">*</span></label>
+            <input type="text" id="visitaTitolo" class="aa-input" placeholder="Es. Rinascimento al MNAA">
+          </div>
+
+          <div class="aa-form-group">
+            <label class="aa-label">Museo <span class="required">*</span></label>
+            <select id="visitaMuseo" class="aa-select">
+              <option value="">Seleziona museo...</option>
+            </select>
+          </div>
+
+          <div class="aa-form-group">
+            <label class="aa-label">Descrizione</label>
+            <textarea id="visitaDescrizione" class="aa-textarea" rows="3" placeholder="Descrivi il percorso..."></textarea>
+          </div>
+
+          <div class="row g-2">
+            <div class="col-6">
+              <div class="aa-form-group">
+                <label class="aa-label">Tags</label>
+                <input type="text" id="visitaTags" class="aa-input" placeholder="tag1, tag2">
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="aa-form-group">
+                <label class="aa-label">Durata (min)</label>
+                <input type="number" id="visitaDurata" class="aa-input" value="60" min="5">
+              </div>
+            </div>
+          </div>
+
+          <!-- Pubblicazione -->
+          <div class="divider"></div>
+          <div class="aa-sidebar-title" style="font-size:0.72rem"><i class="bi bi-shield-lock"></i> Pubblicazione</div>
+
+          <div class="row g-2">
+            <div class="col-6">
+              <div class="aa-form-group">
+                <label class="aa-label">Licenza</label>
+                <select id="visitaLicenza" class="aa-select">
+                  <option value="gratuito">Gratuito</option>
+                  <option value="CC-BY">CC-BY</option>
+                  <option value="CC-BY-SA">CC-BY-SA</option>
+                  <option value="CC-BY-NC">CC-BY-NC</option>
+                  <option value="proprietario">Proprietario</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="aa-form-group">
+                <label class="aa-label">Prezzo (€)</label>
+                <input type="number" id="visitaPrezzo" class="aa-input" value="0" min="0" step="0.01">
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <input type="checkbox" id="visitaPubblica" class="form-check-input" style="width:18px;height:18px">
+            <label for="visitaPubblica" class="aa-label mb-0" style="text-transform:none;letter-spacing:0">Pubblica visita nel marketplace</label>
+          </div>
+
+          <!-- Autore -->
+          <div class="aa-form-group">
+            <label class="aa-label">Autore (Utente) <span class="required">*</span></label>
+            <select id="visitaAutore" class="aa-select">
+              <option value="">Seleziona autore...</option>
+            </select>
+          </div>
+
+          <!-- Hidden ID per modifica -->
+          <input type="hidden" id="visitaId">
+
+          <div class="d-flex gap-2 mt-3">
+            <button class="btn-aa-primary flex-grow-1" onclick="salvaVisita()">
+              <i class="bi bi-floppy"></i> Salva Visita
+            </button>
+            <button class="btn-aa-outline" onclick="resetEditor()">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+
+          <!-- Visite salvate -->
+          <div class="divider"></div>
+          <div class="aa-sidebar-title" style="font-size:0.72rem"><i class="bi bi-clock-history"></i> Visite Esistenti</div>
+          <div id="visiteList" style="max-height:200px;overflow-y:auto">
+            <div class="text-center py-2"><div class="aa-spinner"></div></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- PANNELLO DESTRO: GESTIONE ITEMS -->
+    <div class="col-lg-7 col-xl-8">
+      <div class="row g-4">
+
+        <!-- PERCORSO CORRENTE (DnD) -->
+        <div class="col-12">
+          <div class="aa-card">
+            <div class="aa-card-header d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-list-ol"></i> Percorso della Visita</span>
+              <div class="d-flex align-items-center gap-2">
+                <span class="text-slate small" id="countItems">0 item</span>
+                <span class="text-slate small">|</span>
+                <span class="text-slate small" id="durataCalcolata">Durata: 0 min</span>
+              </div>
+            </div>
+            <div class="aa-card-body">
+              <div id="dndList" class="aa-dnd-list">
+                <div class="aa-empty" style="padding:1.5rem">
+                  <div class="aa-empty-icon" style="font-size:2rem">📭</div>
+                  <p class="mb-0" style="font-size:0.85rem">Trascina qui gli item o usare il bottone "+"</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CATALOGO ITEM DA AGGIUNGERE -->
+        <div class="col-12">
+          <div class="aa-card">
+            <div class="aa-card-header d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-collection"></i> Catalogo Item Disponibili</span>
+              <div class="aa-search-wrap" style="width:240px">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" id="cercaCatalogo" class="aa-input" placeholder="Cerca..." style="font-size:0.82rem;padding:0.4rem 0.4rem 0.4rem 30px">
+              </div>
+            </div>
+            <div class="aa-card-body p-2">
+              <div id="catalogoItems" style="max-height:380px;overflow-y:auto;padding:6px">
+                <div class="text-center py-4"><div class="aa-spinner"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="aa-toast-container" id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/editor-visita.js"></script>
+</body>
+</html>
