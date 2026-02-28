@@ -50,13 +50,12 @@ app.get("/db/search", async (req, res) => {
 // Questa rotta deve stare per ultima: se non trova un'API o un file statico,
 // rimanda all'index.html di React (necessario per il Navigator)
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
-});
-
-app.listen(8000, () => {
-  console.log("------------------------------------------");
-  console.log("Server ArtAround attivo su porta 8000");
-  console.log("Navigator: http://localhost:8000");
-  console.log("Marketplace: http://localhost:8000/marketplace");
-  console.log("------------------------------------------");
+  // Se la richiesta NON inizia con /db e NON inizia con /marketplace
+  // allora mandiamo il file di React (Navigator)
+  if (!req.url.startsWith("/db") && !req.url.startsWith("/marketplace")) {
+    res.sendFile(path.join(__dirname, "dist", "index.html"));
+  } else {
+    // Se cercava qualcosa in marketplace o db che non esiste, mandiamo un 404 standard
+    res.status(404).send("Risorsa non trovata nel Marketplace o nel Database");
+  }
 });
