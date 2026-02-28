@@ -9,53 +9,79 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Credenziali fornite
-const mongoCredentials = {
-  user: "site252620",
-  pwd: "Oht2Ieyi",
-  site: "mongo_site252620",
-};
+// LOGICA AMBIENTE: Riconosce se sei sul tuo PC o sul server universitario
+const isRemote =
+  process.env.NODE_ENV === "production" || process.cwd().includes("site252620");
+
+const mongoCredentials = isRemote
+  ? {
+      // Credenziali per GOCKER (Remoto)
+      user: "site252620",
+      pwd: "Oht2Ieyi",
+      site: "mongo_site252620",
+      url: `mongodb://site252620:Oht2Ieyi@mongo_site252620:27017`,
+    }
+  : {
+      // Credenziali per DOCKER LOCAL (Tuo PC)
+      user: "",
+      pwd: "",
+      site: "localhost",
+      // RIMUOVI user:pwd se sono vuoti per il locale
+      url: "mongodb://127.0.0.1:27017",
+    };
+
+// Seleziona la porta corretta: 8888 per Uni, 8000 per Locale
+const PORT = isRemote ? 8888 : 8000;
 
 /* --- SERVIZIO FILE STATICI --- */
 
-// 1. Serve il Marketplace (JS/HTML/CSS puro)
-// Accessibile a: http://localhost:8000/marketplace/
 app.use("/marketplace", express.static(path.join(__dirname, "../marketplace")));
-
-// 2. Serve i dati di configurazione e immagini (per la genericità)
-// Accessibile a: http://localhost:8000/data/config.json
 app.use("/data", express.static(path.join(__dirname, "public/data")));
 app.use("/img", express.static(path.join(__dirname, "public/img")));
-
-// 3. Serve il Navigator (React build)
-// Nota: 'dist' deve essere dentro la cartella 'backend' dopo il build
 app.use(express.static(path.join(__dirname, "dist")));
 
-/* --- API --- */
+/* --- API PER IL DATABASE --- */
 
-// Inizializzazione DB
 app.get("/db/create", async (req, res) => {
   const result = await mymongo.create(mongoCredentials);
   res.send(result);
 });
 
-// Ricerca per Navigator e Marketplace
 app.get("/db/search", async (req, res) => {
   const result = await mymongo.search(req.query, mongoCredentials);
   res.json(result);
 });
 
-/* --- GESTIONE ROUTING REACT --- */
+/* --- GESTIONE ROUTING REACT (NAVIGATOR) --- */
 
-// Questa rotta deve stare per ultima: se non trova un'API o un file statico,
-// rimanda all'index.html di React (necessario per il Navigator)
 app.get("*", (req, res) => {
-  // Se la richiesta NON inizia con /db e NON inizia con /marketplace
-  // allora mandiamo il file di React (Navigator)
   if (!req.url.startsWith("/db") && !req.url.startsWith("/marketplace")) {
     res.sendFile(path.join(__dirname, "dist", "index.html"));
   } else {
-    // Se cercava qualcosa in marketplace o db che non esiste, mandiamo un 404 standard
-    res.status(404).send("Risorsa non trovata nel Marketplace o nel Database");
+    res.status(404).send("Risorsa non trovata");
   }
+});
+
+/* --- AVVIO SERVER E AUTO-POPULATE --- */
+
+// rimosso il doppione "const PORT = 8000" che avevi qui
+app.listen(PORT, async () => {
+  console.log("------------------------------------------");
+  console.log(`AMBIENTE: ${isRemote ? "REMOTO (Uni)" : "LOCALE (Docker)"}`);
+  console.log(`Server ArtAround attivo su porta ${PORT}`);
+
+  try {
+    console.log("Verifica e popolamento automatico del database in corso...");
+    const result = await mymongo.create(mongoCredentials);
+    console.log("Risultato DB:", result);
+  } catch (err) {
+    console.error("Errore durante l'auto-popolamento:", err);
+  }
+
+  // Se siamo in locale mostra i link cliccabili
+  if (!isRemote) {
+    console.log(`Navigator: http://localhost:${PORT}`);
+    console.log(`Marketplace: http://localhost:${PORT}/marketplace/index.html`);
+  }
+  console.log("------------------------------------------");
 });
