@@ -1,50 +1,36 @@
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
-const mymongo = require("./scripts/mongo.js");
+const express = require('express');
+const path = require('path');
+const mymongo = require('./scripts/mongo.js'); 
+const cors = require('cors');
 
-let app = express();
-
-/* CONFIGURAZIONE */
-app.use(express.static(path.resolve(__dirname, "dist"))); // Serve il build di React
-app.use(express.json()); // Fondamentale per ricevere dati dalle API
-app.use(express.urlencoded({ extended: true }));
+const app = express();
+app.use(express.json());
 app.use(cors());
-app.enable("trust proxy");
 
-/* CREDENZIALI (Usa le tue) */
+// Credenziali fornite (da usare sia in locale che in remoto)
 const mongoCredentials = {
-  user: "site252620",
-  pwd: "Oht2Ieyi",
-  site: "mongo_site252620",
+    user: "site252620",
+    pwd: "Oht2Ieyi",
+    site: "mongo_site252620"
 };
 
-/* API: CREAZIONE DATI (Seeding) */
-app.get("/db/create", async function (req, res) {
-  const result = await mymongo.create(mongoCredentials);
-  res.send(result);
+// API per inizializzare il DB (Specifica: "Create data on MongoDB")
+app.get('/db/create', async (req, res) => {
+    const result = await mymongo.create(mongoCredentials);
+    res.send(result);
 });
 
-/* API: RICERCA (Usata da Navigator e Marketplace) */
-app.get("/db/search", async function (req, res) {
-  // Questa è l'API che restituirà i JSON al tuo React
-  const result = await mymongo.search(req.query, mongoCredentials);
-  res.json(result);
+// API per le app (Navigator/Marketplace)
+app.get('/db/search', async (req, res) => {
+    const result = await mymongo.search(req.query, mongoCredentials);
+    res.json(result);
 });
 
-/* serve static marketplace files (vanilla SPA) */
-// adjust the path if you moved the marketplace directory elsewhere
-app.use(
-  "/marketplace",
-  express.static(path.resolve(__dirname, "../src/marketplace/Prova3/public")),
-);
+// Serve i file statici (il build di React)
+app.use(express.static(path.join(__dirname, 'dist')));
 
-/* GESTIONE FRONTEND (REACT ROUTING) */
-app.get("*", (req, res) => {
-  // Questo assicura che React gestisca le sue rotte interne
-  res.sendFile(path.resolve(__dirname, "dist", "index.html"));
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-app.listen(8000, function () {
-  console.log(`Server ArtAround attivo sulla porta 8000`);
-});
+app.listen(8000, () => console.log("Server running on port 8000"));
