@@ -118,3 +118,9 @@ exports.saveVisit = async function (visitData, credentials) {
     return { error: err.message };
   }
 };
+
+module.exports = {
+  create: exports.create,
+  search: exports.search,
+  saveVisit: exports.saveVisit, // Assicurati che questa riga ci sia
+};

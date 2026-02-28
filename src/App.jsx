@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  BrowserRouter,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import { NavigatorProvider } from "./navigator/context/NavigatorContext";
 import NavigatorLayout from "./navigator/components/NavigatorLayout";
@@ -14,69 +9,48 @@ import NavigatorVisitOverview from "./navigator/components/NavigatorVisitOvervie
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [showIntro, setShowIntro] = useState(false);
-  const [bounceTime, setBounceTime] = useState(0.1);
+  const [showIntro, setShowIntro] = useState(true); // Rimesso a true per vedere l'animazione
 
-  // redirect desktop users to the marketplace SPA
+  // 1. GESTIONE RESIZE (Per aggiornare isMobile se stringi la finestra)
   useEffect(() => {
-    if (!isMobile) {
-      // the running backend normally listens on port 8000; the
-      // marketplace HTML lives under /marketplace relative to that server.
-      // adjust the port/path if yours is different.
-      const backendPort = 8000;
-      const marketplaceUrl = `${window.location.protocol}//${window.location.hostname}:${backendPort}/marketplace`;
-      if (window.location.href !== marketplaceUrl) {
-        window.location.href = marketplaceUrl;
-      }
-    }
-  }, [isMobile]);
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // 2. LOGICA INTRO
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowIntro(false);
+    }, 3000); // 3 secondi di intro sono sufficienti
+    return () => clearTimeout(timer);
+  }, []);
+
   const text = ["A", "r", "t", "A", "r", "o", "u", "n", "d"];
 
-  const handleBounceTime = () => {
-    setBounceTime((prev) => prev + 0.1);
-  };
-
-  useEffect(() => {
-    if (isMobile) {
-      const timer = setTimeout(() => {
-        setShowIntro(false);
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    } else {
-      setShowIntro(false);
-    }
-  }, [isMobile]);
-
   return (
-    <>
-      {/**In questo file andrà la logica di gestione per determinare se
-      la vista dovrà essere quella della mobile app o della spa (la pagina web).
-      Cerco di scriverla il prima possibile in modo che intanto non compaia sempre l'intro e
-      poi la mia home, poi quando hai anche la tua home la aggiorniamo con le route.
-      Se ti dà fastidio commentala pure, tanto io sviluppo in locale quindi a me non cambia finchè
-      non faccio pull da git con anche la tua parte.*/}
-      {showIntro ? (
-        <div className="intro-wrapper">
-          <h1 className="bounce-text">
-            {text.map((letter, index) => (
-              <span
-                key={index}
-                style={{
-                  animationDelay: `${index * 0.1 + bounceTime}s`,
-                  display: "inline-block",
-                }}
-              >
-                {letter}
-              </span>
-            ))}
-          </h1>
-        </div>
-      ) : (
-        <NavigatorProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route element={<NavigatorLayout isMobile={isMobile} />} />
+    <NavigatorProvider>
+      <BrowserRouter>
+        {showIntro ? (
+          <div className="intro-wrapper">
+            <h1 className="bounce-text">
+              {text.map((letter, index) => (
+                <span
+                  key={index}
+                  style={{
+                    animationDelay: `${index * 0.1}s`,
+                    display: "inline-block",
+                  }}
+                >
+                  {letter}
+                </span>
+              ))}
+            </h1>
+          </div>
+        ) : (
+          <Routes>
+            {/* Definiamo il layout che avvolge le rotte */}
+            <Route element={<NavigatorLayout isMobile={isMobile} />}>
               <Route path="/" element={<NavigatorHome />} />
               <Route path="/home" element={<NavigatorHome />} />
               <Route path="/visit/:id" element={<NavigatorVisitOverview />} />
@@ -84,11 +58,11 @@ function App() {
                 path="/visit/:id/:operaIndex"
                 element={<NavigatorItemViewer />}
               />
-            </Routes>
-          </BrowserRouter>
-        </NavigatorProvider>
-      )}
-    </>
+            </Route>
+          </Routes>
+        )}
+      </BrowserRouter>
+    </NavigatorProvider>
   );
 }
 
