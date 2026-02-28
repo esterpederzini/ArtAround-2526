@@ -2,112 +2,92 @@ const mongoose = require("mongoose");
 const fs = require("fs").promises;
 const path = require("path");
 
-// Carichiamo i modelli che abbiamo appena scritto in inglese
+// Modelli in inglese per coerenza con il database unico
 const User = require("../models/user");
 const Item = require("../models/item");
 const Visit = require("../models/visit");
 
-// Il percorso del file JSON con i dati di test (deve essere in public/data/)
 const SEED_FILE = path.join(__dirname, "../public/data/seed_data.json");
 
+// Funzione di utilità per generare l'URI di connessione
+const getMongoUri = (credentials) => {
+  return credentials && credentials.site
+    ? `mongodb://${credentials.user}:${credentials.pwd}@${credentials.site}/${credentials.user}?authSource=admin&writeConcern=majority`
+    : "mongodb://localhost:27017/ArtAround";
+};
+
 /**
- * Funzione invocata dal server quando si richiede l'inizializzazione del DB.
- * Gestisce la connessione dinamica per i Docker del dipartimento.
+ * Inizializza il DB con i dati obbligatori (Seeding)
  */
 exports.create = async function (credentials) {
   let debug = [];
   try {
-    // Costruzione dell'URI di connessione secondo le specifiche del dipartimento [cite: 619, 620, 659]
-    // Se credentials.site non esiste, prova a connettersi in locale per lo sviluppo
-    const mongouri =
-      credentials && credentials.site
-        ? `mongodb://${credentials.user}:${credentials.pwd}@${credentials.site}/${credentials.user}?authSource=admin&writeConcern=majority`
-        : "mongodb://localhost:27017/ArtAround";
-
-    debug.push(`Connecting to: ${credentials?.site || "localhost"}...`);
-
-    // Connessione tramite Mongoose [cite: 628, 647]
+    const mongouri = getMongoUri(credentials);
     await mongoose.connect(mongouri);
-    debug.push("✅ MongoDB connected successfully.");
+    debug.push("✅ Connected for seeding.");
 
-    // Lettura del file di seed [cite: 234, 424]
     const rawData = await fs.readFile(SEED_FILE, "utf-8");
     const seedData = JSON.parse(rawData);
-    debug.push("📖 Seed data loaded from JSON.");
 
-    // 1. Pulizia totale (Tabula Rasa) per evitare duplicati [cite: 715]
+    // Pulizia collezioni
     await Promise.all([
       User.deleteMany({}),
       Item.deleteMany({}),
       Visit.deleteMany({}),
     ]);
-    debug.push("🗑️ Existing collections cleared.");
 
-    // 2. Creazione Utenti (autore1, autore2, visitatore1, visitatore2) [cite: 427, 428]
-    // L'hash delle password è gestito dal middleware nel modello User.js
+    // Creazione Utenti
     const createdUsers = await User.create(seedData.users);
-    debug.push(`👤 Created ${createdUsers.length} mandatory users.`);
-
-    // 3. Creazione Items (Opere con metadati di lingua e durata) [cite: 266, 275]
     const authors = createdUsers.filter((u) => u.role === "autore");
+
+    // Creazione Items (Opere)
     const itemsToInsert = seedData.items.map((item, index) => ({
       ...item,
       creatorId: authors[index % authors.length]._id,
-      isPublished: true,
     }));
     const createdItems = await Item.insertMany(itemsToInsert);
-    debug.push(`🖼️ Created ${createdItems.length} items (Artworks).`);
 
-    // 4. Creazione Visite (Sequenze con indicazioni logistiche separate) [cite: 264, 429]
+    // Creazione Visite predefinite
     for (const vData of seedData.visits) {
       const visitItems = vData.items.map((it, idx) => ({
         itemId: createdItems[idx % createdItems.length]._id,
         order: it.order,
-        navigationInstruction:
-          it.navigationInstruction || "Follow the path to the next room.",
-        isOptional: it.isOptional || false,
+        navigationInstruction: it.navigationInstruction,
       }));
 
       await Visit.create({
         ...vData,
         creatorId: authors[0]._id,
         items: visitItems,
-        isPublic: true,
       });
     }
-    debug.push(`🗺️ Created ${seedData.visits.length} museum visits.`);
 
     await mongoose.connection.close();
-    debug.push("🔌 Connection closed.");
-
-    return {
-      message: `<h1>Success! Added ${createdItems.length} items and ${seedData.visits.length} visits.</h1>`,
-      debug: debug,
-    };
+    return { message: "<h1>Database Seeding Complete!</h1>", debug: debug };
   } catch (err) {
     if (mongoose.connection.readyState !== 0) await mongoose.connection.close();
-    return { message: "❌ Error: " + err.message, debug: debug };
+    return { message: "❌ Seeding Error: " + err.message };
   }
 };
 
 /**
- * Funzione per cercare contenuti. Verrà chiamata dalle rotte API del tuo server.
+ * Funzione di ricerca unificata per Navigator e Marketplace
  */
 exports.search = async function (q, credentials) {
-  const mongouri =
-    credentials && credentials.site
-      ? `mongodb://${credentials.user}:${credentials.pwd}@${credentials.site}/${credentials.user}?authSource=admin&writeConcern=majority`
-      : "mongodb://localhost:27017/ArtAround";
-
   try {
-    await mongoose.connect(mongouri);
+    await mongoose.connect(getMongoUri(credentials));
 
     let results;
+    // 1. Ricerca specifica per ID (Usata dalla Preview del Navigator)
     if (q.visitId) {
-      // Se cerchiamo una visita, "riempiamo" i dati degli item collegati
       results = await Visit.findById(q.visitId).populate("items.itemId");
-    } else {
-      // Ricerca normale per gli item
+    }
+    // 2. Richiesta di tutte le visite (Usata dalla Home del Navigator)
+    else if (q.type === "visits") {
+      results = await Visit.find(q.museum ? { museum: q.museum } : {});
+    }
+    // 3. Ricerca opere (Usata dal Marketplace/Editor)
+    else {
       let filter = {};
       if (q.museum) filter.museum = q.museum;
       if (q.language) filter.language = q.language;
@@ -116,6 +96,24 @@ exports.search = async function (q, credentials) {
 
     await mongoose.connection.close();
     return results;
+  } catch (err) {
+    return { error: err.message };
+  }
+};
+
+/**
+ * Funzione per salvare una nuova visita (Usata dall'Editor del Marketplace)
+ */
+exports.saveVisit = async function (visitData, credentials) {
+  try {
+    await mongoose.connect(getMongoUri(credentials));
+
+    // Creiamo la visita ricevuta dal Marketplace
+    const newVisit = new Visit(visitData);
+    const saved = await newVisit.save();
+
+    await mongoose.connection.close();
+    return saved;
   } catch (err) {
     return { error: err.message };
   }
