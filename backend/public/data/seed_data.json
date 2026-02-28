@@ -1,0 +1,65 @@
+{
+  "users": [
+    {
+      "username": "autore1",
+      "email": "autore1@artaround.it",
+      "password": "12345678",
+      "role": "autore"
+    },
+    {
+      "username": "autore2",
+      "email": "autore2@artaround.it",
+      "password": "12345678",
+      "role": "autore"
+    },
+    {
+      "username": "visitatore1",
+      "email": "v1@gmail.com",
+      "password": "12345678",
+      "role": "visitatore"
+    },
+    {
+      "username": "visitatore2",
+      "email": "v2@gmail.com",
+      "password": "12345678",
+      "role": "visitatore"
+    }
+  ],
+  "items": [
+    {
+      "workId": "Q12345",
+      "title": "La Nascita di Venere",
+      "description": "Descrizione standard per adulti dell'opera di Botticelli.",
+      "museum": "Uffizi",
+      "author": "Sandro Botticelli",
+      "duration": "1min",
+      "language": "medio",
+      "price": 0
+    },
+    {
+      "workId": "Q12345",
+      "title": "Venere per Bambini",
+      "description": "C'era una volta una bellissima signora che nasceva da una conchiglia...",
+      "museum": "Uffizi",
+      "author": "Sandro Botticelli",
+      "duration": "15s",
+      "language": "infantile",
+      "price": 0
+    }
+  ],
+  "visits": [
+    {
+      "title": "Tour Rapido Rinascimento",
+      "description": "Le opere imperdibili in 15 minuti",
+      "museum": "Uffizi",
+      "estimatedDuration": 15,
+      "items": [
+        {
+          "order": 1,
+          "navigationInstruction": "Entra nella Sala 10 e guarda a destra",
+          "isOptional": false
+        }
+      ]
+    }
+  ]
+}

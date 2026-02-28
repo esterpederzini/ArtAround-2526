@@ -14,8 +14,22 @@ import NavigatorVisitOverview from "./navigator/components/NavigatorVisitOvervie
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [showIntro, setShowIntro] = useState(isMobile);
+  const [showIntro, setShowIntro] = useState(false);
   const [bounceTime, setBounceTime] = useState(0.1);
+
+  // redirect desktop users to the marketplace SPA
+  useEffect(() => {
+    if (!isMobile) {
+      // the running backend normally listens on port 8000; the
+      // marketplace HTML lives under /marketplace relative to that server.
+      // adjust the port/path if yours is different.
+      const backendPort = 8000;
+      const marketplaceUrl = `${window.location.protocol}//${window.location.hostname}:${backendPort}/marketplace`;
+      if (window.location.href !== marketplaceUrl) {
+        window.location.href = marketplaceUrl;
+      }
+    }
+  }, [isMobile]);
   const text = ["A", "r", "t", "A", "r", "o", "u", "n", "d"];
 
   const handleBounceTime = () => {
@@ -36,7 +50,7 @@ function App() {
 
   return (
     <>
-    {/**In questo file andrà la logica di gestione per determinare se
+      {/**In questo file andrà la logica di gestione per determinare se
       la vista dovrà essere quella della mobile app o della spa (la pagina web).
       Cerco di scriverla il prima possibile in modo che intanto non compaia sempre l'intro e
       poi la mia home, poi quando hai anche la tua home la aggiorniamo con le route.

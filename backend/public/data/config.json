@@ -1,0 +1,12 @@
+{
+  "appName": "ArtAround",
+  "museumName": "Galleria degli Uffizi",
+  "motto": "Anywhere. Anytime. Everyone.",
+  "heroImage": "/img/uffizi_hero.jpg",
+  "themeColor": "#5b252d",
+  "defaultLanguage": "medio",
+  "features": {
+    "allowPurchases": true,
+    "enableAudio": true
+  }
+}
