@@ -1,91 +1,223 @@
 @import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
 
-.home-container {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+:root {
+  --bg-dark: #0a0e14;
+  --bg-card: #111827;
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --accent: #3b82f6;
+  --nav-bg: rgba(10, 14, 20, 0.8);
+}
+
+.home-dark-container {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
   min-height: 100vh;
-}
-
-.home-hero-section {
-  position: relative;
   width: 100%;
-  height: 40vh;
-  overflow: hidden;
+  font-family: "Nunito", sans-serif;
+  overflow-x: hidden;
+  padding-bottom: 5rem; /* Spazio per la bottom nav */
 }
 
-.home-hero-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  filter: brightness(0.7);
-}
-
-.home-hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  pointer-events: none;
-  z-index: 3;
-}
-
-.home-hero-title {
-  font-size: 2.6rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  letter-spacing: 1px;
-}
-
-.home-hero-motto {
-  font-size: 1.1rem;
-  font-weight: 400;
-  letter-spacing: 0.5px;
-}
-
-.top-nav-bar {
+/* Header Superiore */
+.home-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 56px;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-  position: absolute;
+  height: 4rem;
+  background: var(--nav-bg);
+  backdrop-filter: blur(10px);
+  position: sticky;
   top: 0;
-  left: 0;
-  z-index: 10;
-  padding: 0 18px;
+  z-index: 100;
+  padding: 0 5vw;
 }
 
-.nav-icon {
-  font-size: 1.8rem;
-  color: #222;
+.menu-icon,
+.profile-icon {
+  font-size: 1.5rem;
+  color: var(--text-main);
+}
+
+.brand-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.05rem;
+  text-transform: uppercase;
+}
+
+/* Hero Section Moderna */
+.hero-modern {
+  position: relative;
+  width: 100%;
+  height: 45vh; /* Altezza basata sulla vista */
+  display: flex;
+  align-items: flex-end;
+  padding: 2.5rem 5vw;
+  background-image:
+    linear-gradient(to top, var(--bg-dark) 5%, transparent 60%),
+    url("https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=2070");
+  background-size: cover;
+  background-position: center;
+}
+
+.hero-content {
+  width: 100%;
+  z-index: 5;
+}
+
+.badge-featured {
+  background: var(--accent);
+  color: white;
+  padding: 0.2rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.hero-title {
+  font-size: clamp(
+    1.8rem,
+    8vw,
+    2.5rem
+  ); /* Dimensione dinamica tra 1.8 e 2.5rem */
+  font-weight: 800;
+  margin: 0.5rem 0;
+  line-height: 1.1;
+}
+
+/* Barra di ricerca responsive */
+.search-bar-mock {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  border-radius: 0.8rem;
   display: flex;
   align-items: center;
+  padding: 0.8rem 1rem;
+  margin-top: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.nav-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #333;
-  letter-spacing: 0.5px;
+.search-bar-mock input {
+  background: transparent;
+  border: none;
+  color: white;
+  flex: 1;
+  margin: 0 0.8rem;
+  font-size: 0.9rem;
 }
 
-.nav-left {
-  justify-content: flex-start;
+/* Sezione Visite con Scroll Orizzontale */
+.visits-section {
+  padding: 2rem 0 1rem 5vw;
 }
 
-.nav-right {
-  justify-content: flex-end;
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 5vw;
+  margin-bottom: 1.2rem;
+}
+
+.section-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.see-all {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.horizontal-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 1.2rem;
+  padding-right: 5vw;
+  scrollbar-width: none; /* Nasconde scrollbar su Firefox */
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  display: none; /* Nasconde scrollbar su Chrome/Safari */
+}
+
+.visit-card {
+  min-width: 65vw; /* Occupa il 65% della larghezza schermo per mostrare l'inizio della successiva */
+  max-width: 18rem;
+}
+
+.card-img-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4; /* Mantiene proporzioni verticali fisse */
+  border-radius: 1.2rem;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.card-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  padding: 0.3rem 0.6rem;
+  font-size: 0.65rem;
+  border-radius: 0.4rem;
+  font-weight: 700;
+}
+
+.visit-card h3 {
+  margin-top: 0.8rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.visit-card p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Bottom Nav Fissa */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 4.5rem;
+  background: var(--bg-card);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 1000;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.nav-item.active {
+  color: var(--accent);
+}
+
+.nav-item i {
+  font-size: 1.4rem;
+  margin-bottom: 0.2rem;
 }

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
-import { NavigatorProvider } from "./navigator/context/NavigatorContext";
-import NavigatorLayout from "./navigator/components/NavigatorLayout";
-import NavigatorItemViewer from "./navigator/components/NavigatorItemViewer";
-import NavigatorHome from "./navigator/components/NavigatorHome";
-import NavigatorVisitOverview from "./navigator/components/NavigatorVisitOverview";
+import { NavigatorProvider } from "./context/NavigatorContext";
+import NavigatorLayout from "./components/NavigatorLayout";
+import NavigatorItemViewer from "./components/NavigatorItemViewer";
+import NavigatorHome from "./components/NavigatorHome";
+import NavigatorVisitOverview from "./components/NavigatorVisitOverview";
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -30,7 +30,7 @@ function App() {
 
   return (
     <NavigatorProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/mobile">
         {showIntro ? (
           <div className="intro-wrapper">
             <h1 className="bounce-text">
@@ -49,7 +49,6 @@ function App() {
           </div>
         ) : (
           <Routes>
-            {/* Definiamo il layout che avvolge le rotte */}
             <Route element={<NavigatorLayout isMobile={isMobile} />}>
               <Route path="/" element={<NavigatorHome />} />
               <Route path="/home" element={<NavigatorHome />} />

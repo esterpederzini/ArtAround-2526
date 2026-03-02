@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import mockData from "../../mockData.json";
+import data from "../mockData.json";
 import {
   Container,
   Row,
@@ -14,6 +14,7 @@ import { useParams, useNavigate } from "react-router-dom"; // Aggiunto useNaviga
 import "../CSS/NavigatorItemViewer.css";
 
 export default function NavigatorItemViewer() {
+  const data = [];
   const { id, operaIndex } = useParams();
   const navigate = useNavigate();
   const currentIndex = parseInt(operaIndex) || 0;
