@@ -9,7 +9,7 @@ const fs = require("fs").promises;
 const path = require("path");
 
 // Configurazione nomi
-let fn = "/seed_data.json";
+let fn = "seed_data.json";
 let dbname = "artaround";
 
 // --- 1. DEFINIZIONE DELLO SCHEMA ---
@@ -35,7 +35,7 @@ exports.create = async (credentials) => {
     await mongoose.connect(mongouri);
     debug.push(`Connesso a MongoDB su ${credentials.site}...`);
 
-    let seedPath = path.join(process.cwd(), fn);
+    let seedPath = path.join(__dirname, "..", "seed_data.json");
     debug.push(`Lettura file: ${seedPath}`);
 
     let doc = await fs.readFile(seedPath, "utf8");
