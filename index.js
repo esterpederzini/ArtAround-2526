@@ -24,7 +24,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // 3. GESTIONE CONFIG E DATABASE
 app.get("/api/config", (req, res) => {
-  res.sendFile(path.join(process.cwd(), "config.json"));
+  // Usa __dirname per essere sicuri di puntare alla cartella del progetto
+  res.sendFile(path.join(__dirname, "config.json"));
 });
 
 app.get("/db/create", async function (req, res) {
