@@ -2,45 +2,58 @@ const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
 const cors = require("cors");
-require("dotenv").config();
 
+// 1. IMPORTA GLI SCRIPT DEL PROFESSOR VITALI
+const mymongo = require("./scripts/mongo.js");
 const app = express();
+
+// Globali richieste dagli script di default
+global.rootDir = process.cwd();
+
+// 2. CREDENZIALI GOCKER (Inserisci quelle del tuo account)
+const mongoCredentials = {
+  user: "site252620",
+  pwd: "Oht2Ieyi",
+  site: "mongo_site252620",
+};
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// 1. CONNESSIONE AL DATABASE (usa i dati del file .env)
-const mongoUri =
-  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/artaround";
-mongoose
-  .connect(mongoUri)
-  .then(() => console.log("✅ Connesso a MongoDB con successo"))
-  .catch((err) => console.error("❌ Errore connessione MongoDB:", err));
+// 3. GESTIONE CONFIG E DATABASE
+app.get("/api/config", (req, res) => {
+  res.sendFile(path.join(process.cwd(), "config.json"));
+});
 
-// 2. COLLEGAMENTO ROTTE API (quelle che abbiamo messo in routes/api.js)
-const apiRoutes = require("./routes/api");
-app.use("/api", apiRoutes);
+app.get("/db/create", async function (req, res) {
+  res.send(await mymongo.create(mongoCredentials));
+});
 
-// 3. GESTIONE FRONTEND (Le tue due scatole)
+app.get("/db/search", async function (req, res) {
+  // Gestisce sia query normali che AJAX dal tuo React
+  res.send(await mymongo.search(req.query, mongoCredentials));
+});
 
-// Marketplace & Editor (Vanilla JS della tua amica)
-// Se vai su http://localhost:8000/ vedi la sua parte
+// 4. SERVIZIO FILE STATICI
+// Marketplace (Vanilla JS) sulla root
 app.use("/", express.static(path.join(__dirname, "marketplace")));
 
-// Navigator (Tua App React)
-// Se vai su http://localhost:8000/mobile vedi la tua parte
+// Navigator (React Build) su /mobile
 app.use("/mobile", express.static(path.join(__dirname, "navigator/dist")));
 
-// Fallback per React (necessario se usi React Router)
-app.get(/^\/mobile(?:\/.*)?$/, (req, res) => {
+// Fallback per React Router (fondamentale per non avere 404 al refresh)
+app.get("/mobile/*", (req, res) => {
   res.sendFile(path.join(__dirname, "navigator/dist", "index.html"));
 });
 
-// AVVIO SERVER
-const PORT = process.env.PORT || 8000;
+// 5. AVVIO SERVER
+const PORT = 8000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server ArtAround in esecuzione!`);
-  console.log(`📍 Marketplace: http://localhost:${PORT}/`);
-  console.log(`📍 Navigator (React): http://localhost:${PORT}/mobile`);
+  global.startDate = new Date();
+  console.log(
+    `🚀 Server ArtAround avviato il ${global.startDate.toLocaleString()}`,
+  );
+  console.log(`📍 URL: https://site252620.tw.cs.unibo.it/mobile`);
 });

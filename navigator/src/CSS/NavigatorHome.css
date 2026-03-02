@@ -221,3 +221,127 @@
   font-size: 1.4rem;
   margin-bottom: 0.2rem;
 }
+
+/* --- SIDEBAR SYSTEM --- */
+
+/* Overlay: lo sfondo scuro che copre la home quando la sidebar è aperta */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1100;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.sidebar-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Sidebar: il pannello laterale */
+.side-bar {
+  position: fixed;
+  top: 0;
+  left: -280px; /* Nasconde la sidebar a sinistra */
+  width: 280px;
+  height: 100%;
+  background-color: var(--bg-card);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.side-bar.open {
+  left: 0; /* La fa scivolare dentro lo schermo */
+}
+
+/* Header della Sidebar */
+.side-bar-header {
+  padding: 2rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+}
+
+.profile-thumb i {
+  font-size: 2.5rem;
+  color: var(--accent);
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-info strong {
+  font-size: 1rem;
+}
+
+.profile-info small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.close-btn {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.8rem;
+}
+
+/* Navigazione interna Sidebar */
+.side-nav {
+  padding: 1.5rem 1rem;
+  flex: 1;
+}
+
+.side-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: var(--text-main);
+}
+
+.side-nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.side-nav-item i {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+}
+
+/* Footer Sidebar */
+.side-bar-footer {
+  padding: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.settings-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.9rem;
+}

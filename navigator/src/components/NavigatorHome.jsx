@@ -5,115 +5,69 @@ import "../CSS/NavigatorHome.css";
 const NavigatorHome = () => {
   const [visits, setVisits] = useState([]);
   const [config, setConfig] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Lo stato è già qui
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 1. Configurazione (Mock o Fetch)
-    fetch("/data/config.json")
+    // 1. Caricamento Configurazione
+    fetch("/api/config")
       .then((res) => res.json())
       .then((data) => setConfig(data))
-      .catch(() =>
+      .catch((err) => {
+        console.warn("Config non trovato, uso default:", err);
         setConfig({
-          museumName: "Museum Explorer",
-          appName: "Discover the World of Art",
-        }),
-      );
+          museumName: "ArtAround",
+          appName: "Discover the Art",
+        });
+      });
 
-    // 2. Visite (Carichiamo i dati per le card)
-    fetch("/db/search?type=visits")
+    // 2. Caricamento Visite
+    fetch("/db/search")
       .then((res) => res.json())
-      .then((data) => setVisits(Array.isArray(data) ? data : []))
-      .catch((err) => console.error("Errore visite:", err));
+      .then((data) => {
+        const visitList = data.result || data;
+        setVisits(Array.isArray(visitList) ? visitList : []);
+      })
+      .catch((err) => console.error("Errore fetch visite:", err));
   }, []);
 
-  // Inline side bar component
-  const NavigatorSideBar = ({ open, onClose }) => {
-    const handleNav = (path) => {
-      onClose();
-      navigate(path);
-    };
-
-    return (
-      <>
-        <div
-          className={`sidebar-overlay ${open ? "visible" : ""}`}
-          onClick={onClose}
-          aria-hidden={!open}
-        />
-        <aside className={`side-bar ${open ? "open" : ""}`} aria-hidden={!open}>
-          <div className="side-bar-header">
-            <div className="profile-thumb">
-              <i className="bi bi-person-circle"></i>
-            </div>
-            <div className="profile-info">
-              <strong>{config?.museumName || "Museum Explorer"}</strong>
-              <small>{config?.appName || "Discover the World of Art"}</small>
-            </div>
-            <button className="close-btn" onClick={onClose} aria-label="Close">
-              <i className="bi bi-x"></i>
-            </button>
-          </div>
-
-          <nav className="side-nav">
-            <div className="side-nav-item" onClick={() => handleNav("/")}>
-              <i className="bi bi-house-door"></i>
-              <span>Home</span>
-            </div>
-            <div className="side-nav-item" onClick={() => handleNav("/map")}>
-              <i className="bi bi-map"></i>
-              <span>Floor Map</span>
-            </div>
-            <div className="side-nav-item" onClick={() => handleNav("/audio")}>
-              <i className="bi bi-headphones"></i>
-              <span>Audio Guides</span>
-            </div>
-            <div
-              className="side-nav-item"
-              onClick={() => handleNav("/favorites")}
-            >
-              <i className="bi bi-heart"></i>
-              <span>Favorites</span>
-            </div>
-          </nav>
-
-          <div className="side-bar-footer">
-            <button
-              className="settings-btn"
-              onClick={() => handleNav("/settings")}
-            >
-              <i className="bi bi-gear"></i>
-              <span>Settings</span>
-            </button>
-          </div>
-        </aside>
-      </>
-    );
-  };
+  // Funzione per gestire l'apertura/chiusura
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
     <div className="home-dark-container">
+      {/* PASSAGGIO 1: Il componente NavigatorSideBar riceve 'open' 
+          e la funzione per chiudersi 'onClose' 
+      */}
+      <NavigatorSideBar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        config={config}
+        navigate={navigate}
+      />
+
       {/* Header superiore */}
       <header className="home-header">
-        <i className="bi bi-list menu-icon"></i>
-        <span className="brand-name">
-          {config?.museumName || "Museum Explorer"}
-        </span>
+        {/* PASSAGGIO 2: Aggiungiamo onClick all'icona del menu
+         */}
+        <i
+          className="bi bi-list menu-icon"
+          onClick={toggleSidebar}
+          style={{ cursor: "pointer" }}
+        ></i>
+        <span className="brand-name">{config?.museumName || "Loading..."}</span>
         <i className="bi bi-person-circle profile-icon"></i>
       </header>
 
-      {/* Sezione Hero con Immagine di sfondo */}
+      {/* Resto del codice invariato... */}
       <section className="hero-modern">
         <div className="hero-content">
           <span className="badge-featured">FEATURED EXPERIENCE</span>
-          <h1 className="hero-title">
-            {config?.appName || "Discover the World of Art"}
-          </h1>
+          <h1 className="hero-title">{config?.appName || "ArtAround"}</h1>
           <p className="hero-subtitle">
-            Curated journeys through the finest collections.
+            {config?.motto ||
+              "Curated journeys through the finest collections."}
           </p>
-
-          {/* Barra di ricerca finta (come da immagine) */}
           <div className="search-bar-mock">
             <i className="bi bi-search"></i>
             <input
@@ -126,18 +80,16 @@ const NavigatorHome = () => {
         </div>
       </section>
 
-      {/* Sezione Explore Visits (Orizzontale) */}
       <section className="visits-section">
         <div className="section-header">
           <h2>Explore Visits</h2>
           <span className="see-all">SEE ALL</span>
         </div>
-
         <div className="horizontal-scroll">
           {visits.length > 0 ? (
             visits.map((visita) => (
               <div
-                key={visita._id}
+                key={visita._id || visita.title}
                 className="visit-card"
                 onClick={() => navigate(`/visit/${visita._id}`)}
               >
@@ -152,36 +104,97 @@ const NavigatorHome = () => {
                 </div>
                 <h3>{visita.title}</h3>
                 <p>
-                  {visita.duration || "60 min"} • {visita.stops || "12 stops"}
+                  {visita.duration || "60 min"} • {visita.stops || "12"} stops
                 </p>
               </div>
             ))
           ) : (
-            <p className="empty-msg">No visits available yet.</p>
+            <p className="empty-msg">
+              No visits found. Did you run /db/create?
+            </p>
           )}
         </div>
       </section>
 
-      {/* Navigazione Bottom (Mockup come immagine) */}
       <nav className="bottom-nav">
-        <div className="nav-item active">
+        <div className="nav-item active" onClick={() => navigate("/")}>
           <i className="bi bi-house-door-fill"></i>
           <span>HOME</span>
         </div>
-        <div className="nav-item">
+        <div className="nav-item" onClick={() => navigate("/map")}>
           <i className="bi bi-map"></i>
           <span>FLOOR MAP</span>
         </div>
-        <div className="nav-item">
+        <div className="nav-item" onClick={() => navigate("/audio")}>
           <i className="bi bi-headphones"></i>
           <span>AUDIO</span>
         </div>
-        <div className="nav-item">
+        <div className="nav-item" onClick={() => navigate("/favorites")}>
           <i className="bi bi-heart"></i>
           <span>FAVORITES</span>
         </div>
       </nav>
     </div>
+  );
+};
+
+const NavigatorSideBar = ({ open, onClose, config, navigate }) => {
+  const handleNav = (path) => {
+    onClose();
+    navigate(path);
+  };
+
+  return (
+    <>
+      <div
+        className={`sidebar-overlay ${open ? "visible" : ""}`}
+        onClick={onClose}
+      />
+      <aside className={`side-bar ${open ? "open" : ""}`}>
+        <div className="side-bar-header">
+          <div className="profile-thumb">
+            <i className="bi bi-person-circle"></i>
+          </div>
+          <div className="profile-info">
+            <strong>{config?.museumName || "ArtAround"}</strong>
+            <small>Premium Member</small>
+          </div>
+          <button className="close-btn" onClick={onClose}>
+            <i className="bi bi-x"></i>
+          </button>
+        </div>
+        <nav className="side-nav">
+          <div className="side-nav-item" onClick={() => handleNav("/")}>
+            <i className="bi bi-house-door"></i>
+            <span>Home</span>
+          </div>
+          <div className="side-nav-item" onClick={() => handleNav("/map")}>
+            <i className="bi bi-map"></i>
+            <span>Floor Map</span>
+          </div>
+          <div className="side-nav-item" onClick={() => handleNav("/audio")}>
+            <i className="bi bi-headphones"></i>
+            <span>Audio Guides</span>
+          </div>
+          <div
+            className="side-nav-item"
+            onClick={() => handleNav("/favorites")}
+          >
+            <i className="bi bi-heart"></i>
+            <span>Favorites</span>
+          </div>
+        </nav>
+        <div className="side-bar-footer">
+          <button
+            className="settings-btn"
+            onClick={() => handleNav("/settings")}
+          >
+            <i className="bi bi-gear"></i>
+            <span>Settings</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 };
 
