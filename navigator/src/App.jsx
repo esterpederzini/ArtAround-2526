@@ -1,35 +1,69 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "./App.css";
+import { NavigatorProvider } from "./navigator/context/NavigatorContext";
+import NavigatorLayout from "./navigator/components/NavigatorLayout";
+import NavigatorItemViewer from "./navigator/components/NavigatorItemViewer";
+import NavigatorHome from "./navigator/components/NavigatorHome";
+import NavigatorVisitOverview from "./navigator/components/NavigatorVisitOverview";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [showIntro, setShowIntro] = useState(true); // Rimesso a true per vedere l'animazione
+
+  // 1. GESTIONE RESIZE (Per aggiornare isMobile se stringi la finestra)
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // 2. LOGICA INTRO
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowIntro(false);
+    }, 3000); // 3 secondi di intro sono sufficienti
+    return () => clearTimeout(timer);
+  }, []);
+
+  const text = ["A", "r", "t", "A", "r", "o", "u", "n", "d"];
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <NavigatorProvider>
+      <BrowserRouter>
+        {showIntro ? (
+          <div className="intro-wrapper">
+            <h1 className="bounce-text">
+              {text.map((letter, index) => (
+                <span
+                  key={index}
+                  style={{
+                    animationDelay: `${index * 0.1}s`,
+                    display: "inline-block",
+                  }}
+                >
+                  {letter}
+                </span>
+              ))}
+            </h1>
+          </div>
+        ) : (
+          <Routes>
+            {/* Definiamo il layout che avvolge le rotte */}
+            <Route element={<NavigatorLayout isMobile={isMobile} />}>
+              <Route path="/" element={<NavigatorHome />} />
+              <Route path="/home" element={<NavigatorHome />} />
+              <Route path="/visit/:id" element={<NavigatorVisitOverview />} />
+              <Route
+                path="/visit/:id/:operaIndex"
+                element={<NavigatorItemViewer />}
+              />
+            </Route>
+          </Routes>
+        )}
+      </BrowserRouter>
+    </NavigatorProvider>
+  );
 }
 
-export default App
+export default App;
