@@ -45,16 +45,29 @@ app.use("/", express.static(path.join(__dirname, "marketplace")));
 app.use("/mobile", express.static(path.join(__dirname, "navigator/dist")));
 
 // Fallback per React Router (fondamentale per non avere 404 al refresh)
-app.get("/mobile/*", (req, res) => {
+// Nota: NON ci sono le virgolette, ma le barre diagonali / /
+app.get(/^\/mobile(?:\/.*)?$/, (req, res) => {
   res.sendFile(path.join(__dirname, "navigator/dist", "index.html"));
 });
 
 // 5. AVVIO SERVER
-const PORT = 8000;
+// Se esiste una porta del sistema usa quella, altrimenti usa la 8000 (locale)
+const PORT = process.env.PORT || 8000;
+
 app.listen(PORT, () => {
   global.startDate = new Date();
+
+  // DEFINIAMO la variabile baseURL (o base) qui dentro
+  const isGocker =
+    process.env.USER === "site252620" || process.cwd().includes("site252620");
+
+  const baseURL = isGocker
+    ? `https://site252620.tw.cs.unibo.it`
+    : `http://localhost:${PORT}`;
+
   console.log(
     `🚀 Server ArtAround avviato il ${global.startDate.toLocaleString()}`,
   );
-  console.log(`📍 URL: https://site252620.tw.cs.unibo.it/mobile`);
+  console.log(`💻 Marketplace (PC): ${baseURL}/`);
+  console.log(`📱 Navigator (Mobile): ${baseURL}/mobile`);
 });

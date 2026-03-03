@@ -1,19 +1,17 @@
 /*
 File: scripts/mongo.js
 Progetto: ArtAround
-Descrizione: Gestione Database MongoDB per Gocker
+Descrizione: Gestione Database MongoDB (Atlas o Gocker)
 */
 
 const mongoose = require("mongoose");
 const fs = require("fs").promises;
 const path = require("path");
+require("dotenv").config(); // Carica il file .env
 
-// Configurazione nomi
-let fn = "seed_data.json";
 let dbname = "artaround";
 
 // --- 1. DEFINIZIONE DELLO SCHEMA ---
-// Questo schema è quello che il Navigator si aspetta di ricevere
 const visitSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: false },
@@ -26,29 +24,33 @@ const visitSchema = new mongoose.Schema({
 const Visit = mongoose.model("Visit", visitSchema);
 mongoose.set("strictQuery", false);
 
-// --- 2. FUNZIONE CREATE (Popola il DB dal JSON) ---
+// --- FUNZIONE DI SUPPORTO PER L'URI ---
+const getUri = (credentials) => {
+  if (process.env.MONGO_URL) {
+    console.log("🛠️ Usando database ATLAS");
+    return process.env.MONGO_URL;
+  }
+  console.log("🌐 Usando database GOCKER");
+  return `mongodb://${credentials.user}:${credentials.pwd}@${credentials.site}/${dbname}?authSource=admin&writeConcern=majority`;
+};
+
+// --- 2. FUNZIONE CREATE ---
 exports.create = async (credentials) => {
   let debug = [];
   try {
-    const mongouri = `mongodb://${credentials.user}:${credentials.pwd}@${credentials.site}/${dbname}?authSource=admin&writeConcern=majority`;
-
+    const mongouri = getUri(credentials);
     await mongoose.connect(mongouri);
-    debug.push(`Connesso a MongoDB su ${credentials.site}...`);
 
     let seedPath = path.join(__dirname, "..", "seed_data.json");
-    debug.push(`Lettura file: ${seedPath}`);
-
     let doc = await fs.readFile(seedPath, "utf8");
     let fullData = JSON.parse(doc);
 
-    // --- LOGICA DI MAPPATURA ---
-    // Prendiamo la lista "visite" dal tuo JSON e la adattiamo allo Schema
     let dataToInsert = fullData.visite.map((v) => ({
       title: v.titolo,
       description: v.descrizione,
       image:
         v.immagine ||
-        "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?q=80&w=2070", // Default Egizio se manca
+        "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?q=80&w=2070",
       type: "AUDIO GUIDE",
       duration: v.durataTotaleStimata
         ? v.durataTotaleStimata + " min"
@@ -56,31 +58,24 @@ exports.create = async (credentials) => {
       stops: v.tags ? v.tags.length : 0,
     }));
 
-    debug.push(`Dati processati: trovate ${dataToInsert.length} visite.`);
-
-    // Svuota la collezione e inserisce i nuovi dati
     await Visit.deleteMany({});
-    debug.push(`Database pulito.`);
-
     let inserted = await Visit.insertMany(dataToInsert);
-    debug.push(`Inseriti ${inserted.length} nuovi record.`);
-
     await mongoose.connection.close();
+
     return {
       message: `<h1>Successo!</h1><p>Database popolato con ${inserted.length} visite.</p>`,
       debug: debug,
     };
   } catch (e) {
     console.error(e);
-    return { error: e.message, debug: debug };
+    return { error: e.message };
   }
 };
 
-// --- 3. FUNZIONE SEARCH (Per il tuo Navigator) ---
+// --- 3. FUNZIONE SEARCH ---
 exports.search = async (q, credentials) => {
-  const mongouri = `mongodb://${credentials.user}:${credentials.pwd}@${credentials.site}/${dbname}?authSource=admin&writeConcern=majority`;
-
   try {
+    const mongouri = getUri(credentials);
     await mongoose.connect(mongouri);
 
     let query = {};
@@ -90,8 +85,6 @@ exports.search = async (q, credentials) => {
 
     const results = await Visit.find(query);
     await mongoose.connection.close();
-
-    // Restituiamo i risultati pronti per il Navigator
     return results;
   } catch (e) {
     console.error(e);
