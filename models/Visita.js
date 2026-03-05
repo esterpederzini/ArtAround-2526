@@ -1,79 +1,36 @@
 const mongoose = require("mongoose");
 
-const itemInVisitaSchema = new mongoose.Schema(
+const tappaSchema = new mongoose.Schema(
   {
-    itemId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Item",
-      required: true,
+    ordine: Number,
+    logistica: String,
+    item_default: {
+      type: String, // OBBLIGATORIO: String se i tuoi ID sono "it_ramesse_..."
+      ref: "Item", // Deve corrispondere al nome del modello in Item.js
     },
-    ordine: { type: Number, required: true },
-    opzionale: { type: Boolean, default: false },
-    notePersonali: { type: String, default: "" },
+    varianti_difficolta: {
+      infantile: String,
+      medio: String,
+      avanzato: String,
+    },
   },
   { _id: false },
 );
 
 const visitaSchema = new mongoose.Schema(
   {
-    titolo: {
-      type: String,
-      required: [true, "Titolo visita obbligatorio"],
-      trim: true,
-    },
-    descrizione: {
-      type: String,
-      default: "",
-    },
-    museo: {
-      type: String,
-      required: [true, "Museo obbligatorio"],
-      trim: true,
-    },
-    creatorId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    items: [itemInVisitaSchema],
-    pubblica: {
-      type: Boolean,
-      default: false,
-    },
-    prezzo: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-    licenza: {
-      tipo: {
-        type: String,
-        enum: ["gratuito", "CC-BY", "CC-BY-SA", "CC-BY-NC", "proprietario"],
-        default: "gratuito",
-      },
-    },
-    durataTotaleStimata: {
-      type: Number, // in minuti
-      default: 0,
-    },
-    tags: [String],
-    logAdozioni: [
-      {
-        adottanteId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        dataAdozione: { type: Date, default: Date.now },
-        prezzo: Number,
-      },
-    ],
+    titolo: { type: String }, // Opzionale se usi 'title'
+    title: { type: String }, // Aggiunto per matchare "title" del JSON
+    museo: { type: String },
+    image: { type: String },
+    type: { type: String },
+    duration: { type: String },
+    stops: { type: Number },
+    livello_base: { type: String }, // Match con "livello_base"
+    info_generale: { type: String }, // Match con "info_generale"
+    tappe: [tappaSchema],
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true, strict: false, strictPopulate: false },
 );
 
-// Calcolo automatico durata
-visitaSchema.pre("save", function (next) {
-  // Placeholder: la durata viene calcolata nel controller
-  next();
-});
-
-module.exports = mongoose.model("Visita", visitaSchema);
+module.exports = mongoose.model("Visita", visitaSchema, "visits");

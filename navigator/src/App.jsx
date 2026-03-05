@@ -6,12 +6,11 @@ import NavigatorLayout from "./components/NavigatorLayout";
 import NavigatorItemViewer from "./components/NavigatorItemViewer";
 import NavigatorHome from "./components/NavigatorHome";
 import NavigatorVisitOverview from "./components/NavigatorVisitOverview";
+import NavigatorLogin from "./components/NavigatorLogin";
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [showIntro, setShowIntro] = useState(true); // Rimesso a true per vedere l'animazione
-
-  // 1. GESTIONE RESIZE (Per aggiornare isMobile se stringi la finestra)
+  const [showIntro, setShowIntro] = useState(false);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener("resize", handleResize);
@@ -22,7 +21,7 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowIntro(false);
-    }, 3000); // 3 secondi di intro sono sufficienti
+    }, 3000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -50,6 +49,7 @@ function App() {
         ) : (
           <Routes>
             <Route element={<NavigatorLayout isMobile={isMobile} />}>
+              <Route path="/login" element={<NavigatorLogin />} />
               <Route path="/" element={<NavigatorHome />} />
               <Route path="/home" element={<NavigatorHome />} />
               <Route path="/visit/:id" element={<NavigatorVisitOverview />} />

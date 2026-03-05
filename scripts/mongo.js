@@ -76,7 +76,7 @@ exports.create = async (credentials) => {
 exports.search = async (q, credentials) => {
   try {
     const mongouri = getUri(credentials);
-    await mongoose.connect(mongouri);
+    //await mongoose.connect(mongouri);
 
     let query = {};
     if (q && q.title) {

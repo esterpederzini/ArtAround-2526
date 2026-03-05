@@ -181,26 +181,23 @@ exports.acquistaItem = async (req, res) => {
 // ─── VISITE ─────────────────────────────────────────────────
 exports.getVisite = async (req, res) => {
   try {
-    const {
-      museo,
-      creatorId,
-      pubblica = "true",
-      pagina = 1,
-      limite = 12,
-    } = req.query;
+    const { museo, creatorId, pagina = 1, limite = 12 } = req.query;
+
     const filtro = {};
     if (museo) filtro.museo = museo;
     if (creatorId) filtro.creatorId = creatorId;
-    if (pubblica !== "tutti") filtro.pubblica = pubblica === "true";
+    // Commentiamo il filtro pubblica se non lo hai inserito in tutti i documenti su Atlas
+    // if (pubblica !== "tutti") filtro.pubblica = pubblica === "true";
 
     const skip = (Number(pagina) - 1) * Number(limite);
+
     const [visite, totale] = await Promise.all([
       Visita.find(filtro)
         .populate("creatorId", "username")
-        .populate(
-          "items.itemId",
-          "titolo operaId lunghezza linguaggio immagine",
-        )
+        .populate({
+          path: "tappe.item_default", // PERCORSO CORRETTO (Atlas)
+          select: "titolo operaId lunghezza linguaggio url autore", // 'url' invece di 'immagine'
+        })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(Number(limite)),
@@ -214,22 +211,32 @@ exports.getVisite = async (req, res) => {
       pagine: Math.ceil(totale / Number(limite)),
     });
   } catch (err) {
+    console.error("Errore getVisite:", err.message);
     risposta(res, 500, null, err.message);
   }
 };
 
 exports.getVisitaById = async (req, res) => {
   try {
-    const visita = await Visita.findById(req.params.id)
+    const visita = await Visita.findOne({
+      $or: [{ _id: req.params.id }, { id: req.params.id }],
+    })
       .populate("creatorId", "username email")
       .populate({
-        path: "items.itemId",
+        path: "tappe.item_default",
+        model: "Item",
         select:
-          "titolo operaId lunghezza linguaggio immagine descrizione autore categoria prezzo licenza",
+          "titolo operaId lunghezza linguaggio url descrizione autore categoria prezzo licenza",
       });
-    if (!visita) return risposta(res, 404, null, "Visita non trovata");
+
+    if (!visita) {
+      return risposta(res, 404, null, "Visita non trovata");
+    }
+
+    // Restituiamo i dati nel formato atteso dal frontend
     risposta(res, 200, visita);
   } catch (err) {
+    console.error("ERRORE BACKEND getVisitaById:", err.message);
     risposta(res, 500, null, err.message);
   }
 };
@@ -310,17 +317,20 @@ exports.loginUtente = async (req, res) => {
   try {
     const { username, password } = req.body;
     const utente = await User.findOne({ username });
-    if (!utente) return risposta(res, 401, null, "Credenziali non valide");
 
-    const match = await utente.comparePassword(password);
-    if (!match) return risposta(res, 401, null, "Credenziali non valide");
+    if (!utente) return risposta(res, 401, null, "Utente non trovato");
+
+    // Temporaneamente confrontiamo le stringhe direttamente
+    // perché i dati nel JSON non sono criptati
+    if (utente.password !== password) {
+      return risposta(res, 401, null, "Password errata");
+    }
 
     risposta(res, 200, utente.toJSON(), "Login effettuato");
   } catch (err) {
     risposta(res, 500, null, err.message);
   }
 };
-
 // ─── LOG & STATS ────────────────────────────────────────────
 exports.getLogVendite = async (req, res) => {
   try {

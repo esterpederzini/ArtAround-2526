@@ -5,8 +5,15 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   base: "/mobile/",
+  server: {
+    proxy: {
+      // Reindirizza le chiamate API al tuo server Node (Porta 8000)
+      "/api": "http://localhost:8000",
+      "/db": "http://localhost:8000",
+    },
+  },
   build: {
     outDir: "dist",
-    emptyOutDir: true, // Questo pulisce la vecchia cartella dist ogni volta
+    emptyOutDir: true,
   },
 });

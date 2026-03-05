@@ -23,7 +23,7 @@
 .home-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center; /* Centra il contenuto (il titolo) */
   width: 100%;
   height: 4rem;
   background: var(--nav-bg);
@@ -32,6 +32,12 @@
   top: 0;
   z-index: 100;
   padding: 0 5vw;
+  position: relative; /* Necessario per posizionare l'icona in modo assoluto */
+}
+
+.menu-icon {
+  position: absolute; /* Sgancia l'icona dal flusso per non interferire con la centratura del titolo */
+  left: 5vw; /* Allinea l'icona con il padding del contenitore */
 }
 
 .menu-icon,
@@ -65,17 +71,6 @@
 .hero-content {
   width: 100%;
   z-index: 5;
-}
-
-.badge-featured {
-  background: var(--accent);
-  color: white;
-  padding: 0.2rem 0.8rem;
-  border-radius: 1rem;
-  font-size: 0.7rem;
-  font-weight: 800;
-  display: inline-block;
-  margin-bottom: 0.5rem;
 }
 
 .hero-title {
@@ -344,4 +339,16 @@
   width: 100%;
   font-family: inherit;
   font-size: 0.9rem;
+}
+
+/* Forza la visibilità quando è aperta */
+.side-bar.open {
+  left: 0 !important;
+  visibility: visible !important;
+}
+
+.sidebar-overlay.visible {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
 }
