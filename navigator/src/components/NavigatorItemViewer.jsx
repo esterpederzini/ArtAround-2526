@@ -1,53 +1,122 @@
 import React, { useState, useEffect } from "react";
-import data from "../mockData.json";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Container,
   Row,
   Col,
   Card,
-  Nav,
   Navbar,
   Modal,
   Button,
+  Spinner,
 } from "react-bootstrap";
-import { useParams, useNavigate } from "react-router-dom"; // Aggiunto useNavigate
 import "../CSS/NavigatorItemViewer.css";
 
 export default function NavigatorItemViewer() {
-  const data = [];
   const { id, operaIndex } = useParams();
   const navigate = useNavigate();
-  const currentIndex = parseInt(operaIndex) || 0;
-
-  const safeId = id || "visita_001"; // Metti qui un ID che esiste nel tuo JSON
   const safeIndex = parseInt(operaIndex) || 0;
-  console.log(safeId);
 
-  const [prefDurata, setPrefDurata] = useState("3s");
+  const [visit, setVisit] = useState(null);
+  const [currentItem, setCurrentItem] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [prefLingua, setPrefLingua] = useState("medio");
-  const [isPlaying, setIsPlaying] = useState(true);
-
-  // --- LOGICA MODAL ---
+  const [isPlaying, setIsPlaying] = useState(false); // Partiamo da false per sicurezza
   const [showExitModal, setShowExitModal] = useState(false);
+
+  // --- LOGICA SINTESI VOCALE ---
+  const speak = (text) => {
+    window.speechSynthesis.cancel(); // Ferma letture precedenti
+    if (!text) return;
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "it-IT";
+    utterance.rate = 0.9; // Velocità leggermente ridotta per chiarezza
+
+    // Quando la sintesi finisce, resettiamo lo stato play
+    utterance.onend = () => setIsPlaying(false);
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    window.speechSynthesis.cancel();
+    setIsPlaying(false);
+  };
+
+  // Effetto per gestire la voce quando cambia l'item o lo stato isPlaying
+  useEffect(() => {
+    if (isPlaying && currentItem) {
+      speak(currentItem.descrizione);
+    } else {
+      window.speechSynthesis.cancel();
+    }
+  }, [currentItem, isPlaying]);
+
+  // Stop sintesi se lasciamo la pagina
+  useEffect(() => {
+    return () => window.speechSynthesis.cancel();
+  }, []);
+  // -----------------------------
+
   const handleClose = () => setShowExitModal(false);
-  const handleShow = () => setShowExitModal(true);
-  const handleConfirmExit = () => navigate(`/visit/${safeId}`);
+  const handleShow = () => {
+    stopSpeaking(); // Fermiamo la voce se apriamo il modal
+    setShowExitModal(true);
+  };
+  const handleConfirmExit = () => navigate(`/visit/${id}`);
 
-  const visit = mockData.visite.find((v) => String(v.id) === String(safeId));
-  console.log(visit);
-  if (!visit) return <div>Visita non trovata</div>;
-  const currentOpera = visit.oggetti[safeIndex];
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/visite/${id}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.successo && json.data) {
+          setVisit(json.data);
+          setCurrentItem(json.data.tappe[safeIndex].item_default);
+          if (json.data.livello_base) setPrefLingua(json.data.livello_base);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Errore fetch:", err);
+        setLoading(false);
+      });
+  }, [id, safeIndex]);
 
-  const currentItem =
-    currentOpera.items.find(
-      (it) => it.durata === prefDurata && it.linguaggio === prefLingua,
-    ) || currentOpera.items[0];
+  const cambiaDifficolta = (livello) => {
+    stopSpeaking(); // Reset audio al cambio difficoltà
+    setPrefLingua(livello);
+    const nuovoId = visit.tappe[safeIndex].varianti_difficolta[livello];
+    if (!nuovoId) return alert("Variante non disponibile");
+
+    fetch(`/api/items/${nuovoId}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.successo) {
+          setCurrentItem(json.data);
+          // Facciamo ripartire la voce automaticamente dopo il caricamento
+          setIsPlaying(true);
+        }
+      });
+  };
 
   const cambiaOpera = (nuovoIndice) => {
-    if (nuovoIndice >= 0 && nuovoIndice < visit.oggetti.length) {
-      navigate(`/visit/${safeId}/${nuovoIndice}`);
+    stopSpeaking();
+    if (visit && nuovoIndice >= 0 && nuovoIndice < visit.tappe.length) {
+      navigate(`/visit/${id}/${nuovoIndice}`);
     }
   };
+
+  if (loading)
+    return (
+      <div className="vh-100 d-flex justify-content-center align-items-center bg-dark text-white">
+        <Spinner animation="border" variant="light" />
+      </div>
+    );
+
+  if (!visit || !currentItem)
+    return <div className="text-white p-5 text-center">Opera non trovata</div>;
 
   return (
     <>
@@ -56,70 +125,90 @@ export default function NavigatorItemViewer() {
           <button className="top-nav-btn" onClick={handleShow}>
             <i className="bi bi-chevron-left"></i>
           </button>
-
           <div className="top-nav-center">
-            <span className="top-nav-title">GALLERY TOUR</span>
+            <span className="top-nav-title">{visit.title || visit.titolo}</span>
           </div>
         </div>
+
         <Row className="justify-content-center g-0">
-          <Col xs={12} md={8} lg={6} className="p-0">
-            <div className="img-container">
+          <Col xs={12} md={8} lg={6} className="p-0 text-center">
+            <div className="img-container mb-3">
               <img
-                src={currentOpera.immagine_riconoscimento}
-                alt={currentOpera.titolo_opera}
+                src={currentItem.url || "/img/placeholder.jpg"}
+                alt={currentItem.titolo}
               />
             </div>
           </Col>
         </Row>
+
         <Row className="justify-content-center">
           <Col xs={12} md={6} className="p-0">
-            <Card
-              className="d-flex text-center m-0 p-0 card-viewer"
-              style={{ overflowY: "auto" }}
-            >
-              <Card.Body className="shadow-none card-viewer">
+            <Card className="card-viewer shadow-none">
+              <Card.Body>
                 <div className="text-start px-2">
-                  <h2 className="mb-1 fw-bold h4">
-                    {currentOpera.titolo_opera}
-                  </h2>
-                  <p
-                    className="text-muted mb-2"
-                    style={{ fontStyle: "italic" }}
-                  >
-                    {currentOpera.autore}
-                    <i class="bi bi-info-circle p-2 mt-2"></i>
-                  </p>
-
-                  <p
-                    className="small text-secondary mb-0"
-                    style={{ fontSize: "0.85rem" }}
-                  >
-                    {currentOpera.info_autore ||
-                      "Facciamo finta ci sia scritto vita, morte e miracoli."}
-                  </p>
+                  <h2 className="mb-1 fw-bold h4">{currentItem.titolo}</h2>
+                  <div className="d-flex gap-2 my-3">
+                    {["infantile", "medio", "avanzato"].map((lvl) => (
+                      <button
+                        key={lvl}
+                        className={`btn-difficolta-custom ${prefLingua === lvl ? "active" : ""}`}
+                        onClick={() => cambiaDifficolta(lvl)}
+                      >
+                        {lvl === "infantile" ? "semplice" : lvl}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <hr className="my-3 mx-2" style={{ opacity: "0.1" }} />
-
-                <div className="text-start px-2 item-text-content">
-                  <Card.Text>
-                    {/* {currentItem.testo} */}
-                    Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                    Quae, debitis! Voluptates magni nulla itaque ut quia
-                    distinctio facilis tenetur ad! Lorem ipsum dolor sit amet
-                    consectetur adipisicing elit. Quisquam in tempora maiores
-                    excepturi quas eligendi dolore atque saepe expedita. Porro
-                    debitis provident nam modi voluptas, distinctio fuga cumque?
-                    Voluptates, nobis?
-                  </Card.Text>
+                <div className="text-start px-2">
+                  <Card.Text>{currentItem.descrizione}</Card.Text>
                 </div>
 
-                <div className="mt-4 mx-2 logistic mb-5">
-                  <div className="text-start bg-light rounded border-danger border-start border-3 p-2">
-                    <p className="d-block text-muted text-start m-0">
-                      Prossima tappa:
+                {/* --- BOTTONI ACCESSIBILI (REQUISITO BASE) --- */}
+                <div className="mt-4 px-2 d-flex flex-wrap gap-2">
+                  <Button
+                    variant="outline-light"
+                    size="sm"
+                    className="rounded-pill"
+                    onClick={() =>
+                      speak(
+                        `L'autore di quest'opera è ${currentItem.autore || "sconosciuto"}`,
+                      )
+                    }
+                  >
+                    <i className="bi bi-person-fill me-1"></i> Chi è l'autore?
+                  </Button>
+                  <Button
+                    variant="outline-light"
+                    size="sm"
+                    className="rounded-pill"
+                    onClick={() =>
+                      speak(
+                        `Il periodo artistico è ${currentItem.periodo || "non specificato"}`,
+                      )
+                    }
+                  >
+                    <i className="bi bi-calendar-event-fill me-1"></i> Qual è il
+                    periodo?
+                  </Button>
+                </div>
+
+                <div className="mt-4 mx-2">
+                  <div className="text-start rounded border-warning border-start border-3 p-3 bg-dark">
+                    <p className="small text-muted m-0">Logistica:</p>
+                    <p className="m-0 small">
+                      {visit.tappe[safeIndex].logistica}
                     </p>
-                    <p>{currentOpera.logistica_prossimo}</p>
+                    {/* Pulsante audio per logistica */}
+                    <i
+                      className="bi bi-volume-up mt-2 d-inline-block"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => speak(visit.tappe[safeIndex].logistica)}
+                    >
+                      {" "}
+                      Ascolta logistica
+                    </i>
                   </div>
                 </div>
               </Card.Body>
@@ -130,33 +219,28 @@ export default function NavigatorItemViewer() {
 
       <Navbar fixed="bottom" className="audio-player-fixed p-0 border-0">
         <Container fluid className="player-container">
-          {/* Progress Area */}
           <div className="progress-section">
             <div className="progress-bar-container">
-              <div className="progress-bar-fill mt-2" style={{ width: "40%" }}>
+              <div
+                className="progress-bar-fill mt-2"
+                style={{ width: isPlaying ? "60%" : "30%" }}
+              >
                 <div className="progress-cursor"></div>
               </div>
             </div>
             <div className="timer-row">
-              <span>01:42</span>
-              <span>04:55</span>
+              <span>00:00</span>
+              <span>{currentItem.lunghezza || "02:00"}</span>
             </div>
           </div>
 
-          {/* Main Controls */}
           <div className="controls-row">
-            <button className="btn-seek">
-              <i className="bi bi-arrow-counterclockwise"></i>
-              <span className="seek-val">10</span>
-            </button>
-
             <button
               className="btn-skip-step"
               onClick={() => cambiaOpera(safeIndex - 1)}
             >
               <i className="bi bi-skip-start-fill"></i>
             </button>
-
             <div
               className="play-btn-sphere"
               onClick={() => setIsPlaying(!isPlaying)}
@@ -165,23 +249,16 @@ export default function NavigatorItemViewer() {
                 className={`bi ${isPlaying ? "bi-pause-fill" : "bi-play-fill"}`}
               ></i>
             </div>
-
             <button
               className="btn-skip-step"
               onClick={() => cambiaOpera(safeIndex + 1)}
             >
               <i className="bi bi-skip-end-fill"></i>
             </button>
-
-            <button className="btn-seek">
-              <i className="bi bi-arrow-clockwise"></i>
-              <span className="seek-val">10</span>
-            </button>
           </div>
         </Container>
       </Navbar>
 
-      {/* MODAL DI CONFERMA */}
       <Modal
         show={showExitModal}
         onHide={handleClose}
@@ -189,32 +266,22 @@ export default function NavigatorItemViewer() {
         className="exit-modal"
       >
         <Modal.Header closeButton className="border-0">
-          <Modal.Title className="fw-bold" style={{ color: "#1a1a1d" }}>
-            Interrompere la visita?
+          <Modal.Title className="fw-bold" style={{ color: "#5b252d" }}>
+            Conferma uscita
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="text-muted">
-          Sei sicuro di voler interrompere l'ascolto e tornare alla lista delle
-          opere?
+        <Modal.Body style={{ color: "#212529" }}>
+          Sei sicuro di voler tornare alla lista delle opere?
         </Modal.Body>
         <Modal.Footer className="border-0">
-          <Button
-            variant="link"
-            className="text-decoration-none text-muted"
-            onClick={handleClose}
-          >
+          <Button variant="secondary" onClick={handleClose}>
             Annulla
           </Button>
           <Button
-            style={{
-              backgroundColor: "#e18f37",
-              border: "none",
-              borderRadius: "10px",
-              padding: "10px 25px",
-            }}
+            style={{ backgroundColor: "#5b252d", border: "none" }}
             onClick={handleConfirmExit}
           >
-            Conferma
+            Esci
           </Button>
         </Modal.Footer>
       </Modal>

@@ -146,14 +146,9 @@ function NavigatorVisitOverview() {
                           <Card.Title className="opera-title">
                             {opera.titolo}
                           </Card.Title>
-                          <CardSubtitle className="author">
-                            Autore: {opera.autore}
-                          </CardSubtitle>
                           <div className="audio-info mt-2">
                             <i className="bi bi-headphones me-2"></i>
-                            <span>
-                              {opera.lunghezza} • {opera.linguaggio}
-                            </span>
+                            <span>{opera.lunghezza}</span>
                           </div>
                         </Card.Body>
                       </Col>
