@@ -1,36 +1,23 @@
 /*
 File: scripts/mongo.js
-Progetto: ArtAround
-Descrizione: Gestione Database MongoDB (Atlas o Gocker)
+Descrizione: Popolamento DB per Gocker usando i modelli esistenti
 */
 
 const mongoose = require("mongoose");
 const fs = require("fs").promises;
 const path = require("path");
-require("dotenv").config(); // Carica il file .env
+require("dotenv").config();
+
+// --- 1. IMPORTA I MODELLI ESISTENTI ---
+// Assicurati che i percorsi siano corretti rispetto alla posizione di mongo.js
+const Item = require("../models/Item"); // o come si chiama il file dell'Item
+const Visit = require("../models/Visit"); // o Visita.js
+const User = require("../models/User");
 
 let dbname = "artaround";
 
-// --- 1. DEFINIZIONE DELLO SCHEMA ---
-const visitSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: { type: String, required: false },
-  image: { type: String, required: false },
-  type: { type: String, required: false },
-  duration: { type: String, required: false },
-  stops: { type: Number, required: false },
-});
-
-const Visit = mongoose.model("Visit", visitSchema);
-mongoose.set("strictQuery", false);
-
-// --- FUNZIONE DI SUPPORTO PER L'URI ---
 const getUri = (credentials) => {
-  if (process.env.MONGO_URL) {
-    console.log("🛠️ Usando database ATLAS");
-    return process.env.MONGO_URL;
-  }
-  console.log("🌐 Usando database GOCKER");
+  if (process.env.MONGO_URL) return process.env.MONGO_URL;
   return `mongodb://${credentials.user}:${credentials.pwd}@${credentials.site}/${dbname}?authSource=admin&writeConcern=majority`;
 };
 
@@ -39,55 +26,70 @@ exports.create = async (credentials) => {
   let debug = [];
   try {
     const mongouri = getUri(credentials);
-    await mongoose.connect(mongouri);
 
-    let seedPath = path.join(__dirname, "..", "seed_data.json");
+    // Connessione: se mongoose è già connesso (stato 1), non fare nulla
+    if (mongoose.connection.readyState === 0) {
+      await mongoose.connect(mongouri);
+    }
+    debug.push("✅ Connesso al DB");
+
+    // Usiamo process.cwd() per trovare il file nella root del progetto Docker
+    let seedPath = path.join(process.cwd(), "seed_data.json");
+    debug.push(`Lettura file: ${seedPath}`);
+
     let doc = await fs.readFile(seedPath, "utf8");
     let fullData = JSON.parse(doc);
 
-    let dataToInsert = fullData.visite.map((v) => ({
-      title: v.titolo,
-      description: v.descrizione,
-      image:
-        v.immagine ||
-        "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?q=80&w=2070",
-      type: "AUDIO GUIDE",
-      duration: v.durataTotaleStimata
-        ? v.durataTotaleStimata + " min"
-        : "60 min",
-      stops: v.tags ? v.tags.length : 0,
-    }));
-
+    // PULIZIA TOTALE (Svuota le collezioni prima di ricaricare)
+    await Item.deleteMany({});
     await Visit.deleteMany({});
-    let inserted = await Visit.insertMany(dataToInsert);
-    await mongoose.connection.close();
+    await User.deleteMany({});
+    debug.push("🗑️ Database ripulito");
+
+    // 1. INSERIMENTO UTENTI
+    if (fullData.utenti) {
+      await User.insertMany(fullData.utenti);
+      debug.push(`👤 Inseriti ${fullData.utenti.length} utenti`);
+    }
+
+    // 2. INSERIMENTO ITEMS
+    if (fullData.items) {
+      await Item.insertMany(fullData.items);
+      debug.push(`🖼️ Inseriti ${fullData.items.length} items`);
+    }
+
+    // 3. INSERIMENTO VISITE
+    if (fullData.visits) {
+      let visitsToInsert = fullData.visits.map((v) => ({
+        id: v.id,
+        title: v.title || v.titolo,
+        image: v.image || v.immagine,
+        museo: v.museo,
+        livello_base: v.livello_base || v.difficolta_target,
+        info_generale: v.info_generale || v.descrizione_logistica,
+        stops: v.stops || (v.tappe ? v.tappe.length : 0),
+        duration: v.duration || "60 min",
+        tappe: (v.tappe || []).map((t) => ({
+          ordine: t.ordine,
+          logistica: t.logistica || t.indicazione_per_raggiungerlo,
+          item_default:
+            t.item_default || t.item_deafult || t.item_id_principale,
+          varianti_difficolta: t.varianti_difficolta || {},
+        })),
+      }));
+
+      await Visit.insertMany(visitsToInsert);
+      debug.push(`🗺️ Inserite ${visitsToInsert.length} visite`);
+    }
 
     return {
-      message: `<h1>Successo!</h1><p>Database popolato con ${inserted.length} visite.</p>`,
+      success: true,
+      message:
+        "<h1>Successo!</h1><p>DB Gocker popolato correttamente usando i modelli originali.</p>",
       debug: debug,
     };
   } catch (e) {
-    console.error(e);
-    return { error: e.message };
-  }
-};
-
-// --- 3. FUNZIONE SEARCH ---
-exports.search = async (q, credentials) => {
-  try {
-    const mongouri = getUri(credentials);
-    //await mongoose.connect(mongouri);
-
-    let query = {};
-    if (q && q.title) {
-      query.title = { $regex: new RegExp(q.title, "i") };
-    }
-
-    const results = await Visit.find(query);
-    await mongoose.connection.close();
-    return results;
-  } catch (e) {
-    console.error(e);
-    return { error: e.message };
+    console.error("Errore in create:", e);
+    return { success: false, error: e.message, debug: debug };
   }
 };
