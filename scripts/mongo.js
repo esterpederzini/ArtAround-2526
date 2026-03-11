@@ -1,6 +1,6 @@
 /*
 File: scripts/mongo.js
-Descrizione: Popolamento DB per Gocker - Supporta Visite, Items e Utenti
+Descrizione: Popolamento DB per Gocker usando i modelli esistenti
 */
 
 const mongoose = require("mongoose");
@@ -8,60 +8,13 @@ const fs = require("fs").promises;
 const path = require("path");
 require("dotenv").config();
 
+// --- 1. IMPORTA I MODELLI ESISTENTI ---
+// Assicurati che i percorsi siano corretti rispetto alla posizione di mongo.js
+const Item = require("../models/Item"); // o come si chiama il file dell'Item
+const Visit = require("../models/Visit"); // o Visita.js
+const User = require("../models/User");
+
 let dbname = "artaround";
-
-// --- 1. DEFINIZIONE SCHEMI CON CONTROLLO DI SICUREZZA ---
-
-const itemSchema = new mongoose.Schema({
-  _id: String,
-  operaId: String,
-  museo: String,
-  titolo: String,
-  descrizione: String,
-  url: String,
-  autore: String,
-  lunghezza: String,
-  linguaggio: String,
-  profonditaContenuto: String,
-  audioUrl: { type: String, default: "" },
-});
-
-const visitSchema = new mongoose.Schema({
-  id: String,
-  title: String,
-  image: String,
-  type: { type: String, default: "AUDIO GUIDE" },
-  duration: String,
-  stops: Number,
-  museo: String,
-  livello_base: String,
-  info_generale: String,
-  tappe: [
-    {
-      ordine: Number,
-      operaId: String,
-      logistica: String,
-      item_default: { type: String, ref: "Item" },
-      varianti_difficolta: {
-        infantile: String,
-        medio: String,
-        avanzato: String,
-      },
-    },
-  ],
-});
-
-const userSchema = new mongoose.Schema({
-  username: { type: String, required: true },
-  email: { type: String, required: true },
-  password: { type: String, required: true },
-  ruolo: String,
-});
-
-// IL TRUCCO È QUI: Controllo se il modello è già stato compilato per evitare OverwriteModelError
-const Item = mongoose.models.Item || mongoose.model("Item", itemSchema);
-const Visit = mongoose.models.Visit || mongoose.model("Visit", visitSchema);
-const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 const getUri = (credentials) => {
   if (process.env.MONGO_URL) return process.env.MONGO_URL;
@@ -74,17 +27,20 @@ exports.create = async (credentials) => {
   try {
     const mongouri = getUri(credentials);
 
-    // Connessione gestita per evitare conflitti se già connesso
+    // Connessione: se mongoose è già connesso (stato 1), non fare nulla
     if (mongoose.connection.readyState === 0) {
       await mongoose.connect(mongouri);
     }
     debug.push("✅ Connesso al DB");
 
-    let seedPath = path.join(__dirname, "..", "seed_data.json");
+    // Usiamo process.cwd() per trovare il file nella root del progetto Docker
+    let seedPath = path.join(process.cwd(), "seed_data.json");
+    debug.push(`Lettura file: ${seedPath}`);
+
     let doc = await fs.readFile(seedPath, "utf8");
     let fullData = JSON.parse(doc);
 
-    // PULIZIA TOTALE
+    // PULIZIA TOTALE (Svuota le collezioni prima di ricaricare)
     await Item.deleteMany({});
     await Visit.deleteMany({});
     await User.deleteMany({});
@@ -113,7 +69,7 @@ exports.create = async (credentials) => {
         info_generale: v.info_generale || v.descrizione_logistica,
         stops: v.stops || (v.tappe ? v.tappe.length : 0),
         duration: v.duration || "60 min",
-        tappe: v.tappe.map((t) => ({
+        tappe: (v.tappe || []).map((t) => ({
           ordine: t.ordine,
           logistica: t.logistica || t.indicazione_per_raggiungerlo,
           item_default:
@@ -126,12 +82,10 @@ exports.create = async (credentials) => {
       debug.push(`🗺️ Inserite ${visitsToInsert.length} visite`);
     }
 
-    // Non chiudiamo la connessione bruscamente per permettere al server di continuare a girare
-    // await mongoose.connection.close();
-
     return {
       success: true,
-      message: "<h1>Successo!</h1><p>DB Gocker popolato correttamente.</p>",
+      message:
+        "<h1>Successo!</h1><p>DB Gocker popolato correttamente usando i modelli originali.</p>",
       debug: debug,
     };
   } catch (e) {
