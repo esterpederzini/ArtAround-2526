@@ -28,7 +28,11 @@ const NavigatorLogin = () => {
       const json = await response.json();
 
       if (json.successo) {
-        localStorage.setItem("user", JSON.stringify(json.data));
+        const sessionData = {
+          user: json.data,
+          loginTimestamp: new Date().getTime(), // Salva l'ora attuale in millisecondi
+        };
+        localStorage.setItem("user_session", JSON.stringify(sessionData));
         navigate("/");
       } else {
         setError(json.messaggio || "Credenziali non valide");

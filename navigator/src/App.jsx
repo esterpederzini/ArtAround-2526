@@ -7,17 +7,18 @@ import NavigatorItemViewer from "./components/NavigatorItemViewer";
 import NavigatorHome from "./components/NavigatorHome";
 import NavigatorVisitOverview from "./components/NavigatorVisitOverview";
 import NavigatorLogin from "./components/NavigatorLogin";
+import ProtectedRoute from "./components/ProtectedRoute"; // <-- Importa il nuovo componente
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [showIntro, setShowIntro] = useState(false);
+  const [showIntro, setShowIntro] = useState(true); // Se vuoi l'intro, lasciala true inizialmente
+
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 2. LOGICA INTRO
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowIntro(false);
@@ -49,13 +50,41 @@ function App() {
         ) : (
           <Routes>
             <Route element={<NavigatorLayout isMobile={isMobile} />}>
+              {/* LOGIN: Sempre accessibile */}
               <Route path="/login" element={<NavigatorLogin />} />
-              <Route path="/" element={<NavigatorHome />} />
-              <Route path="/home" element={<NavigatorHome />} />
-              <Route path="/visit/:id" element={<NavigatorVisitOverview />} />
+
+              {/* TUTTE LE ALTRE ROTTE: Protette da ProtectedRoute */}
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <NavigatorHome />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/home"
+                element={
+                  <ProtectedRoute>
+                    <NavigatorHome />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/visit/:id"
+                element={
+                  <ProtectedRoute>
+                    <NavigatorVisitOverview />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/visit/:id/:operaIndex"
-                element={<NavigatorItemViewer />}
+                element={
+                  <ProtectedRoute>
+                    <NavigatorItemViewer />
+                  </ProtectedRoute>
+                }
               />
             </Route>
           </Routes>

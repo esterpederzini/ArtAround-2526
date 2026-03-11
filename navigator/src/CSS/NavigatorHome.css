@@ -74,35 +74,39 @@
 }
 
 .hero-title {
-  font-size: clamp(
-    1.8rem,
-    8vw,
-    2.5rem
-  ); /* Dimensione dinamica tra 1.8 e 2.5rem */
+  font-size: clamp(1.8rem, 8vw, 2.5rem);
   font-weight: 800;
   margin: 0.5rem 0;
   line-height: 1.1;
 }
 
-/* Barra di ricerca responsive */
-.search-bar-mock {
+.search-bar {
   background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(15px);
-  border-radius: 0.8rem;
+  backdrop-filter: blur(12px);
+  border-radius: 2rem;
   display: flex;
   align-items: center;
-  padding: 0.8rem 1rem;
-  margin-top: 1.5rem;
+  padding: 0.5rem 1.2rem;
+  margin-top: 2.5rem;
+  width: 85%;
+  max-width: 20rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.search-bar-mock input {
-  background: transparent;
-  border: none;
+.search-bar input {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
   color: white;
   flex: 1;
-  margin: 0 0.8rem;
+  margin: 0 0.5rem;
+  font-size: 0.85rem;
+}
+
+.search-bar i {
   font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 /* Sezione Visite con Scroll Orizzontale */

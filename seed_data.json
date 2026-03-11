@@ -603,7 +603,7 @@
       "profonditaContenuto": "approfondito"
     },
     {
-      "_id": "it_librodeimorti_01",
+      "_id": "it_libro_01",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -619,7 +619,7 @@
       "profonditaContenuto": "superficiale"
     },
     {
-      "_id": "it_librodeimorti_02",
+      "_id": "it_libro_02",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -635,7 +635,7 @@
       "profonditaContenuto": "standard"
     },
     {
-      "_id": "it_librodeimorti_03",
+      "_id": "it_libro_03",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -651,7 +651,7 @@
       "profonditaContenuto": "approfondito"
     },
     {
-      "_id": "it_librodeimorti_04",
+      "_id": "it_libro_04",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -667,7 +667,7 @@
       "profonditaContenuto": "superficiale"
     },
     {
-      "_id": "it_librodeimorti_05",
+      "_id": "it_libro_05",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -683,7 +683,7 @@
       "profonditaContenuto": "standard"
     },
     {
-      "_id": "it_librodeimorti_06",
+      "_id": "it_libro_06",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -699,7 +699,7 @@
       "profonditaContenuto": "approfondito"
     },
     {
-      "_id": "it_librodeimorti_07",
+      "_id": "it_libro_07",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -715,7 +715,7 @@
       "profonditaContenuto": "superficiale"
     },
     {
-      "_id": "it_librodeimorti_08",
+      "_id": "it_libro_08",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -731,7 +731,7 @@
       "profonditaContenuto": "standard"
     },
     {
-      "_id": "it_librodeimorti_09",
+      "_id": "it_libro_09",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -749,6 +749,120 @@
   ],
   "visits": [
     {
+      "id": "visita_medium_egizio",
+      "title": "I Tesori della Valle",
+      "image": "https://mole24.it/wp-content/uploads/2025/07/tomba-di-kha-e-merit-museo-egizio-torino.jpg",
+      "type": "AUDIO GUIDE",
+      "duration": "60 min",
+      "stops": 4,
+      "museo": "Museo Egizio di Torino",
+      "livello_base": "medio",
+      "info_generale": "Benvenuti. Il percorso inizia al piano terra. Si consiglia l'uso degli ascensori verso le sale superiori.",
+      "tappe": [
+        {
+          "ordine": 1,
+          "operaId": "ME-003",
+          "logistica": "Recatevi presso la sala dei papiri e individuate il Papiro dei Re.",
+          "item_default": "it_papiro_05",
+          "varianti_difficolta": {
+            "infantile": "it_papiro_02",
+            "medio": "it_papiro_05",
+            "avanzato": "it_papiro_08"
+          }
+        },
+        {
+          "ordine": 2,
+          "operaId": "ME-002",
+          "logistica": "Spostatevi nella sezione dei corredi e cercate i Sarcofagi di Kha e Merit.",
+          "item_default": "it_kha_05",
+          "varianti_difficolta": {
+            "infantile": "it_kha_02",
+            "medio": "it_kha_05",
+            "avanzato": "it_kha_08"
+          }
+        },
+        {
+          "ordine": 3,
+          "operaId": "ME-001",
+          "logistica": "Raggiungete la monumentale Statua di Ramesse II al centro della galleria.",
+          "item_default": "it_ramesse_05",
+          "varianti_difficolta": {
+            "infantile": "it_ramesse_02",
+            "medio": "it_ramesse_05",
+            "avanzato": "it_ramesse_08"
+          }
+        },
+        {
+          "ordine": 4,
+          "operaId": "ME-005",
+          "logistica": "Concludete la visita davanti al Libro dei Morti.",
+          "item_default": "it_libro_05",
+          "varianti_difficolta": {
+            "infantile": "it_libro_02",
+            "medio": "it_libro_05",
+            "avanzato": "it_libro_08"
+          }
+        }
+      ]
+    },
+    {
+      "id": "visita_hard_egizio",
+      "title": "Analisi Storica del Nuovo Regno",
+      "image": "https://cdn.finestresullarte.info/rivista/immagini/2024/fn/torino-museo-egizio-sfinge-amon.jpg",
+      "type": "EXPERT GUIDE",
+      "duration": "90 min",
+      "stops": 4,
+      "museo": "Museo Egizio di Torino",
+      "livello_base": "avanzato",
+      "info_generale": "Percorso accademico. Si prega di sostare nelle zone meno affollate per l'ascolto delle analisi tecniche.",
+      "tappe": [
+        {
+          "ordine": 1,
+          "operaId": "ME-004",
+          "logistica": "Inizio analisi dalla statuaria ufficiale: posizionatevi di fronte all'androsfinge monumentale.",
+          "item_default": "it_sfinge_08",
+          "varianti_difficolta": {
+            "infantile": "it_sfinge_02",
+            "medio": "it_sfinge_05",
+            "avanzato": "it_sfinge_08"
+          }
+        },
+        {
+          "ordine": 2,
+          "operaId": "ME-003",
+          "logistica": "Studio della cronologia: spostatevi di fronte al Canone di Torino.",
+          "item_default": "it_papiro_08",
+          "varianti_difficolta": {
+            "infantile": "it_papiro_02",
+            "medio": "it_papiro_05",
+            "avanzato": "it_papiro_08"
+          }
+        },
+        {
+          "ordine": 3,
+          "operaId": "ME-005",
+          "logistica": "Esame della ritualità: individuate il Libro dei Morti di Iuefankh.",
+          "item_default": "it_libro_08",
+          "varianti_difficolta": {
+            "infantile": "it_libro_02",
+            "medio": "it_libro_05",
+            "avanzato": "it_libro_08"
+          }
+        },
+        {
+          "ordine": 4,
+          "operaId": "ME-001",
+          "logistica": "Conclusione filologica: tornate alla Galleria dei Re per la statua di Ramesse II.",
+          "item_default": "it_ramesse_08",
+          "varianti_difficolta": {
+            "infantile": "it_ramesse_02",
+            "medio": "it_ramesse_05",
+            "avanzato": "it_ramesse_08"
+          }
+        }
+      ]
+    },
+    {
       "id": "visita_infantile_01",
       "titolo": "Piccoli Esploratori dell'Egitto",
       "museo": "Museo Egizio di Torino",
@@ -758,75 +872,17 @@
         {
           "ordine": 1,
           "indicazione_per_raggiungerlo": "Entra nella Galleria dei Re e cerca il re gigante seduto sul trono.",
-          "item_id_principale": "it_ramesse_02"
+          "item_default": "it_ramesse_02"
         },
         {
           "ordine": 2,
           "indicazione_per_raggiungerlo": "Prosegui dritto verso le grandi scatole colorate che proteggevano Kha e Merit.",
-          "item_id_principale": "it_kha_02"
+          "item_default": "it_kha_02"
         },
         {
           "ordine": 3,
           "indicazione_per_raggiungerlo": "Cerca la statua con il corpo di leone che fa la guardia!",
-          "item_id_principale": "it_sfinge_02"
-        }
-      ]
-    },
-    {
-      "id": "visita_media_01",
-      "titolo": "I Tesori Inestimabili del Nilo",
-      "museo": "Museo Egizio di Torino",
-      "difficolta_target": "medio",
-      "descrizione_logistica": "Benvenuti. Il percorso inizia al piano terra. Si consiglia l'uso degli ascensori per accedere alle sale superiori. Il costo del biglietto intero è di 18€.",
-      "tappe": [
-        {
-          "ordine": 1,
-          "indicazione_per_raggiungerlo": "Recatevi presso la sala dei papiri e individuate il Canone Reale.",
-          "item_id_principale": "it_papiro_05"
-        },
-        {
-          "ordine": 2,
-          "indicazione_per_raggiungerlo": "Spostatevi nella sezione dedicata ai corredi funerari intatti.",
-          "item_id_principale": "it_kha_05"
-        },
-        {
-          "ordine": 3,
-          "indicazione_per_raggiungerlo": "Proseguite verso la monumentale Statua di Ramesse II al centro della galleria.",
-          "item_id_principale": "it_ramesse_05"
-        },
-        {
-          "ordine": 4,
-          "indicazione_per_raggiungerlo": "Concludete la visita davanti al Libro dei Morti di Iuefankh.",
-          "item_id_principale": "it_libro_05"
-        }
-      ]
-    },
-    {
-      "id": "visita_avanzata_01",
-      "titolo": "Analisi Storica e Filologica del Nuovo Regno",
-      "museo": "Museo Egizio di Torino",
-      "difficolta_target": "avanzato",
-      "descrizione_logistica": "Percorso accademico specialistico. Per la consultazione dei dettagli tecnici si prega di sostare nelle zone meno affollate delle sale.",
-      "tappe": [
-        {
-          "ordine": 1,
-          "indicazione_per_raggiungerlo": "Analisi della statuaria ufficiale: posizionatevi di fronte all'androsfinge monumentale.",
-          "item_id_principale": "it_sfinge_08"
-        },
-        {
-          "ordine": 2,
-          "indicazione_per_raggiungerlo": "Studio della cronologia regia: spostatevi di fronte al Canone di Torino.",
-          "item_id_principale": "it_papiro_08"
-        },
-        {
-          "ordine": 3,
-          "indicazione_per_raggiungerlo": "Esame della ritualità tolemaica: individuate il Libro dei Morti.",
-          "item_id_principale": "it_libro_08"
-        },
-        {
-          "ordine": 4,
-          "indicazione_per_raggiungerlo": "Conclusione filologica: tornate alla Galleria dei Re per la statua in diorite di Ramesse II.",
-          "item_id_principale": "it_ramesse_08"
+          "item_default": "it_sfinge_02"
         }
       ]
     }
