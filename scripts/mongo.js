@@ -10,10 +10,10 @@ require("dotenv").config();
 
 let dbname = "artaround";
 
-// --- 1. SCHEMI (Allineati ai tuoi dati reali) ---
+// --- 1. DEFINIZIONE SCHEMI CON CONTROLLO DI SICUREZZA ---
 
 const itemSchema = new mongoose.Schema({
-  _id: String, // Usiamo l'ID testuale (es: it_ramesse_01)
+  _id: String,
   operaId: String,
   museo: String,
   titolo: String,
@@ -51,7 +51,6 @@ const visitSchema = new mongoose.Schema({
   ],
 });
 
-// Schema Utenti per il Login
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true },
   email: { type: String, required: true },
@@ -59,6 +58,7 @@ const userSchema = new mongoose.Schema({
   ruolo: String,
 });
 
+// IL TRUCCO È QUI: Controllo se il modello è già stato compilato per evitare OverwriteModelError
 const Item = mongoose.models.Item || mongoose.model("Item", itemSchema);
 const Visit = mongoose.models.Visit || mongoose.model("Visit", visitSchema);
 const User = mongoose.models.User || mongoose.model("User", userSchema);
@@ -73,7 +73,11 @@ exports.create = async (credentials) => {
   let debug = [];
   try {
     const mongouri = getUri(credentials);
-    await mongoose.connect(mongouri);
+
+    // Connessione gestita per evitare conflitti se già connesso
+    if (mongoose.connection.readyState === 0) {
+      await mongoose.connect(mongouri);
+    }
     debug.push("✅ Connesso al DB");
 
     let seedPath = path.join(__dirname, "..", "seed_data.json");
@@ -98,35 +102,40 @@ exports.create = async (credentials) => {
       debug.push(`🖼️ Inseriti ${fullData.items.length} items`);
     }
 
-    // 3. INSERIMENTO VISITE (Mappatura fedele ai tuoi dati)
-    let visitsToInsert = fullData.visits.map((v) => ({
-      id: v.id,
-      title: v.title || v.titolo, // Accetta entrambi
-      image: v.image || v.immagine, // Accetta entrambi
-      museo: v.museo,
-      livello_base: v.livello_base || v.difficolta_target, // Accetta entrambi
-      info_generale: v.info_generale || v.descrizione_logistica, // Accetta entrambi
-      stops: v.stops || (v.tappe ? v.tappe.length : 0),
-      duration: v.duration || "60 min",
-      tappe: v.tappe.map((t) => ({
-        ordine: t.ordine,
-        logistica: t.logistica || t.indicazione_per_raggiungerlo,
-        item_default: t.item_default || t.item_deafult || t.item_id_principale, // Protezione per l'errore "deafult"
-        varianti_difficolta: t.varianti_difficolta || {},
-      })),
-    }));
+    // 3. INSERIMENTO VISITE
+    if (fullData.visits) {
+      let visitsToInsert = fullData.visits.map((v) => ({
+        id: v.id,
+        title: v.title || v.titolo,
+        image: v.image || v.immagine,
+        museo: v.museo,
+        livello_base: v.livello_base || v.difficolta_target,
+        info_generale: v.info_generale || v.descrizione_logistica,
+        stops: v.stops || (v.tappe ? v.tappe.length : 0),
+        duration: v.duration || "60 min",
+        tappe: v.tappe.map((t) => ({
+          ordine: t.ordine,
+          logistica: t.logistica || t.indicazione_per_raggiungerlo,
+          item_default:
+            t.item_default || t.item_deafult || t.item_id_principale,
+          varianti_difficolta: t.varianti_difficolta || {},
+        })),
+      }));
 
-    await Visit.insertMany(visitsToInsert);
-    debug.push(`🗺️ Inserite ${visitsToInsert.length} visite`);
+      await Visit.insertMany(visitsToInsert);
+      debug.push(`🗺️ Inserite ${visitsToInsert.length} visite`);
+    }
 
-    await mongoose.connection.close();
+    // Non chiudiamo la connessione bruscamente per permettere al server di continuare a girare
+    // await mongoose.connection.close();
+
     return {
       success: true,
       message: "<h1>Successo!</h1><p>DB Gocker popolato correttamente.</p>",
       debug: debug,
     };
   } catch (e) {
-    console.error(e);
+    console.error("Errore in create:", e);
     return { success: false, error: e.message, debug: debug };
   }
 };
