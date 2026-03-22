@@ -127,7 +127,7 @@
 
 /* --- TASTO START VISIT --- */
 .start-visit-btn {
-  background-color: #5b252d !important;
+  background-color: #e18f37 !important;
   border: none !important;
   border-radius: 15px !important;
   padding: 15px !important;
@@ -139,13 +139,13 @@
 
 .start-visit-btn:active {
   transform: scale(0.96);
-  background-color: #5c2d34 !important;
+  background-color: #e18f37 !important;
 }
 
 /* Cerchio bianco intorno all'icona play */
 .play-icon-circle {
   background-color: white;
-  color: #5b252d;
+  color: #e18f37;
   width: 30px;
   height: 30px;
   border-radius: 50%;
@@ -157,4 +157,66 @@
 .play-icon-circle i {
   font-size: 1.2rem;
   margin-left: 2px; /* Allineamento ottico dell'icona play */
+}
+
+/* --- OVERVIEW VARIANT: SOPHISTICATED MODAL --- */
+/* --- OVERVIEW VARIANT: SAME COLORS, DIFFERENT LAYOUT --- */
+.museum-modal-overview .modal-content {
+  background-color: rgba(26, 26, 29, 0.9) !important;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(225, 143, 55, 0.3); /* Bordo arancio più visibile */
+  border-radius: 20px;
+  padding: 10px;
+}
+
+.museum-modal-content-overview {
+  text-align: center;
+  padding: 25px 20px !important;
+}
+
+.museum-modal-icon-overview {
+  font-size: 2.8rem;
+  color: #e18f37; /* Stesso arancio */
+  margin-bottom: 15px;
+}
+
+.museum-modal-title-overview {
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+.museum-modal-text-overview {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin-bottom: 25px;
+}
+
+.museum-modal-actions-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Pulsanti con gli stessi colori ma angoli meno arrotondati per distinguerli */
+.btn-overview-confirm {
+  background-color: #e18f37;
+  color: #1a1a1d;
+  border: none;
+  border-radius: 8px; /* Più squadrato */
+  padding: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-overview-cancel {
+  background: transparent;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
 }

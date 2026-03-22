@@ -29,6 +29,8 @@ exports.getItems = async (req, res) => {
       minPrezzo,
       maxPrezzo,
       cerca,
+      operaId, // ADDED: support for operaId filtering
+      lunghezza, // ADDED: support for length filtering
       pagina = 1,
       limite = 20,
       pubblicato = "true",
@@ -38,13 +40,18 @@ exports.getItems = async (req, res) => {
     if (museo) filtro.museo = museo;
     if (linguaggio) filtro.linguaggio = linguaggio;
     if (categoria) filtro.categoria = categoria;
+    if (operaId) filtro.operaId = operaId; // ADDED to filter
+    if (lunghezza) filtro.lunghezza = lunghezza; // ADDED to filter
+
     if (licenza) filtro["licenza.tipo"] = licenza;
     if (pubblicato !== "tutti") filtro.pubblicato = pubblicato === "true";
+
     if (minPrezzo !== undefined || maxPrezzo !== undefined) {
       filtro.prezzo = {};
       if (minPrezzo) filtro.prezzo.$gte = Number(minPrezzo);
       if (maxPrezzo) filtro.prezzo.$lte = Number(maxPrezzo);
     }
+
     if (cerca) {
       filtro.$or = [
         { titolo: { $regex: cerca, $options: "i" } },
@@ -196,7 +203,7 @@ exports.getVisite = async (req, res) => {
         .populate("creatorId", "username")
         .populate({
           path: "tappe.item_default", // PERCORSO CORRETTO (Atlas)
-          select: "titolo operaId lunghezza linguaggio url autore", // 'url' invece di 'immagine'
+          select: "titolo operaId lunghezza linguaggio url autore audioUrl", // 'url' invece di 'immagine'
         })
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -226,7 +233,7 @@ exports.getVisitaById = async (req, res) => {
         path: "tappe.item_default",
         model: "Item",
         select:
-          "titolo operaId lunghezza linguaggio url descrizione autore categoria prezzo licenza",
+          "titolo operaId lunghezza linguaggio url descrizione autore categoria prezzo licenza audioUrl",
       });
 
     if (!visita) {

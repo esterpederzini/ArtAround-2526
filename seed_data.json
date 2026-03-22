@@ -560,6 +560,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
       "descrizione": "Androsfinge scultorea con funzione apotropaica.",
+      "audioUrl": "/mobile/audio/it_sfinge07_3s.m4a",
       "url": "https://cdn.finestresullarte.info/rivista/immagini/2024/fn/torino-museo-egizio-sfinge-amon.jpg",
       "autore": "autore2",
       "lunghezza": "3s",
@@ -576,6 +577,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
       "descrizione": "Androsfinge in arenaria, sintesi iconografica tra forza ferina e intelligenza sovrana. Evidenzia il nemes e l'ureo frontale, attributi atti a marcare il carattere protettivo dell'opera.",
+      "audioUrl": "/mobile/audio/it_sfinge08_15s.m4a",
       "url": "https://cdn.finestresullarte.info/rivista/immagini/2024/fn/torino-museo-egizio-sfinge-amon.jpg",
       "autore": "autore2",
       "lunghezza": "15s",
@@ -591,7 +593,8 @@
       "operaId": "ME-004",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
-      "descrizione": "L'androsfinge monumentale costituisce un perfetto esempio di sintesi iconografica tipica della statuaria ufficiale egizia. La scultura unisce la possanza ferina del corpo leonino all'intelligenza raziocinante espressa dal volto umano, identificabile con il sovrano regnante. La testa è incorniciata dal classico drappo nemes sormontato dall'ureo, chiari indicatori di regalità. Questa tipologia statuaria aveva una spiccata funzione apotropaica e processionale, destinata a delimitare i dromos dei complessi templari per incanalare l'energia divina e allontanare le entità caotiche esterne al Maat.",
+      "descrizione": "L'androsfinge monumentale in arenaria qui esposta costituisce un eccellente esempio di sintesi iconografica, tipica della statuaria ufficiale egizia del Nuovo Regno. La scultura fonde magistralmente la possanza ferina del corpo leonino all'intelligenza raziocinante espressa dal volto umano, in cui è possibile identificare i tratti idealizzati del sovrano regnante. Il volto, dal modellato ieratico, è incorniciato dal classico copricapo nemes, sormontato sulla fronte dall'ureo regale, il cobra sacro atto a fulminare i nemici del faraone. Notate la tensione muscolare delle zampe anteriori, che suggerisce una forza trattenuta, pronta a scattare in difesa del sacro. Questa tipologia statuaria assolveva a una precisa funzione apotropaica e processionale: le sfingi venivano infatti collocate in lunghe file per delimitare i dromos, i viali d'accesso ai complessi templari. La loro presenza non era solo ornamentale, ma serviva a incanalare l'energia divina verso il santuario, e contemporaneamente, ad allontanare le entità caotiche esterne all'ordine del Maat, garantendo l'integrità spirituale del luogo sacro.",
+      "audioUrl": "/mobile/audio/it_sfinge09_1m.m4a",
       "url": "https://cdn.finestresullarte.info/rivista/immagini/2024/fn/torino-museo-egizio-sfinge-amon.jpg",
       "autore": "autore2",
       "lunghezza": "40s",
@@ -864,25 +867,47 @@
     },
     {
       "id": "visita_infantile_01",
-      "titolo": "Piccoli Esploratori dell'Egitto",
+      "title": "Piccoli Esploratori dell'Egitto",
+      "image": "https://collezioni.museoegizio.it/public/objects/images/0016U0_5F46330BD94B260326B5E06A63F2AA53_full.jpg",
+      "type": "KIDS GUIDE",
+      "duration": "45 min",
+      "stops": 3,
       "museo": "Museo Egizio di Torino",
-      "difficolta_target": "infantile",
-      "descrizione_logistica": "L'entrata del museo è in Via Accademia delle Scienze 6. Il biglietto per i bambini è ridotto ed è disponibile un servizio di guardaroba gratuito al piano interrato.",
+      "livello_base": "infantile",
+      "info_generale": "L'entrata del museo è in Via Accademia delle Scienze 6. Il biglietto per i bambini è ridotto ed è disponibile un servizio di guardaroba gratuito al piano interrato.",
       "tappe": [
         {
           "ordine": 1,
-          "indicazione_per_raggiungerlo": "Entra nella Galleria dei Re e cerca il re gigante seduto sul trono.",
-          "item_default": "it_ramesse_02"
+          "operaId": "ME-001",
+          "logistica": "Entra nella Galleria dei Re e cerca il re gigante seduto sul trono: è Ramesse II!",
+          "item_default": "it_ramesse_02",
+          "varianti_difficolta": {
+            "infantile": "it_ramesse_02",
+            "medio": "it_ramesse_05",
+            "avanzato": "it_ramesse_08"
+          }
         },
         {
           "ordine": 2,
-          "indicazione_per_raggiungerlo": "Prosegui dritto verso le grandi scatole colorate che proteggevano Kha e Merit.",
-          "item_default": "it_kha_02"
+          "operaId": "ME-002",
+          "logistica": "Prosegui dritto verso le grandi scatole colorate che proteggevano Kha e Merit.",
+          "item_default": "it_kha_02",
+          "varianti_difficolta": {
+            "infantile": "it_kha_02",
+            "medio": "it_kha_05",
+            "avanzato": "it_kha_08"
+          }
         },
         {
           "ordine": 3,
-          "indicazione_per_raggiungerlo": "Cerca la statua con il corpo di leone che fa la guardia!",
-          "item_default": "it_sfinge_02"
+          "operaId": "ME-004",
+          "logistica": "Cerca la statua con il corpo di leone che fa la guardia! Hai trovato la Sfinge?",
+          "item_default": "it_sfinge_02",
+          "varianti_difficolta": {
+            "infantile": "it_sfinge_02",
+            "medio": "it_sfinge_05",
+            "avanzato": "it_sfinge_08"
+          }
         }
       ]
     }

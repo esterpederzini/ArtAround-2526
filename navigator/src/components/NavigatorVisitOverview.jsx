@@ -160,26 +160,36 @@ function NavigatorVisitOverview() {
           })}
       </Container>
 
-      <Modal show={showExitModal} onHide={handleClose} centered>
-        <Modal.Header closeButton className="border-0">
-          <Modal.Title style={{ color: "#5b252d" }}>
-            Conferma uscita
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Sei sicuro di voler interrompere la visita e tornare alla Home?
+      <Modal
+        show={showExitModal}
+        onHide={handleClose}
+        centered
+        className="museum-modal-overview"
+      >
+        <Modal.Body className="museum-modal-content-overview">
+          <div className="museum-modal-icon-overview">
+            <i className="bi bi-exclamation-circle"></i>
+          </div>
+
+          <h5 className="museum-modal-title-overview">Conferma uscita</h5>
+
+          <p className="museum-modal-text-overview">
+            Sei sicuro di voler interrompere la visita e tornare alla Home?
+          </p>
+
+          <div className="museum-modal-actions-overview">
+            <button
+              className="btn-overview-confirm"
+              onClick={handleConfirmExit}
+            >
+              Esci dalla visita
+            </button>
+
+            <button className="btn-overview-cancel" onClick={handleClose}>
+              Annulla
+            </button>
+          </div>
         </Modal.Body>
-        <Modal.Footer className="border-0">
-          <Button variant="secondary" onClick={handleClose}>
-            Annulla
-          </Button>
-          <Button
-            style={{ backgroundColor: "#5b252d", border: "none" }}
-            onClick={handleConfirmExit}
-          >
-            Esci
-          </Button>
-        </Modal.Footer>
       </Modal>
     </>
   );

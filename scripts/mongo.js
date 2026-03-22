@@ -11,7 +11,7 @@ require("dotenv").config();
 // --- 1. IMPORTA I MODELLI ESISTENTI ---
 // Assicurati che i percorsi siano corretti rispetto alla posizione di mongo.js
 const Item = require("../models/Item"); // o come si chiama il file dell'Item
-const Visit = require("../models/Visit"); // o Visita.js
+const Visit = require("../models/Visita"); // o Visita.js
 const User = require("../models/User");
 
 let dbname = "artaround";
