@@ -61,7 +61,8 @@ app.get("/db/create", async function (req, res) {
 app.use("/mobile", express.static(path.join(__dirname, "navigator/dist")));
 
 // Gestione del refresh per la Single Page Application (Mobile)
-app.get("/mobile*", (req, res) => {
+// Con Express/router recenti, usiamo una regex invece di "/mobile*"
+app.get(/^\/mobile(?:\/.*)?$/, (req, res) => {
   res.sendFile(path.join(__dirname, "navigator/dist", "index.html"));
 });
 
