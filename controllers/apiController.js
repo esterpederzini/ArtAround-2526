@@ -99,7 +99,7 @@ exports.creaItem = async (req, res) => {
   try {
     const { creatorId, ...resto } = req.body;
 
-    // Verifica autore
+    // 1. Verifica che l'utente esista e abbia i permessi
     const utente = await User.findById(creatorId);
     if (!utente || !["autore", "admin"].includes(utente.ruolo)) {
       return risposta(
@@ -110,7 +110,16 @@ exports.creaItem = async (req, res) => {
       );
     }
 
-    const item = await Item.create({ ...resto, creatorId });
+    // 2. CREIAMO L'OGGETTO DA SALVARE
+    // Aggiungiamo esplicitamente 'autore' usando lo username dell'utente loggato
+    const datiNuovoItem = { 
+      ...resto, 
+      creatorId: creatorId,
+      autore: utente.username // <--- QUESTO RISOLVE IL TUO ERRORE
+    };
+
+    const item = await Item.create(datiNuovoItem);
+    
     risposta(res, 201, item, "Item creato con successo");
   } catch (err) {
     if (err.name === "ValidationError") {

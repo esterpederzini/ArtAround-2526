@@ -23,32 +23,18 @@ let mongoURI;
 if (isGocker) {
   mongoURI =
     "mongodb://site252620:Oht2Ieyi@localhost:27017/site252620?authSource=admin";
-  console.log("1");
+  console.log("Configurazione: GOKER/SSH");
 } else {
   mongoURI =
     "mongodb+srv://dbArtAround2526:MIeXFqS2A9P8npk5@cluster0.xsxp2c3.mongodb.net/test?retryWrites=true&w=majority";
-  console.log("2");
+  console.log("Configurazione: LOCALE/CASA");
 }
 
-// mongoose
-//   .connect(mongoURI)
-//   .then(() => {
-//     console.log(
-//       `✅ Mongoose connesso in modalità: ${isGocker ? "GOKER/SSH" : "LOCALE/CASA"}`,
-//     );
-//   })
-//   .catch((err) => {
-//     console.error("❌ Errore connessione Mongoose:", err.message);
-//   });
-
 if (mongoose.connection.readyState === 0) {
-  // 0 significa "scollegato"
   mongoose
     .connect(mongoURI)
     .then(() => {
-      console.log(
-        `✅ Mongoose connesso in modalità: ${isGocker ? "GOKER/SSH" : "LOCALE/CASA"}`,
-      );
+      console.log(`✅ Mongoose connesso`);
     })
     .catch((err) => {
       console.error("❌ Errore connessione Mongoose:", err.message);
@@ -59,6 +45,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// 1. ROTTE API (Sempre per prime)
 app.use("/api", apiRouter);
 
 app.get("/api/config", (req, res) => {
@@ -69,27 +56,34 @@ app.get("/db/create", async function (req, res) {
   res.send(await mymongo.create(mongoCredentials));
 });
 
-app.use("/", express.static(path.join(__dirname, "marketplace")));
+// 2. MOBILE APP (navigator/dist)
+// Serviamo i file statici della cartella mobile
 app.use("/mobile", express.static(path.join(__dirname, "navigator/dist")));
 
+// Gestione del refresh per la Single Page Application (Mobile)
+// Con Express/router recenti, usiamo una regex invece di "/mobile*"
 app.get(/^\/mobile(?:\/.*)?$/, (req, res) => {
   res.sendFile(path.join(__dirname, "navigator/dist", "index.html"));
 });
 
+// 3. MARKETPLACE (Radice del sito)
+// AGGIUNTO: 'extensions' permette di navigare su /gallery invece di /gallery.html
+app.use("/", express.static(path.join(__dirname, "marketplace"), {
+  extensions: ['html', 'htm']
+}));
+
+// Fallback per la home del marketplace se non trova index.html automaticamente
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "marketplace", "index.html"));
+});
+
+// 4. GESTIONE ERRORE 404 (Se nessuna delle precedenti funziona)
+app.use((req, res) => {
+  res.status(404).send("<h1>404 - Pagina non trovata</h1><p>Controlla l'indirizzo inserito.</p>");
+});
+
 // 5. AVVIO SERVER
 const PORT = process.env.PORT || 8000;
-
 app.listen(PORT, () => {
-  global.startDate = new Date();
-
-  const baseURL = isGocker
-    ? `https://site252620.tw.cs.unibo.it`
-    : `http://localhost:${PORT}`;
-
-  console.log(
-    `Server ArtAround avviato il ${global.startDate.toLocaleString()}`,
-  );
-  console.log(`Marketplace: ${baseURL}/`);
-  console.log(`Navigator: ${baseURL}/mobile`);
-  console.log(`API Endpoint: ${baseURL}/api/visite`);
+  console.log(`🚀 Server in ascolto su http://localhost:${PORT}`);
 });
