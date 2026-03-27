@@ -6,7 +6,6 @@ import {
   Col,
   Card,
   Modal,
-  Button,
   Spinner,
 } from "react-bootstrap";
 import "../CSS/NavigatorItemViewer.css";
@@ -29,6 +28,20 @@ export default function NavigatorItemViewer() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef(new Audio());
+  const sourceChangePlayTokenRef = useRef(0);
+
+  const resolveAudioUrl = (rawUrl, requestedDuration) => {
+    if (!rawUrl) return "";
+
+    let resolved = rawUrl;
+
+    // Temporary compatibility for legacy seed value pointing to a non-existent file.
+    if (requestedDuration === "40s") {
+      resolved = resolved.replace("_1m.m4a", "_40s.m4a");
+    }
+
+    return resolved;
+  };
 
   // --- 1. INITIAL FETCH ---
   useEffect(() => {
@@ -65,7 +78,10 @@ export default function NavigatorItemViewer() {
     }
 
     setIsPlaying(false);
-    const operaId = visit.tappe[safeIndex].operaId;
+    const operaId =
+      visit.tappe[safeIndex]?.operaId ||
+      currentItem?.operaId ||
+      visit.tappe[safeIndex]?.item_default?.operaId;
 
     // ADDED CONSOLE LOGS FOR DEBUGGING
     console.log("--- LOGIC UPDATE START ---");
@@ -74,6 +90,12 @@ export default function NavigatorItemViewer() {
     console.log("Current OperaId:", operaId);
 
     try {
+      if (!operaId) {
+        console.warn("DEBUG: Missing operaId, cannot update item combination");
+        alert("Dati opera non disponibili, ricarica la pagina.");
+        return;
+      }
+
       const url = `/api/items?operaId=${operaId}&linguaggio=${newLevel}&lunghezza=${newDuration}&pubblicato=tutti`;
       console.log("Fetching URL:", url);
 
@@ -85,11 +107,11 @@ export default function NavigatorItemViewer() {
         console.log("DEBUG: Item Found! New Item ID:", newItem._id);
         console.log("DEBUG: New Item Audio URL:", newItem.audioUrl);
 
+        // Trigger source-change flow: stop previous and auto-start new source.
+        setIsPlaying(false);
         setCurrentItem(newItem);
         setLanguageLevel(newLevel);
         setSelectedDuration(newDuration);
-
-        setTimeout(() => setIsPlaying(true), 300);
       } else {
         console.warn(`DEBUG: No item found for ${newLevel} and ${newDuration}`);
         alert(
@@ -113,38 +135,195 @@ export default function NavigatorItemViewer() {
   useEffect(() => {
     if (currentItem?.audioUrl) {
       const audio = audioRef.current;
+      const playToken = ++sourceChangePlayTokenRef.current;
+      const resolvedAudioUrl = resolveAudioUrl(
+        currentItem.audioUrl,
+        selectedDuration,
+      );
+      console.log("[AUDIO] Source update", {
+        itemId: currentItem?._id,
+        rawAudioUrl: currentItem?.audioUrl,
+        resolvedAudioUrl,
+        selectedDuration,
+      });
       audio.pause();
-      audio.src = currentItem.audioUrl;
+      audio.src = resolvedAudioUrl;
       audio.load();
+      setCurrentTime(0);
+      setDuration(0);
+      setIsPlaying(false);
 
-      const handleLoadedMetadata = () => setDuration(audio.duration);
+      const handleLoadedMetadata = () => {
+        console.log("[AUDIO] loadedmetadata", {
+          duration: audio.duration,
+          readyState: audio.readyState,
+          currentSrc: audio.currentSrc,
+        });
+        setDuration(audio.duration);
+      };
       const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
       const handleEnded = () => {
+        console.log("[AUDIO] ended");
         setIsPlaying(false);
         setCurrentTime(0);
+      };
+      const handleError = () => {
+        console.error("[AUDIO] load error", {
+          resolvedAudioUrl,
+          currentSrc: audio.currentSrc,
+          readyState: audio.readyState,
+          mediaErrorCode: audio.error?.code,
+          mediaErrorMessage: audio.error?.message,
+        });
+        setIsPlaying(false);
       };
 
       audio.addEventListener("loadedmetadata", handleLoadedMetadata);
       audio.addEventListener("timeupdate", handleTimeUpdate);
       audio.addEventListener("ended", handleEnded);
+      audio.addEventListener("error", handleError);
+
+      // Always auto-start the new source when the visualized item changes.
+      const autoStart = async () => {
+        try {
+          if (audio.readyState < 2) {
+            await new Promise((resolve, reject) => {
+              const onCanPlay = () => {
+                cleanup();
+                resolve();
+              };
+              const onError = () => {
+                cleanup();
+                reject(new Error("Cannot load source for autoplay"));
+              };
+              const cleanup = () => {
+                audio.removeEventListener("canplay", onCanPlay);
+                audio.removeEventListener("error", onError);
+              };
+              audio.addEventListener("canplay", onCanPlay, { once: true });
+              audio.addEventListener("error", onError, { once: true });
+            });
+          }
+
+          // Avoid stale play attempts if the source changed again.
+          if (sourceChangePlayTokenRef.current !== playToken) return;
+
+          await audio.play();
+          if (sourceChangePlayTokenRef.current !== playToken) return;
+          setIsPlaying(true);
+          console.log("[AUDIO] Auto-started on source change", {
+            currentSrc: audio.currentSrc,
+          });
+        } catch (e) {
+          console.error("[AUDIO] Auto-start failed on source change", {
+            error: e?.message || e,
+            currentSrc: audio.currentSrc,
+          });
+          setIsPlaying(false);
+        }
+      };
+
+      autoStart();
 
       return () => {
+        // Invalidate any pending async play from previous source.
+        sourceChangePlayTokenRef.current += 1;
         audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
         audio.removeEventListener("timeupdate", handleTimeUpdate);
         audio.removeEventListener("ended", handleEnded);
+        audio.removeEventListener("error", handleError);
       };
     }
-  }, [currentItem]);
+  }, [currentItem, selectedDuration]);
 
-  useEffect(() => {
-    if (isPlaying && currentItem?.audioUrl) {
-      audioRef.current
-        .play()
-        .catch((e) => console.error("Audio Play Error:", e));
-    } else {
-      audioRef.current.pause();
+  const handlePlayPauseClick = async () => {
+    const audio = audioRef.current;
+    if (!currentItem?.audioUrl) return;
+
+    const resolvedAudioUrl = resolveAudioUrl(currentItem.audioUrl, selectedDuration);
+    if (!resolvedAudioUrl) return;
+
+    console.log("[AUDIO] Play button clicked", {
+      isPlaying,
+      itemId: currentItem?._id,
+      selectedDuration,
+      rawAudioUrl: currentItem?.audioUrl,
+      resolvedAudioUrl,
+      currentSrc: audio.currentSrc,
+      readyState: audio.readyState,
+      paused: audio.paused,
+    });
+
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+      console.log("[AUDIO] Paused by user");
+      return;
     }
-  }, [isPlaying, currentItem]);
+
+    try {
+      // Ensure src is aligned with the currently selected variant.
+      if (audio.src !== new URL(resolvedAudioUrl, window.location.origin).href) {
+        console.log("[AUDIO] Syncing src before play", {
+          previousSrc: audio.currentSrc,
+          nextSrc: resolvedAudioUrl,
+        });
+        audio.src = resolvedAudioUrl;
+        audio.load();
+      }
+
+      // If metadata is not ready yet, wait for canplay once.
+      if (audio.readyState < 2) {
+        console.log("[AUDIO] Waiting for canplay", {
+          readyState: audio.readyState,
+          currentSrc: audio.currentSrc,
+        });
+        await new Promise((resolve, reject) => {
+          const onCanPlay = () => {
+            cleanup();
+            console.log("[AUDIO] canplay received", {
+              readyState: audio.readyState,
+              currentSrc: audio.currentSrc,
+            });
+            resolve();
+          };
+          const onError = () => {
+            cleanup();
+            console.error("[AUDIO] Error before canplay", {
+              currentSrc: audio.currentSrc,
+              mediaErrorCode: audio.error?.code,
+              mediaErrorMessage: audio.error?.message,
+            });
+            reject(new Error(`Cannot load audio: ${resolvedAudioUrl}`));
+          };
+          const cleanup = () => {
+            audio.removeEventListener("canplay", onCanPlay);
+            audio.removeEventListener("error", onError);
+          };
+          audio.addEventListener("canplay", onCanPlay, { once: true });
+          audio.addEventListener("error", onError, { once: true });
+        });
+      }
+
+      // Play directly inside click gesture to avoid autoplay-policy blocking.
+      await audio.play();
+      setIsPlaying(true);
+      console.log("[AUDIO] Playback started", {
+        currentSrc: audio.currentSrc,
+        currentTime: audio.currentTime,
+        readyState: audio.readyState,
+      });
+    } catch (e) {
+      console.error("[AUDIO] Play error", {
+        error: e?.message || e,
+        currentSrc: audio.currentSrc,
+        readyState: audio.readyState,
+        mediaErrorCode: audio.error?.code,
+        mediaErrorMessage: audio.error?.message,
+      });
+      setIsPlaying(false);
+    }
+  };
 
   const changeItem = (newIndex) => {
     setIsPlaying(false);
@@ -287,7 +466,7 @@ export default function NavigatorItemViewer() {
                     </button>
                     <div
                       className="play-sphere-main"
-                      onClick={() => setIsPlaying(!isPlaying)}
+                      onClick={handlePlayPauseClick}
                     >
                       <i
                         className={`bi ${isPlaying ? "bi-pause-fill" : "bi-play-fill"}`}

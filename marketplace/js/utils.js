@@ -5,7 +5,11 @@
 // ─── API FETCH ──────────────────────────────────────
 async function apiFetch(url, opzioni = {}) {
   try {
-    const risposta = await fetch(url, opzioni);
+    const token = getAuthToken();
+    const headers = { ...(opzioni.headers || {}) };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const risposta = await fetch(url, { ...opzioni, headers });
     const json = await risposta.json();
     if (!risposta.ok || !json.successo) {
       showToast(json.messaggio || "Errore API", "error");
@@ -42,6 +46,19 @@ function showToast(messaggio, tipo = "info", durata = 3500) {
 function getUtenteCorrente() {
   try {
     return JSON.parse(localStorage.getItem("aa_utente"));
+  } catch {
+    return null;
+  }
+}
+
+function getAuthToken() {
+  const token = localStorage.getItem("aa_token");
+  if (token) return token;
+
+  // Backward-compatible fallback for navigator-style session object.
+  try {
+    const session = JSON.parse(localStorage.getItem("user_session"));
+    return session?.token || null;
   } catch {
     return null;
   }

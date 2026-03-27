@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
@@ -57,20 +58,42 @@ app.get("/db/create", async function (req, res) {
 });
 
 // 2. MOBILE APP (navigator/dist)
-// Serviamo i file statici della cartella mobile
-app.use("/mobile", express.static(path.join(__dirname, "navigator/dist")));
+const navigatorDistPath = path.join(__dirname, "navigator", "dist");
+const navigatorSourcePath = path.join(__dirname, "navigator");
+const navigatorPublicAudioPath = path.join(__dirname, "navigator", "public", "audio");
+
+// Audio sempre disponibile anche se "dist" non esiste (ambiente dev)
+app.use("/mobile/audio", express.static(navigatorPublicAudioPath));
+
+// Build frontend (produzione)
+app.use("/mobile", express.static(navigatorDistPath));
 
 // Gestione del refresh per la Single Page Application (Mobile)
 // Con Express/router recenti, usiamo una regex invece di "/mobile*"
+app.use("/mobile", express.static(navigatorSourcePath));
 app.get(/^\/mobile(?:\/.*)?$/, (req, res) => {
-  res.sendFile(path.join(__dirname, "navigator/dist", "index.html"));
+  const distIndexPath = path.join(navigatorDistPath, "index.html");
+  const sourceIndexPath = path.join(navigatorSourcePath, "index.html");
+
+  if (fs.existsSync(distIndexPath)) {
+    return res.sendFile(distIndexPath);
+  }
+
+  if (fs.existsSync(sourceIndexPath)) {
+    return res.sendFile(sourceIndexPath);
+  }
+
+  return res.status(404).send("Mobile app non trovata: build mancante.");
 });
 
 // 3. MARKETPLACE (Radice del sito)
 // AGGIUNTO: 'extensions' permette di navigare su /gallery invece di /gallery.html
-app.use("/", express.static(path.join(__dirname, "marketplace"), {
-  extensions: ['html', 'htm']
-}));
+app.use(
+  "/",
+  express.static(path.join(__dirname, "marketplace"), {
+    extensions: ["html", "htm"],
+  }),
+);
 
 // Fallback per la home del marketplace se non trova index.html automaticamente
 app.get("/", (req, res) => {
@@ -79,7 +102,11 @@ app.get("/", (req, res) => {
 
 // 4. GESTIONE ERRORE 404 (Se nessuna delle precedenti funziona)
 app.use((req, res) => {
-  res.status(404).send("<h1>404 - Pagina non trovata</h1><p>Controlla l'indirizzo inserito.</p>");
+  res
+    .status(404)
+    .send(
+      "<h1>404 - Pagina non trovata</h1><p>Controlla l'indirizzo inserito.</p>",
+    );
 });
 
 // 5. AVVIO SERVER

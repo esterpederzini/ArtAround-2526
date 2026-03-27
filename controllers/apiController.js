@@ -2,6 +2,7 @@ const Item = require("../models/Item");
 const Visita = require("../models/Visita");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const { createAuthToken } = require("../middleware/auth");
 
 // ─── UTILITY ────────────────────────────────────────────────
 const risposta = (res, status, data, messaggio = "") => {
@@ -97,7 +98,8 @@ exports.getItemById = async (req, res) => {
 
 exports.creaItem = async (req, res) => {
   try {
-    const { creatorId, ...resto } = req.body;
+    const creatorId = req.auth?.sub;
+    const { creatorId: _, ...resto } = req.body;
 
     // 1. Verifica che l'utente esista e abbia i permessi
     const utente = await User.findById(creatorId);
@@ -112,10 +114,10 @@ exports.creaItem = async (req, res) => {
 
     // 2. CREIAMO L'OGGETTO DA SALVARE
     // Aggiungiamo esplicitamente 'autore' usando lo username dell'utente loggato
-    const datiNuovoItem = { 
-      ...resto, 
+    const datiNuovoItem = {
+      ...resto,
       creatorId: creatorId,
-      autore: utente.username // <--- QUESTO RISOLVE IL TUO ERRORE
+      autore: utente.username,
     };
 
     const item = await Item.create(datiNuovoItem);
@@ -176,7 +178,7 @@ exports.pubblicaItem = async (req, res) => {
 
 exports.acquistaItem = async (req, res) => {
   try {
-    const { acquirenteId } = req.body;
+    const acquirenteId = req.auth?.sub;
     const item = await Item.findById(req.params.id);
     if (!item) return risposta(res, 404, null, "Item non trovato");
 
@@ -259,7 +261,10 @@ exports.getVisitaById = async (req, res) => {
 
 exports.creaVisita = async (req, res) => {
   try {
-    const visita = await Visita.create(req.body);
+    const visita = await Visita.create({
+      ...req.body,
+      creatorId: req.auth?.sub,
+    });
     risposta(res, 201, visita, "Visita creata con successo");
   } catch (err) {
     if (err.name === "ValidationError") {
@@ -302,7 +307,7 @@ exports.eliminaVisita = async (req, res) => {
 
 exports.adottaVisita = async (req, res) => {
   try {
-    const { adottanteId } = req.body;
+    const adottanteId = req.auth?.sub;
     const visita = await Visita.findById(req.params.id);
     if (!visita) return risposta(res, 404, null, "Visita non trovata");
 
@@ -332,17 +337,36 @@ exports.getUtenti = async (req, res) => {
 exports.loginUtente = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const utente = await User.findOne({ username });
+    const identifier = (username || "").trim();
+    const utente = await User.findOne({
+      $or: [{ username: identifier }, { email: identifier.toLowerCase() }],
+    });
 
     if (!utente) return risposta(res, 401, null, "Utente non trovato");
 
-    // Temporaneamente confrontiamo le stringhe direttamente
-    // perché i dati nel JSON non sono criptati
-    if (utente.password !== password) {
+    let passwordValida = false;
+    if (utente.password && utente.password.startsWith("$2")) {
+      passwordValida = await utente.comparePassword(password);
+    } else {
+      // Migrazione automatica: se ancora in chiaro, convalida e cifra.
+      passwordValida = utente.password === password;
+      if (passwordValida) {
+        utente.password = await bcrypt.hash(password, 12);
+        await utente.save();
+      }
+    }
+
+    if (!passwordValida) {
       return risposta(res, 401, null, "Password errata");
     }
 
-    risposta(res, 200, utente.toJSON(), "Login effettuato");
+    const token = createAuthToken(utente);
+    risposta(
+      res,
+      200,
+      { user: utente.toJSON(), token },
+      "Login effettuato",
+    );
   } catch (err) {
     risposta(res, 500, null, err.message);
   }

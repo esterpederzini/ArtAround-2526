@@ -8,6 +8,13 @@ let dragSrc = null;
 
 // ─── INIT ────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
+  if (!richiedeAutore()) {
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 600);
+    return;
+  }
+
   await caricaMusei();
   await caricaAutori();
   await caricaTuttiItems();
