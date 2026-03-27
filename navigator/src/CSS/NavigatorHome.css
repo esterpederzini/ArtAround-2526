@@ -1,0 +1,358 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
+
+:root {
+  --bg-dark: #0a0e14;
+  --bg-card: #111827;
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --accent: #3b82f6;
+  --nav-bg: rgba(10, 14, 20, 0.8);
+}
+
+.home-dark-container {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  width: 100%;
+  font-family: "Nunito", sans-serif;
+  overflow-x: hidden;
+  padding-bottom: 5rem; /* Spazio per la bottom nav */
+}
+
+/* Header Superiore */
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centra il contenuto (il titolo) */
+  width: 100%;
+  height: 4rem;
+  background: var(--nav-bg);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 0 5vw;
+  position: relative; /* Necessario per posizionare l'icona in modo assoluto */
+}
+
+.menu-icon {
+  position: absolute; /* Sgancia l'icona dal flusso per non interferire con la centratura del titolo */
+  left: 5vw; /* Allinea l'icona con il padding del contenitore */
+}
+
+.menu-icon,
+.profile-icon {
+  font-size: 1.5rem;
+  color: var(--text-main);
+}
+
+.brand-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.05rem;
+  text-transform: uppercase;
+}
+
+/* Hero Section Moderna */
+.hero-modern {
+  position: relative;
+  width: 100%;
+  height: 45vh; /* Altezza basata sulla vista */
+  display: flex;
+  align-items: flex-end;
+  padding: 2.5rem 5vw;
+  background-image:
+    linear-gradient(to top, var(--bg-dark) 5%, transparent 60%),
+    url("https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=2070");
+  background-size: cover;
+  background-position: center;
+}
+
+.hero-content {
+  width: 100%;
+  z-index: 5;
+}
+
+.hero-title {
+  font-size: clamp(1.8rem, 8vw, 2.5rem);
+  font-weight: 800;
+  margin: 0.5rem 0;
+  line-height: 1.1;
+}
+
+.search-bar {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 2rem;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1.2rem;
+  margin-top: 2.5rem;
+  width: 85%;
+  max-width: 20rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.search-bar input {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: white;
+  flex: 1;
+  margin: 0 0.5rem;
+  font-size: 0.85rem;
+}
+
+.search-bar i {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Sezione Visite con Scroll Orizzontale */
+.visits-section {
+  padding: 2rem 0 1rem 5vw;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 5vw;
+  margin-bottom: 1.2rem;
+}
+
+.section-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.see-all {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.horizontal-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 1.2rem;
+  padding-right: 5vw;
+  scrollbar-width: none; /* Nasconde scrollbar su Firefox */
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  display: none; /* Nasconde scrollbar su Chrome/Safari */
+}
+
+.visit-card {
+  min-width: 65vw; /* Occupa il 65% della larghezza schermo per mostrare l'inizio della successiva */
+  max-width: 18rem;
+}
+
+.card-img-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4; /* Mantiene proporzioni verticali fisse */
+  border-radius: 1.2rem;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.card-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  padding: 0.3rem 0.6rem;
+  font-size: 0.65rem;
+  border-radius: 0.4rem;
+  font-weight: 700;
+}
+
+.visit-card h3 {
+  margin-top: 0.8rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.visit-card p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Bottom Nav Fissa */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 4.5rem;
+  background: var(--bg-card);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 1000;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.nav-item.active {
+  color: var(--accent);
+}
+
+.nav-item i {
+  font-size: 1.4rem;
+  margin-bottom: 0.2rem;
+}
+
+/* --- SIDEBAR SYSTEM --- */
+
+/* Overlay: lo sfondo scuro che copre la home quando la sidebar è aperta */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1100;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.sidebar-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Sidebar: il pannello laterale */
+.side-bar {
+  position: fixed;
+  top: 0;
+  left: -280px; /* Nasconde la sidebar a sinistra */
+  width: 280px;
+  height: 100%;
+  background-color: var(--bg-card);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.side-bar.open {
+  left: 0; /* La fa scivolare dentro lo schermo */
+}
+
+/* Header della Sidebar */
+.side-bar-header {
+  padding: 2rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+}
+
+.profile-thumb i {
+  font-size: 2.5rem;
+  color: var(--accent);
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-info strong {
+  font-size: 1rem;
+}
+
+.profile-info small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.close-btn {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.8rem;
+}
+
+/* Navigazione interna Sidebar */
+.side-nav {
+  padding: 1.5rem 1rem;
+  flex: 1;
+}
+
+.side-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: var(--text-main);
+}
+
+.side-nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.side-nav-item i {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+}
+
+/* Footer Sidebar */
+.side-bar-footer {
+  padding: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.settings-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+/* Forza la visibilità quando è aperta */
+.side-bar.open {
+  left: 0 !important;
+  visibility: visible !important;
+}
+
+.sidebar-overlay.visible {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
