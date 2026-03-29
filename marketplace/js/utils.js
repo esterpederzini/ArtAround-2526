@@ -127,6 +127,7 @@ function lunghezzaInMinuti(lunghezza) {
     "3s": 0.05,
     "15s": 0.25,
     "30s": 0.5,
+    "40s": 0.67,
     "1m": 1,
     "3m": 3,
     "5m": 5,

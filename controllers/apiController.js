@@ -9,6 +9,77 @@ const risposta = (res, status, data, messaggio = "") => {
   res.status(status).json({ successo: status < 400, messaggio, data });
 };
 
+/**
+ * Navigator and seed data use `tappe[].item_default` (Item id) + optional `operaId`.
+ * Legacy marketplace saves sent `items[]` instead — convert that shape here.
+ */
+async function buildTappeFromEditorItems(items) {
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const sorted = [...items].sort(
+    (a, b) => (Number(a.ordine) || 0) - (Number(b.ordine) || 0),
+  );
+  const tappe = [];
+  let fallbackOrder = 1;
+  for (const row of sorted) {
+    if (!row.itemId) continue;
+    const idStr = String(row.itemId);
+    const itemDoc = await Item.findById(idStr).select("operaId").lean();
+    const operaId = itemDoc?.operaId || row.operaId || "";
+    tappe.push({
+      ordine: row.ordine != null ? Number(row.ordine) : fallbackOrder,
+      logistica: row.logistica || "",
+      item_default: idStr,
+      operaId,
+      opzionale: !!row.opzionale,
+    });
+    fallbackOrder += 1;
+  }
+  return tappe.length ? tappe : null;
+}
+
+/**
+ * Ensure every tappa has `operaId` (Navigator reads tappa.operaId before populate).
+ */
+async function enrichTappeWithOperaIds(tappe) {
+  if (!Array.isArray(tappe) || !tappe.length) return tappe;
+  const out = [];
+  for (const row of tappe) {
+    const idStr = String(row.item_default ?? "");
+    let operaId = row.operaId || "";
+    if (idStr && !operaId) {
+      const doc = await Item.findById(idStr).select("operaId").lean();
+      operaId = doc?.operaId || "";
+    }
+    out.push({
+      ...row,
+      ordine: row.ordine != null ? Number(row.ordine) : out.length + 1,
+      logistica: row.logistica ?? "",
+      item_default: idStr,
+      operaId,
+    });
+  }
+  return out;
+}
+
+/**
+ * Prepare visit payload for Mongo: merge `items` → `tappe`, enrich opera ids, drop legacy `items`.
+ */
+async function normalizeVisitPayloadForStorage(body) {
+  const out = { ...body };
+  // Legacy: editor used `items`; keep converting until all clients send `tappe` only.
+  if (Array.isArray(out.items) && out.items.length > 0) {
+    const built = await buildTappeFromEditorItems(out.items);
+    if (built) {
+      out.tappe = built;
+      delete out.items;
+    }
+  }
+  if (Array.isArray(out.tappe) && out.tappe.length > 0) {
+    out.tappe = await enrichTappeWithOperaIds(out.tappe);
+  }
+  return out;
+}
+
 // ─── MUSEI ──────────────────────────────────────────────────
 exports.getMusei = async (req, res) => {
   try {
@@ -261,8 +332,9 @@ exports.getVisitaById = async (req, res) => {
 
 exports.creaVisita = async (req, res) => {
   try {
+    const payload = await normalizeVisitPayloadForStorage({ ...req.body });
     const visita = await Visita.create({
-      ...req.body,
+      ...payload,
       creatorId: req.auth?.sub,
     });
     risposta(res, 201, visita, "Visita creata con successo");
@@ -283,9 +355,15 @@ exports.creaVisita = async (req, res) => {
 
 exports.aggiornaVisita = async (req, res) => {
   try {
+    const payload = await normalizeVisitPayloadForStorage({ ...req.body });
+    const mongoUpdate = { $set: payload };
+    // Stop stale `items` from shadowing `tappe` after migration to tappe-only saves.
+    if (Object.prototype.hasOwnProperty.call(payload, "tappe")) {
+      mongoUpdate.$unset = { items: "" };
+    }
     const visita = await Visita.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      mongoUpdate,
       { new: true, runValidators: true },
     );
     if (!visita) return risposta(res, 404, null, "Visita non trovata");

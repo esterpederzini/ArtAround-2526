@@ -53,7 +53,9 @@ export default function NavigatorItemViewer() {
           const fetchedVisit = json.data;
           setVisit(fetchedVisit);
 
-          const defaultItem = fetchedVisit.tappe[safeIndex]?.item_default;
+          // Navigator model: stops live in `tappe` (never assume array exists).
+          const stops = fetchedVisit.tappe ?? [];
+          const defaultItem = stops[safeIndex]?.item_default;
           console.log("DEBUG: Initial Item Loaded:", defaultItem);
 
           if (defaultItem) {
@@ -72,16 +74,17 @@ export default function NavigatorItemViewer() {
 
   // --- 2. CORE LOGIC: CROSS-REFERENCE SEARCH (LEVEL + DURATION) ---
   const updateContent = async (newLevel, newDuration) => {
-    if (!visit || !visit.tappe[safeIndex]) {
+    const stops = visit?.tappe ?? [];
+    if (!visit || !stops[safeIndex]) {
       console.error("DEBUG: Visit or Tappa data missing during updateContent");
       return;
     }
 
     setIsPlaying(false);
     const operaId =
-      visit.tappe[safeIndex]?.operaId ||
+      stops[safeIndex]?.operaId ||
       currentItem?.operaId ||
-      visit.tappe[safeIndex]?.item_default?.operaId;
+      stops[safeIndex]?.item_default?.operaId;
 
     // ADDED CONSOLE LOGS FOR DEBUGGING
     console.log("--- LOGIC UPDATE START ---");
@@ -327,7 +330,8 @@ export default function NavigatorItemViewer() {
 
   const changeItem = (newIndex) => {
     setIsPlaying(false);
-    if (visit && newIndex >= 0 && newIndex < visit.tappe.length) {
+    const len = visit?.tappe?.length ?? 0;
+    if (visit && newIndex >= 0 && newIndex < len) {
       navigate(`/visit/${id}/${newIndex}`);
       window.scrollTo(0, 0);
     }
@@ -341,6 +345,22 @@ export default function NavigatorItemViewer() {
         <Spinner animation="border" variant="light" />
       </div>
     );
+
+  const tappeList = visit?.tappe ?? [];
+  if (!tappeList.length) {
+    return (
+      <div className="vh-100 d-flex flex-column justify-content-center align-items-center bg-dark text-white px-4 text-center">
+        <p className="mb-3">Questa visita non ha tappe definite.</p>
+        <button
+          type="button"
+          className="btn btn-outline-light"
+          onClick={() => navigate(`/visit/${id}`)}
+        >
+          Torna al percorso
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -482,10 +502,10 @@ export default function NavigatorItemViewer() {
                     <button
                       className="btn-item-skip"
                       onClick={() => changeItem(safeIndex + 1)}
-                      disabled={visit && safeIndex === visit.tappe.length - 1}
+                      disabled={visit && safeIndex === tappeList.length - 1}
                       style={{
                         opacity:
-                          visit && safeIndex === visit.tappe.length - 1
+                          visit && safeIndex === tappeList.length - 1
                             ? 0.2
                             : 0.5,
                       }}

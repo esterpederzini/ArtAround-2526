@@ -80,7 +80,7 @@ async function caricaVisiteList() {
     .map(
       (v) => `
     <div class="d-flex justify-content-between align-items-center py-1 border-bottom" style="border-color:var(--aa-stone)!important">
-      <span class="small text-truncate" style="max-width:140px" title="${v.titolo}">${v.titolo}</span>
+      <span class="small text-truncate" style="max-width:140px" title="${v.titolo || v.title}">${v.titolo || v.title}</span>
       <div class="d-flex gap-1">
         <button class="btn-aa-outline" style="font-size:0.72rem;padding:1px 7px" onclick="caricaVisitaPerModifica('${v._id}')">✎</button>
         <button class="btn-aa-danger" style="font-size:0.72rem;padding:1px 6px" onclick="eliminaVisita('${v._id}')">✕</button>
@@ -285,6 +285,22 @@ function onDragEnd(e) {
     .forEach((el) => (el.style.borderTop = ""));
 }
 
+/**
+ * Build `tappe` in the same shape as seed / Navigator (item_default, operaId, ordine).
+ */
+function buildTappeFromPath(pathItems) {
+  return pathItems.map((i) => {
+    const meta = tuttiItems.find((x) => String(x._id) === String(i.itemId)) || {};
+    return {
+      ordine: i.ordine,
+      logistica: "",
+      item_default: String(i.itemId),
+      operaId: meta.operaId || "",
+      opzionale: !!i.opzionale,
+    };
+  });
+}
+
 // ─── SALVA VISITA ─────────────────────────────────────
 async function salvaVisita() {
   const titolo = document.getElementById("visitaTitolo").value.trim();
@@ -310,8 +326,13 @@ async function salvaVisita() {
   if (!itemsNelPercorso.length)
     return showToast("Aggiungi almeno un item al percorso", "error");
 
+  // `tappe` is what Navigator reads; API also accepts legacy `items` and normalizes.
+  const tappe = buildTappeFromPath(itemsNelPercorso);
+
   const payload = {
     titolo,
+    // Navigator home cards use `title` on seed docs; keep both in sync.
+    title: titolo,
     museo,
     descrizione: desc,
     tags,
@@ -320,11 +341,9 @@ async function salvaVisita() {
     prezzo,
     pubblica,
     creatorId: autoreId,
-    items: itemsNelPercorso.map((i) => ({
-      itemId: i.itemId,
-      ordine: i.ordine,
-      opzionale: i.opzionale,
-    })),
+    stops: itemsNelPercorso.length,
+    duration: `${durata} min`,
+    tappe,
   };
 
   const metodo = id ? "PUT" : "POST";
@@ -349,7 +368,7 @@ async function caricaVisitaPerModifica(id) {
   if (!v) return;
 
   document.getElementById("visitaId").value = v._id;
-  document.getElementById("visitaTitolo").value = v.titolo;
+  document.getElementById("visitaTitolo").value = v.titolo || v.title || "";
   document.getElementById("visitaMuseo").value = v.museo;
   document.getElementById("visitaDescrizione").value = v.descrizione || "";
   document.getElementById("visitaTags").value = (v.tags || []).join(", ");
@@ -359,20 +378,51 @@ async function caricaVisitaPerModifica(id) {
   document.getElementById("visitaPrezzo").value = v.prezzo || 0;
   document.getElementById("visitaPubblica").checked = v.pubblica;
   document.getElementById("visitaAutore").value = v.creatorId?._id || "";
-  document.getElementById("editorTitolo").textContent = `Modifica: ${v.titolo}`;
+  const visitLabel = v.titolo || v.title || "Visita";
+  document.getElementById("editorTitolo").textContent = `Modifica: ${visitLabel}`;
 
-  itemsNelPercorso = (v.items || []).map((i) => ({
-    itemId: i.itemId?._id || i.itemId,
-    ordine: i.ordine,
-    opzionale: i.opzionale,
-    titolo: i.itemId?.titolo || "–",
-    lunghezza: i.itemId?.lunghezza || "1m",
-    linguaggio: i.itemId?.linguaggio || "intermedio",
-    categoria: i.itemId?.categoria || "altro",
-  }));
+  // Primary: `tappe` (Navigator + seed). Fallback: legacy `items` until re-saved.
+  let rawTappe = Array.isArray(v.tappe) ? v.tappe : [];
+  if (
+    rawTappe.length === 0 &&
+    Array.isArray(v.items) &&
+    v.items.length > 0
+  ) {
+    rawTappe = v.items.map((row) => ({
+      ordine: row.ordine,
+      opzionale: row.opzionale,
+      item_default: row.itemId?._id || row.itemId,
+    }));
+  }
+
+  itemsNelPercorso = rawTappe.map((t) => {
+    const def = t.item_default;
+    const itemId =
+      def && typeof def === "object" && def._id != null ? def._id : def;
+    const pop = def && typeof def === "object" ? def : null;
+    const meta =
+      pop ||
+      tuttiItems.find((x) => String(x._id) === String(itemId)) ||
+      {};
+    return {
+      itemId: String(itemId),
+      ordine: t.ordine,
+      opzionale: !!t.opzionale,
+      titolo: meta.titolo || "–",
+      lunghezza: meta.lunghezza || "1m",
+      linguaggio: meta.linguaggio || "intermedio",
+      categoria: meta.categoria || "altro",
+    };
+  });
+  itemsNelPercorso.sort(
+    (a, b) => (Number(a.ordine) || 0) - (Number(b.ordine) || 0),
+  );
+  itemsNelPercorso.forEach((row, idx) => {
+    row.ordine = idx + 1;
+  });
 
   renderPercorso();
-  showToast(`Visita "${v.titolo}" caricata per modifica`, "info");
+  showToast(`Visita "${visitLabel}" caricata per modifica`, "info");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 

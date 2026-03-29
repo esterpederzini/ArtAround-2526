@@ -97,6 +97,7 @@ function NavigatorVisitOverview() {
           <Button
             className="start-visit-btn d-flex align-items-center justify-content-center gap-3"
             onClick={() => navigate(`/visit/${id}/0`)}
+            disabled={!(visit.tappe && visit.tappe.length)}
           >
             <div className="play-icon-circle">
               <i className="bi bi-play-fill"></i>
@@ -104,6 +105,13 @@ function NavigatorVisitOverview() {
             <span className="fw-bold">Inizia la visita</span>
           </Button>
         </div>
+
+        {!(visit.tappe && visit.tappe.length) ? (
+          <p className="text-secondary small px-1">
+            Nessuna tappa in questa visita. Controlla che sia stata salvata dal
+            marketplace con il percorso (<code>tappe</code>).
+          </p>
+        ) : null}
 
         {/* tappe è l'array nel modello Visita che contiene itemId */}
         {visit.tappe &&
