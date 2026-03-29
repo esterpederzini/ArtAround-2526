@@ -10,8 +10,7 @@ const risposta = (res, status, data, messaggio = "") => {
 };
 
 /**
- * Navigator and seed data use `tappe[].item_default` (Item id) + optional `operaId`.
- * Legacy marketplace saves sent `items[]` instead — convert that shape here.
+ * Prepara il payload della visita per Mongo: merge `items` → `tappe`, arricchisce operaId.
  */
 async function buildTappeFromEditorItems(items) {
   if (!Array.isArray(items) || items.length === 0) return null;
@@ -37,9 +36,6 @@ async function buildTappeFromEditorItems(items) {
   return tappe.length ? tappe : null;
 }
 
-/**
- * Ensure every tappa has `operaId` (Navigator reads tappa.operaId before populate).
- */
 async function enrichTappeWithOperaIds(tappe) {
   if (!Array.isArray(tappe) || !tappe.length) return tappe;
   const out = [];
@@ -61,12 +57,8 @@ async function enrichTappeWithOperaIds(tappe) {
   return out;
 }
 
-/**
- * Prepare visit payload for Mongo: merge `items` → `tappe`, enrich opera ids, drop legacy `items`.
- */
 async function normalizeVisitPayloadForStorage(body) {
   const out = { ...body };
-  // Legacy: editor used `items`; keep converting until all clients send `tappe` only.
   if (Array.isArray(out.items) && out.items.length > 0) {
     const built = await buildTappeFromEditorItems(out.items);
     if (built) {
@@ -101,8 +93,8 @@ exports.getItems = async (req, res) => {
       minPrezzo,
       maxPrezzo,
       cerca,
-      operaId, // ADDED: support for operaId filtering
-      lunghezza, // ADDED: support for length filtering
+      operaId,
+      lunghezza,
       pagina = 1,
       limite = 20,
       pubblicato = "true",
@@ -112,9 +104,8 @@ exports.getItems = async (req, res) => {
     if (museo) filtro.museo = museo;
     if (linguaggio) filtro.linguaggio = linguaggio;
     if (categoria) filtro.categoria = categoria;
-    if (operaId) filtro.operaId = operaId; // ADDED to filter
-    if (lunghezza) filtro.lunghezza = lunghezza; // ADDED to filter
-
+    if (operaId) filtro.operaId = operaId;
+    if (lunghezza) filtro.lunghezza = lunghezza;
     if (licenza) filtro["licenza.tipo"] = licenza;
     if (pubblicato !== "tutti") filtro.pubblicato = pubblicato === "true";
 
@@ -142,7 +133,6 @@ exports.getItems = async (req, res) => {
         .limit(Number(limite)),
       Item.countDocuments(filtro),
     ]);
-
     risposta(res, 200, {
       items,
       totale,
@@ -170,9 +160,6 @@ exports.getItemById = async (req, res) => {
 exports.creaItem = async (req, res) => {
   try {
     const creatorId = req.auth?.sub;
-    const { creatorId: _, ...resto } = req.body;
-
-    // 1. Verifica che l'utente esista e abbia i permessi
     const utente = await User.findById(creatorId);
     if (!utente || !["autore", "admin"].includes(utente.ruolo)) {
       return risposta(
@@ -182,29 +169,10 @@ exports.creaItem = async (req, res) => {
         "Solo gli autori possono creare contenuti",
       );
     }
-
-    // 2. CREIAMO L'OGGETTO DA SALVARE
-    // Aggiungiamo esplicitamente 'autore' usando lo username dell'utente loggato
-    const datiNuovoItem = {
-      ...resto,
-      creatorId: creatorId,
-      autore: utente.username,
-    };
-
+    const datiNuovoItem = { ...req.body, creatorId, autore: utente.username };
     const item = await Item.create(datiNuovoItem);
-    
     risposta(res, 201, item, "Item creato con successo");
   } catch (err) {
-    if (err.name === "ValidationError") {
-      return risposta(
-        res,
-        400,
-        null,
-        Object.values(err.errors)
-          .map((e) => e.message)
-          .join(", "),
-      );
-    }
     risposta(res, 500, null, err.message);
   }
 };
@@ -252,40 +220,46 @@ exports.acquistaItem = async (req, res) => {
     const acquirenteId = req.auth?.sub;
     const item = await Item.findById(req.params.id);
     if (!item) return risposta(res, 404, null, "Item non trovato");
-
-    const logEntry = { acquirenteId, prezzo: item.prezzo, tipo: "acquisto" };
-    item.logVendite.push(logEntry);
+    item.logVendite.push({
+      acquirenteId,
+      prezzo: item.prezzo,
+      tipo: "acquisto",
+    });
     await item.save();
-
     await User.findByIdAndUpdate(acquirenteId, {
       $push: { acquistiEffettuati: { itemId: item._id, prezzo: item.prezzo } },
     });
-
     risposta(res, 200, item, "Acquisto registrato");
   } catch (err) {
     risposta(res, 500, null, err.message);
   }
 };
 
-// ─── VISITE ─────────────────────────────────────────────────
+// ─── VISITE (MODIFICATA PER NAVIGATOR) ──────────────────────
 exports.getVisite = async (req, res) => {
   try {
-    const { museo, creatorId, pagina = 1, limite = 12 } = req.query;
+    const { museo, creatorId, soloMie, pagina = 1, limite = 12 } = req.query;
+    const utenteId = req.auth?.sub; // Preso dal token JWT
 
     const filtro = {};
     if (museo) filtro.museo = museo;
     if (creatorId) filtro.creatorId = creatorId;
-    // Commentiamo il filtro pubblica se non lo hai inserito in tutti i documenti su Atlas
-    // if (pubblica !== "tutti") filtro.pubblica = pubblica === "true";
+
+    // LOGICA FILTRAGGIO NAVIGATOR: se richiesto, mostriamo solo le visite adottate dall'utente
+    if (soloMie === "true" && utenteId) {
+      const utente = await User.findById(utenteId).select("visiteSalvate");
+      if (utente) {
+        filtro._id = { $in: utente.visiteSalvate };
+      }
+    }
 
     const skip = (Number(pagina) - 1) * Number(limite);
-
     const [visite, totale] = await Promise.all([
       Visita.find(filtro)
         .populate("creatorId", "username")
         .populate({
-          path: "tappe.item_default", // PERCORSO CORRETTO (Atlas)
-          select: "titolo operaId lunghezza linguaggio url autore audioUrl", // 'url' invece di 'immagine'
+          path: "tappe.item_default",
+          select: "titolo operaId lunghezza linguaggio url autore audioUrl",
         })
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -317,15 +291,9 @@ exports.getVisitaById = async (req, res) => {
         select:
           "titolo operaId lunghezza linguaggio url descrizione autore categoria prezzo licenza audioUrl",
       });
-
-    if (!visita) {
-      return risposta(res, 404, null, "Visita non trovata");
-    }
-
-    // Restituiamo i dati nel formato atteso dal frontend
+    if (!visita) return risposta(res, 404, null, "Visita non trovata");
     risposta(res, 200, visita);
   } catch (err) {
-    console.error("ERRORE BACKEND getVisitaById:", err.message);
     risposta(res, 500, null, err.message);
   }
 };
@@ -339,16 +307,6 @@ exports.creaVisita = async (req, res) => {
     });
     risposta(res, 201, visita, "Visita creata con successo");
   } catch (err) {
-    if (err.name === "ValidationError") {
-      return risposta(
-        res,
-        400,
-        null,
-        Object.values(err.errors)
-          .map((e) => e.message)
-          .join(", "),
-      );
-    }
     risposta(res, 500, null, err.message);
   }
 };
@@ -357,15 +315,13 @@ exports.aggiornaVisita = async (req, res) => {
   try {
     const payload = await normalizeVisitPayloadForStorage({ ...req.body });
     const mongoUpdate = { $set: payload };
-    // Stop stale `items` from shadowing `tappe` after migration to tappe-only saves.
     if (Object.prototype.hasOwnProperty.call(payload, "tappe")) {
       mongoUpdate.$unset = { items: "" };
     }
-    const visita = await Visita.findByIdAndUpdate(
-      req.params.id,
-      mongoUpdate,
-      { new: true, runValidators: true },
-    );
+    const visita = await Visita.findByIdAndUpdate(req.params.id, mongoUpdate, {
+      new: true,
+      runValidators: true,
+    });
     if (!visita) return risposta(res, 404, null, "Visita non trovata");
     risposta(res, 200, visita, "Visita aggiornata");
   } catch (err) {
@@ -388,14 +344,11 @@ exports.adottaVisita = async (req, res) => {
     const adottanteId = req.auth?.sub;
     const visita = await Visita.findById(req.params.id);
     if (!visita) return risposta(res, 404, null, "Visita non trovata");
-
     visita.logAdozioni.push({ adottanteId, prezzo: visita.prezzo });
     await visita.save();
-
     await User.findByIdAndUpdate(adottanteId, {
       $addToSet: { visiteSalvate: visita._id },
     });
-
     risposta(res, 200, visita, "Visita adottata");
   } catch (err) {
     risposta(res, 500, null, err.message);
@@ -415,51 +368,35 @@ exports.getUtenti = async (req, res) => {
 exports.loginUtente = async (req, res) => {
   try {
     const { username, password } = req.body;
-    // Rimuoviamo spazi iniziali/finali dall'identificatore
     const identifier = (username || "").trim();
-
-    // Cerchiamo l'utente per username o email (case-insensitive per email)
     const utente = await User.findOne({
       $or: [{ username: identifier }, { email: identifier.toLowerCase() }],
     });
-
     if (!utente) return risposta(res, 401, null, "Utente non trovato");
 
     let passwordValida = false;
-
     if (utente.password && utente.password.startsWith("$2")) {
-      // La password è già hashata con bcrypt: confronto sicuro
       passwordValida = await bcrypt.compare(password, utente.password);
     } else {
-      // Migrazione automatica: la password è ancora in chiaro (es. seed senza hash).
-      // Confrontiamo in chiaro e, se corretta, la hashiamo e salviamo subito.
-      // Usiamo utente.updateOne per evitare di ri-triggerare il pre-save hook
-      // (che hasherebbe di nuovo una password già in chiaro).
       passwordValida = utente.password === password;
       if (passwordValida) {
         const nuovoHash = await bcrypt.hash(password, 12);
-        // Aggiorniamo direttamente nel DB senza passare per il pre-save hook
-        await User.updateOne({ _id: utente._id }, { $set: { password: nuovoHash } });
-        utente.password = nuovoHash; // aggiorniamo anche l'oggetto in memoria
+        await User.updateOne(
+          { _id: utente._id },
+          { $set: { password: nuovoHash } },
+        );
+        utente.password = nuovoHash;
       }
     }
 
-    if (!passwordValida) {
-      return risposta(res, 401, null, "Password errata");
-    }
-
-    // Generiamo il token JWT e restituiamo i dati utente (senza password)
+    if (!passwordValida) return risposta(res, 401, null, "Password errata");
     const token = createAuthToken(utente);
-    risposta(
-      res,
-      200,
-      { user: utente.toJSON(), token },
-      "Login effettuato",
-    );
+    risposta(res, 200, { user: utente.toJSON(), token }, "Login effettuato");
   } catch (err) {
     risposta(res, 500, null, err.message);
   }
 };
+
 // ─── LOG & STATS ────────────────────────────────────────────
 exports.getLogVendite = async (req, res) => {
   try {
@@ -482,7 +419,6 @@ exports.getStats = async (req, res) => {
         Item.countDocuments({ prezzo: 0, pubblicato: true }),
         Item.countDocuments({ prezzo: { $gt: 0 }, pubblicato: true }),
       ]);
-
     risposta(res, 200, {
       totItems,
       totVisite,

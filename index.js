@@ -60,13 +60,18 @@ app.get("/db/create", async function (req, res) {
 // 2. MOBILE APP (navigator/dist)
 const navigatorDistPath = path.join(__dirname, "navigator", "dist");
 const navigatorSourcePath = path.join(__dirname, "navigator");
-const navigatorPublicAudioPath = path.join(__dirname, "navigator", "public", "audio");
+const navigatorPublicAudioPath = path.join(
+  __dirname,
+  "navigator",
+  "public",
+  "audio",
+);
 
 // Audio sempre disponibile anche se "dist" non esiste (ambiente dev)
 app.use("/mobile/audio", express.static(navigatorPublicAudioPath));
 
 // Build frontend (produzione)
-app.use("/mobile", express.static(navigatorDistPath));
+app.use("/mobile", express.static(path.join(__dirname, "navigator", "dist")));
 
 // Gestione del refresh per la Single Page Application (Mobile)
 // Con Express/router recenti, usiamo una regex invece di "/mobile*"
