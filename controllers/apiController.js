@@ -415,7 +415,10 @@ exports.getUtenti = async (req, res) => {
 exports.loginUtente = async (req, res) => {
   try {
     const { username, password } = req.body;
+    // Rimuoviamo spazi iniziali/finali dall'identificatore
     const identifier = (username || "").trim();
+
+    // Cerchiamo l'utente per username o email (case-insensitive per email)
     const utente = await User.findOne({
       $or: [{ username: identifier }, { email: identifier.toLowerCase() }],
     });
@@ -423,14 +426,21 @@ exports.loginUtente = async (req, res) => {
     if (!utente) return risposta(res, 401, null, "Utente non trovato");
 
     let passwordValida = false;
+
     if (utente.password && utente.password.startsWith("$2")) {
-      passwordValida = await utente.comparePassword(password);
+      // La password è già hashata con bcrypt: confronto sicuro
+      passwordValida = await bcrypt.compare(password, utente.password);
     } else {
-      // Migrazione automatica: se ancora in chiaro, convalida e cifra.
+      // Migrazione automatica: la password è ancora in chiaro (es. seed senza hash).
+      // Confrontiamo in chiaro e, se corretta, la hashiamo e salviamo subito.
+      // Usiamo utente.updateOne per evitare di ri-triggerare il pre-save hook
+      // (che hasherebbe di nuovo una password già in chiaro).
       passwordValida = utente.password === password;
       if (passwordValida) {
-        utente.password = await bcrypt.hash(password, 12);
-        await utente.save();
+        const nuovoHash = await bcrypt.hash(password, 12);
+        // Aggiorniamo direttamente nel DB senza passare per il pre-save hook
+        await User.updateOne({ _id: utente._id }, { $set: { password: nuovoHash } });
+        utente.password = nuovoHash; // aggiorniamo anche l'oggetto in memoria
       }
     }
 
@@ -438,6 +448,7 @@ exports.loginUtente = async (req, res) => {
       return risposta(res, 401, null, "Password errata");
     }
 
+    // Generiamo il token JWT e restituiamo i dati utente (senza password)
     const token = createAuthToken(utente);
     risposta(
       res,
