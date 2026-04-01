@@ -2,11 +2,78 @@ const Item = require("../models/Item");
 const Visita = require("../models/Visita");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const { createAuthToken } = require("../middleware/auth");
+const mm = require("music-metadata");
+const path = require("path");
+const fs = require("fs");
 
 // ─── UTILITY ────────────────────────────────────────────────
 const risposta = (res, status, data, messaggio = "") => {
   res.status(status).json({ successo: status < 400, messaggio, data });
 };
+
+/**
+ * Prepara il payload della visita per Mongo: merge `items` → `tappe`, arricchisce operaId.
+ */
+async function buildTappeFromEditorItems(items) {
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const sorted = [...items].sort(
+    (a, b) => (Number(a.ordine) || 0) - (Number(b.ordine) || 0),
+  );
+  const tappe = [];
+  let fallbackOrder = 1;
+  for (const row of sorted) {
+    if (!row.itemId) continue;
+    const idStr = String(row.itemId);
+    const itemDoc = await Item.findById(idStr).select("operaId").lean();
+    const operaId = itemDoc?.operaId || row.operaId || "";
+    tappe.push({
+      ordine: row.ordine != null ? Number(row.ordine) : fallbackOrder,
+      logistica: row.logistica || "",
+      item_default: idStr,
+      operaId,
+      opzionale: !!row.opzionale,
+    });
+    fallbackOrder += 1;
+  }
+  return tappe.length ? tappe : null;
+}
+
+async function enrichTappeWithOperaIds(tappe) {
+  if (!Array.isArray(tappe) || !tappe.length) return tappe;
+  const out = [];
+  for (const row of tappe) {
+    const idStr = String(row.item_default ?? "");
+    let operaId = row.operaId || "";
+    if (idStr && !operaId) {
+      const doc = await Item.findById(idStr).select("operaId").lean();
+      operaId = doc?.operaId || "";
+    }
+    out.push({
+      ...row,
+      ordine: row.ordine != null ? Number(row.ordine) : out.length + 1,
+      logistica: row.logistica ?? "",
+      item_default: idStr,
+      operaId,
+    });
+  }
+  return out;
+}
+
+async function normalizeVisitPayloadForStorage(body) {
+  const out = { ...body };
+  if (Array.isArray(out.items) && out.items.length > 0) {
+    const built = await buildTappeFromEditorItems(out.items);
+    if (built) {
+      out.tappe = built;
+      delete out.items;
+    }
+  }
+  if (Array.isArray(out.tappe) && out.tappe.length > 0) {
+    out.tappe = await enrichTappeWithOperaIds(out.tappe);
+  }
+  return out;
+}
 
 // ─── MUSEI ──────────────────────────────────────────────────
 exports.getMusei = async (req, res) => {
@@ -29,6 +96,8 @@ exports.getItems = async (req, res) => {
       minPrezzo,
       maxPrezzo,
       cerca,
+      operaId,
+      lunghezza,
       pagina = 1,
       limite = 20,
       pubblicato = "true",
@@ -38,13 +107,17 @@ exports.getItems = async (req, res) => {
     if (museo) filtro.museo = museo;
     if (linguaggio) filtro.linguaggio = linguaggio;
     if (categoria) filtro.categoria = categoria;
+    if (operaId) filtro.operaId = operaId;
+    if (lunghezza) filtro.lunghezza = lunghezza;
     if (licenza) filtro["licenza.tipo"] = licenza;
     if (pubblicato !== "tutti") filtro.pubblicato = pubblicato === "true";
+
     if (minPrezzo !== undefined || maxPrezzo !== undefined) {
       filtro.prezzo = {};
       if (minPrezzo) filtro.prezzo.$gte = Number(minPrezzo);
       if (maxPrezzo) filtro.prezzo.$lte = Number(maxPrezzo);
     }
+
     if (cerca) {
       filtro.$or = [
         { titolo: { $regex: cerca, $options: "i" } },
@@ -63,7 +136,6 @@ exports.getItems = async (req, res) => {
         .limit(Number(limite)),
       Item.countDocuments(filtro),
     ]);
-
     risposta(res, 200, {
       items,
       totale,
@@ -90,9 +162,7 @@ exports.getItemById = async (req, res) => {
 
 exports.creaItem = async (req, res) => {
   try {
-    const { creatorId, ...resto } = req.body;
-
-    // Verifica autore
+    const creatorId = req.auth?.sub;
     const utente = await User.findById(creatorId);
     if (!utente || !["autore", "admin"].includes(utente.ruolo)) {
       return risposta(
@@ -102,20 +172,10 @@ exports.creaItem = async (req, res) => {
         "Solo gli autori possono creare contenuti",
       );
     }
-
-    const item = await Item.create({ ...resto, creatorId });
+    const datiNuovoItem = { ...req.body, creatorId, autore: utente.username };
+    const item = await Item.create(datiNuovoItem);
     risposta(res, 201, item, "Item creato con successo");
   } catch (err) {
-    if (err.name === "ValidationError") {
-      return risposta(
-        res,
-        400,
-        null,
-        Object.values(err.errors)
-          .map((e) => e.message)
-          .join(", "),
-      );
-    }
     risposta(res, 500, null, err.message);
   }
 };
@@ -160,43 +220,49 @@ exports.pubblicaItem = async (req, res) => {
 
 exports.acquistaItem = async (req, res) => {
   try {
-    const { acquirenteId } = req.body;
+    const acquirenteId = req.auth?.sub;
     const item = await Item.findById(req.params.id);
     if (!item) return risposta(res, 404, null, "Item non trovato");
-
-    const logEntry = { acquirenteId, prezzo: item.prezzo, tipo: "acquisto" };
-    item.logVendite.push(logEntry);
+    item.logVendite.push({
+      acquirenteId,
+      prezzo: item.prezzo,
+      tipo: "acquisto",
+    });
     await item.save();
-
     await User.findByIdAndUpdate(acquirenteId, {
       $push: { acquistiEffettuati: { itemId: item._id, prezzo: item.prezzo } },
     });
-
     risposta(res, 200, item, "Acquisto registrato");
   } catch (err) {
     risposta(res, 500, null, err.message);
   }
 };
 
-// ─── VISITE ─────────────────────────────────────────────────
+// ─── VISITE (MODIFICATA PER NAVIGATOR) ──────────────────────
 exports.getVisite = async (req, res) => {
   try {
-    const { museo, creatorId, pagina = 1, limite = 12 } = req.query;
+    const { museo, creatorId, soloMie, pagina = 1, limite = 12 } = req.query;
+    const utenteId = req.auth?.sub; // Preso dal token JWT
 
     const filtro = {};
     if (museo) filtro.museo = museo;
     if (creatorId) filtro.creatorId = creatorId;
-    // Commentiamo il filtro pubblica se non lo hai inserito in tutti i documenti su Atlas
-    // if (pubblica !== "tutti") filtro.pubblica = pubblica === "true";
+
+    // LOGICA FILTRAGGIO NAVIGATOR: se richiesto, mostriamo solo le visite adottate dall'utente
+    if (soloMie === "true" && utenteId) {
+      const utente = await User.findById(utenteId).select("visiteSalvate");
+      if (utente) {
+        filtro._id = { $in: utente.visiteSalvate };
+      }
+    }
 
     const skip = (Number(pagina) - 1) * Number(limite);
-
     const [visite, totale] = await Promise.all([
       Visita.find(filtro)
         .populate("creatorId", "username")
         .populate({
-          path: "tappe.item_default", // PERCORSO CORRETTO (Atlas)
-          select: "titolo operaId lunghezza linguaggio url autore", // 'url' invece di 'immagine'
+          path: "tappe.item_default",
+          select: "titolo operaId lunghezza linguaggio url autore audioUrl",
         })
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -218,6 +284,7 @@ exports.getVisite = async (req, res) => {
 
 exports.getVisitaById = async (req, res) => {
   try {
+    // 1. Recupero della visita dal database [cite: 420]
     const visita = await Visita.findOne({
       $or: [{ _id: req.params.id }, { id: req.params.id }],
     })
@@ -226,47 +293,78 @@ exports.getVisitaById = async (req, res) => {
         path: "tappe.item_default",
         model: "Item",
         select:
-          "titolo operaId lunghezza linguaggio url descrizione autore categoria prezzo licenza",
+          "titolo operaId lunghezza linguaggio url descrizione autore categoria prezzo licenza audioUrl",
       });
 
-    if (!visita) {
-      return risposta(res, 404, null, "Visita non trovata");
+    if (!visita) return risposta(res, 404, null, "Visita non trovata");
+
+    // Trasformiamo in oggetto JS semplice per poter aggiungere campi [cite: 263, 264]
+    const visitaObj = visita.toObject();
+
+    // 2. Ciclo sulle tappe per calcolare la durata reale [cite: 266]
+    if (visitaObj.tappe && Array.isArray(visitaObj.tappe)) {
+      for (let tappa of visitaObj.tappe) {
+        // Controllo di sicurezza: se l'item_default o l'audioUrl mancano, salta alla prossima tappa
+        if (!tappa.item_default || !tappa.item_default.audioUrl) continue;
+
+        try {
+          const audioFileName = tappa.item_default.audioUrl.split("/").pop();
+
+          // Costruiamo il percorso assoluto [cite: 239]
+          // NOTA: 'navigator/public/audio' è dove risiedono i file sorgente [cite: 239]
+          const audioFilePath = path.join(
+            process.cwd(),
+            "navigator",
+            "public",
+            "audio",
+            audioFileName,
+          );
+
+          if (fs.existsSync(audioFilePath)) {
+            const metadata = await mm.parseFile(audioFilePath);
+            tappa.item_default.durata_reale = Math.round(
+              metadata.format.duration,
+            );
+          }
+        } catch (audioErr) {
+          console.error("Errore lettura metadati audio:", audioErr.message);
+          // Non blocchiamo l'intera risposta se un singolo file audio ha problemi
+        }
+      }
     }
 
-    // Restituiamo i dati nel formato atteso dal frontend
-    risposta(res, 200, visita);
+    // 3. Invio della risposta corretta [cite: 264]
+    risposta(res, 200, visitaObj);
   } catch (err) {
-    console.error("ERRORE BACKEND getVisitaById:", err.message);
+    console.error("ERRORE CRITICO getVisitaById:", err.message);
     risposta(res, 500, null, err.message);
   }
 };
 
 exports.creaVisita = async (req, res) => {
   try {
-    const visita = await Visita.create(req.body);
+    const payload = await normalizeVisitPayloadForStorage({ ...req.body });
+    const visita = await Visita.create({
+      ...payload,
+      creatorId: req.auth?.sub,
+    });
     risposta(res, 201, visita, "Visita creata con successo");
   } catch (err) {
-    if (err.name === "ValidationError") {
-      return risposta(
-        res,
-        400,
-        null,
-        Object.values(err.errors)
-          .map((e) => e.message)
-          .join(", "),
-      );
-    }
     risposta(res, 500, null, err.message);
   }
 };
 
 exports.aggiornaVisita = async (req, res) => {
   try {
-    const visita = await Visita.findByIdAndUpdate(
-      req.params.id,
-      { $set: req.body },
-      { new: true, runValidators: true },
-    );
+    const payload = await normalizeVisitPayloadForStorage({ ...req.body });
+    const mongoUpdate = { $set: payload };
+    if (Object.prototype.hasOwnProperty.call(payload, "tappe")) {
+      mongoUpdate.$unset = { items: "" };
+    }
+    const visita = await Visita.findByIdAndUpdate(req.params.id, mongoUpdate, {
+      new: true,
+      runValidators: true,
+    });
     if (!visita) return risposta(res, 404, null, "Visita non trovata");
     risposta(res, 200, visita, "Visita aggiornata");
   } catch (err) {
@@ -286,17 +384,14 @@ exports.eliminaVisita = async (req, res) => {
 
 exports.adottaVisita = async (req, res) => {
   try {
-    const { adottanteId } = req.body;
+    const adottanteId = req.auth?.sub;
     const visita = await Visita.findById(req.params.id);
     if (!visita) return risposta(res, 404, null, "Visita non trovata");
-
     visita.logAdozioni.push({ adottanteId, prezzo: visita.prezzo });
     await visita.save();
-
     await User.findByIdAndUpdate(adottanteId, {
       $addToSet: { visiteSalvate: visita._id },
     });
-
     risposta(res, 200, visita, "Visita adottata");
   } catch (err) {
     risposta(res, 500, null, err.message);
@@ -316,21 +411,35 @@ exports.getUtenti = async (req, res) => {
 exports.loginUtente = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const utente = await User.findOne({ username });
-
+    const identifier = (username || "").trim();
+    const utente = await User.findOne({
+      $or: [{ username: identifier }, { email: identifier.toLowerCase() }],
+    });
     if (!utente) return risposta(res, 401, null, "Utente non trovato");
 
-    // Temporaneamente confrontiamo le stringhe direttamente
-    // perché i dati nel JSON non sono criptati
-    if (utente.password !== password) {
-      return risposta(res, 401, null, "Password errata");
+    let passwordValida = false;
+    if (utente.password && utente.password.startsWith("$2")) {
+      passwordValida = await bcrypt.compare(password, utente.password);
+    } else {
+      passwordValida = utente.password === password;
+      if (passwordValida) {
+        const nuovoHash = await bcrypt.hash(password, 12);
+        await User.updateOne(
+          { _id: utente._id },
+          { $set: { password: nuovoHash } },
+        );
+        utente.password = nuovoHash;
+      }
     }
 
-    risposta(res, 200, utente.toJSON(), "Login effettuato");
+    if (!passwordValida) return risposta(res, 401, null, "Password errata");
+    const token = createAuthToken(utente);
+    risposta(res, 200, { user: utente.toJSON(), token }, "Login effettuato");
   } catch (err) {
     risposta(res, 500, null, err.message);
   }
 };
+
 // ─── LOG & STATS ────────────────────────────────────────────
 exports.getLogVendite = async (req, res) => {
   try {
@@ -353,7 +462,6 @@ exports.getStats = async (req, res) => {
         Item.countDocuments({ prezzo: 0, pubblicato: true }),
         Item.countDocuments({ prezzo: { $gt: 0 }, pubblicato: true }),
       ]);
-
     risposta(res, 200, {
       totItems,
       totVisite,

@@ -356,3 +356,35 @@
   visibility: visible !important;
   display: block !important;
 }
+
+.view-all-btn {
+  background: rgba(59, 130, 246, 0.1); /* Colore accent con trasparenza */
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 0.4rem 0.8rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.view-all-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.view-all-btn i {
+  font-size: 0.9rem;
+}
+
+/* Messaggio lista vuota */
+.empty-msg {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 2rem 0;
+}

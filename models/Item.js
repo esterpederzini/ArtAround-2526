@@ -11,11 +11,11 @@ const itemSchema = new mongoose.Schema(
   {
     // AGGIUNTO: Permette di usare stringhe personalizzate come "it_ramesse_01"
     _id: { type: String },
-
     operaId: { type: String, required: true, trim: true, index: true },
     museo: { type: String, required: true, trim: true, index: true },
     titolo: { type: String, required: true, trim: true },
     descrizione: { type: String, required: true },
+    audioUrl: { type: String, default: "" },
     autore: { type: String, required: true, trim: true },
 
     // AGGIUNTO/MODIFICATO: Allineato al campo 'url' che hai su Atlas

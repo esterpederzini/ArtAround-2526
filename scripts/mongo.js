@@ -4,6 +4,7 @@ Descrizione: Popolamento DB per Gocker usando i modelli esistenti
 */
 
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs"); // AGGIUNTO: necessario per hashare le password prima di insertMany
 const fs = require("fs").promises;
 const path = require("path");
 require("dotenv").config();
@@ -11,7 +12,7 @@ require("dotenv").config();
 // --- 1. IMPORTA I MODELLI ESISTENTI ---
 // Assicurati che i percorsi siano corretti rispetto alla posizione di mongo.js
 const Item = require("../models/Item"); // o come si chiama il file dell'Item
-const Visit = require("../models/Visit"); // o Visita.js
+const Visit = require("../models/Visita"); // o Visita.js
 const User = require("../models/User");
 
 let dbname = "artaround";
@@ -47,9 +48,21 @@ exports.create = async (credentials) => {
     debug.push("🗑️ Database ripulito");
 
     // 1. INSERIMENTO UTENTI
+    // IMPORTANTE: insertMany() bypassa il pre-save hook di Mongoose che hashava le password.
+    // Dobbiamo quindi hashare manualmente le password prima di inserirle nel DB,
+    // altrimenti verrebbero salvate in chiaro e il login con bcrypt fallirebbe.
     if (fullData.utenti) {
-      await User.insertMany(fullData.utenti);
-      debug.push(`👤 Inseriti ${fullData.utenti.length} utenti`);
+      const utentiConPasswordHashata = await Promise.all(
+        fullData.utenti.map(async (utente) => {
+          // Hasha la password solo se non è già un hash bcrypt (non inizia con "$2")
+          const passwordHashata = utente.password && !utente.password.startsWith("$2")
+            ? await bcrypt.hash(utente.password, 12)
+            : utente.password;
+          return { ...utente, password: passwordHashata };
+        })
+      );
+      await User.insertMany(utentiConPasswordHashata);
+      debug.push(`👤 Inseriti ${fullData.utenti.length} utenti (password hashate con bcrypt)`);
     }
 
     // 2. INSERIMENTO ITEMS

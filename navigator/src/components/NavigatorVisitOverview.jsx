@@ -97,6 +97,7 @@ function NavigatorVisitOverview() {
           <Button
             className="start-visit-btn d-flex align-items-center justify-content-center gap-3"
             onClick={() => navigate(`/visit/${id}/0`)}
+            disabled={!(visit.tappe && visit.tappe.length)}
           >
             <div className="play-icon-circle">
               <i className="bi bi-play-fill"></i>
@@ -104,6 +105,13 @@ function NavigatorVisitOverview() {
             <span className="fw-bold">Inizia la visita</span>
           </Button>
         </div>
+
+        {!(visit.tappe && visit.tappe.length) ? (
+          <p className="text-secondary small px-1">
+            Nessuna tappa in questa visita. Controlla che sia stata salvata dal
+            marketplace con il percorso (<code>tappe</code>).
+          </p>
+        ) : null}
 
         {/* tappe è l'array nel modello Visita che contiene itemId */}
         {visit.tappe &&
@@ -148,7 +156,12 @@ function NavigatorVisitOverview() {
                           </Card.Title>
                           <div className="audio-info mt-2">
                             <i className="bi bi-headphones me-2"></i>
-                            <span>{opera.lunghezza}</span>
+                            {/* Se esiste durata_reale (calcolata dal backend) usa quella, altrimenti usa l'etichetta di testo */}
+                            <span>
+                              {opera.durata_reale
+                                ? `${opera.durata_reale}s`
+                                : opera.lunghezza}
+                            </span>
                           </div>
                         </Card.Body>
                       </Col>
@@ -160,26 +173,36 @@ function NavigatorVisitOverview() {
           })}
       </Container>
 
-      <Modal show={showExitModal} onHide={handleClose} centered>
-        <Modal.Header closeButton className="border-0">
-          <Modal.Title style={{ color: "#5b252d" }}>
-            Conferma uscita
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Sei sicuro di voler interrompere la visita e tornare alla Home?
+      <Modal
+        show={showExitModal}
+        onHide={handleClose}
+        centered
+        className="museum-modal-overview"
+      >
+        <Modal.Body className="museum-modal-content-overview">
+          <div className="museum-modal-icon-overview">
+            <i className="bi bi-exclamation-circle"></i>
+          </div>
+
+          <h5 className="museum-modal-title-overview">Conferma uscita</h5>
+
+          <p className="museum-modal-text-overview">
+            Sei sicuro di voler interrompere la visita e tornare alla Home?
+          </p>
+
+          <div className="museum-modal-actions-overview">
+            <button
+              className="btn-overview-confirm"
+              onClick={handleConfirmExit}
+            >
+              Esci dalla visita
+            </button>
+
+            <button className="btn-overview-cancel" onClick={handleClose}>
+              Annulla
+            </button>
+          </div>
         </Modal.Body>
-        <Modal.Footer className="border-0">
-          <Button variant="secondary" onClick={handleClose}>
-            Annulla
-          </Button>
-          <Button
-            style={{ backgroundColor: "#5b252d", border: "none" }}
-            onClick={handleConfirmExit}
-          >
-            Esci
-          </Button>
-        </Modal.Footer>
       </Modal>
     </>
   );

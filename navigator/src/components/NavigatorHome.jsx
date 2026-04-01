@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../CSS/NavigatorHome.css";
-import "../CSS/NavigatorSideBar.css";
 
 const NavigatorHome = () => {
   const [visits, setVisits] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // 1. AGGIUNTO: Stato per quello che scrivi
+  const [searchTerm, setSearchTerm] = useState("");
   const [config, setConfig] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
@@ -37,7 +36,7 @@ const NavigatorHome = () => {
       .catch((err) => console.error("Errore fetch visite:", err));
   }, []);
 
-  // 2. AGGIUNTO: Questa è la "lente". Filtra le visite basandosi su searchTerm
+  // Filtro ricerca
   const filteredVisits = visits.filter((visita) => {
     const search = searchTerm.toLowerCase();
     const idVisita = (visita._id || visita.id || "").toLowerCase();
@@ -50,7 +49,14 @@ const NavigatorHome = () => {
 
   const handleNav = (path) => {
     closeSidebar();
-    navigate(path);
+
+    if (path === "/marketplace") {
+      // Forza il ricaricamento completo ignorando il router di React
+      // location.replace sostituisce l'ingresso nella cronologia, evitando loop
+      window.location.replace(window.location.origin + "/");
+    } else {
+      navigate(path);
+    }
   };
 
   const handleLogout = () => {
@@ -65,6 +71,7 @@ const NavigatorHome = () => {
         onClick={closeSidebar}
       />
 
+      {/* SIDEBAR AGGIORNATA */}
       <aside className={`side-bar ${sidebarOpen ? "open" : ""}`}>
         <div className="side-bar-header">
           <div className="profile-thumb">
@@ -82,6 +89,16 @@ const NavigatorHome = () => {
             <i className="bi bi-house-door"></i>
             <span>Home</span>
           </div>
+
+          {/* NUOVO: Collegamento al Marketplace nella Sidebar */}
+          <div
+            className="side-nav-item"
+            onClick={() => handleNav("/marketplace")}
+          >
+            <i className="bi bi-shop"></i>
+            <span>Marketplace</span>
+          </div>
+
           <div className="side-nav-item" onClick={() => handleNav("/map")}>
             <i className="bi bi-map"></i>
             <span>Floor Map</span>
@@ -127,10 +144,19 @@ const NavigatorHome = () => {
       <section className="visits-section">
         <div className="section-header">
           <h2>{searchTerm ? "Risultati" : "Explore Visits"}</h2>
+
+          {/* NUOVO: Pulsante rapido Marketplace */}
+          {!searchTerm && (
+            <button
+              className="view-all-btn"
+              onClick={() => (window.location.href = "/")}
+            >
+              Get More <i className="bi bi-plus-circle"></i>
+            </button>
+          )}
         </div>
 
         <div className="horizontal-scroll">
-          {/* 4. CAMBIATO: Qui usiamo filteredVisits invece di visits */}
           {filteredVisits.length > 0 ? (
             filteredVisits.map((visita) => {
               const visitId = visita._id || visita.id;

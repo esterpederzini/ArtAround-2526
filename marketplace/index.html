@@ -83,7 +83,9 @@
               </a>
               <a
                 href="/editor-visita"
+                id="btnCreaVisitaHero"
                 class="btn-aa-outline"
+                onclick="return vaiAEditorVisita(event)"
                 style="
                   color: var(--aa-cream);
                   border-color: rgba(255, 255, 255, 0.25);
@@ -214,21 +216,17 @@
     <script src="js/utils.js"></script>
     <script>
       // --- LOGICA REDIRECT MOBILE ---
+      // Rimosso redirect automatico a /mobile per permettere la navigazione al marketplace su mobile
+      /*
       function checkDevice() {
-        // 768px è la soglia standard: sotto questa misura è considerato mobile/tablet
         const isMobile = window.innerWidth <= 768;
-
-        // Controlla se siamo già sulla home del marketplace (path "/")
-        // e se siamo effettivamente su un dispositivo mobile
         if (isMobile && window.location.pathname === "/") {
           window.location.href = "/mobile";
         }
       }
-
-      // Esegui il controllo subito
       checkDevice();
-      // Opzionale: controlla se l'utente ridimensiona la finestra del browser
       window.addEventListener("resize", checkDevice);
+      */
 
       // Carica statistiche
       async function caricaStats() {
@@ -317,21 +315,42 @@
         if (!username || !password)
           return showToast("Inserisci username e password", "error");
 
-        const data = await apiFetch("/api/auth/login", {
+        const data = await apiFetch("/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, password }),
         });
         if (!data) return;
 
-        localStorage.setItem("aa_utente", JSON.stringify(data));
+        localStorage.setItem("aa_utente", JSON.stringify(data.user || data));
+        if (data.token) localStorage.setItem("aa_token", data.token);
         chiudiLogin();
         aggiornaUtenteUI();
-        showToast(`Benvenuto, ${data.username}!`, "success");
+        showToast(`Benvenuto, ${(data.user || data).username}!`, "success");
+      }
+
+      function vaiAEditorVisita(event) {
+        const u = getUtenteCorrente();
+        if (!u) {
+          event?.preventDefault?.();
+          apriLogin();
+          showToast("Accedi prima di creare una visita", "info");
+          return false;
+        }
+
+        if (!["autore", "admin"].includes(u.ruolo)) {
+          event?.preventDefault?.();
+          showToast("Solo autore/admin possono creare visite", "error");
+          return false;
+        }
+
+        window.location.href = "/editor-visita";
+        return false;
       }
 
       function logout() {
         localStorage.removeItem("aa_utente");
+        localStorage.removeItem("aa_token");
         aggiornaUtenteUI();
         showToast("Disconnesso", "info");
       }

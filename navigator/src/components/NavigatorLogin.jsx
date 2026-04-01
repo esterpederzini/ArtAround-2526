@@ -28,8 +28,11 @@ const NavigatorLogin = () => {
       const json = await response.json();
 
       if (json.successo) {
+        const userData = json?.data?.user || json?.data;
+        const token = json?.data?.token || null;
         const sessionData = {
-          user: json.data,
+          user: userData,
+          token,
           loginTimestamp: new Date().getTime(), // Salva l'ora attuale in millisecondi
         };
         localStorage.setItem("user_session", JSON.stringify(sessionData));

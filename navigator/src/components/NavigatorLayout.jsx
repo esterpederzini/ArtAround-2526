@@ -4,7 +4,10 @@ import "../CSS/NavigatorLayout.css";
 
 const NavigatorLayout = ({ isMobile }) => {
   const location = useLocation();
-  const showSideBar = !isMobile || ["/", "/home"].includes(location.pathname);
+  // Mostra sempre la sidebar su desktop. 
+  // Su mobile, la mostriamo solo nella Home, così nelle altre sezioni (visita, item) 
+  // lasciamo spazio al contenuto dell'opera/visita.
+  const showSideBar = !isMobile || ["/", "/home", "/login"].includes(location.pathname);
 
   return (
     <div className={`navigator-wrapper ${showSideBar ? "with-sidebar" : ""}`}>
