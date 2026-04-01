@@ -216,21 +216,17 @@
     <script src="js/utils.js"></script>
     <script>
       // --- LOGICA REDIRECT MOBILE ---
+      // Rimosso redirect automatico a /mobile per permettere la navigazione al marketplace su mobile
+      /*
       function checkDevice() {
-        // 768px è la soglia standard: sotto questa misura è considerato mobile/tablet
         const isMobile = window.innerWidth <= 768;
-
-        // Controlla se siamo già sulla home del marketplace (path "/")
-        // e se siamo effettivamente su un dispositivo mobile
         if (isMobile && window.location.pathname === "/") {
           window.location.href = "/mobile";
         }
       }
-
-      // Esegui il controllo subito
       checkDevice();
-      // Opzionale: controlla se l'utente ridimensiona la finestra del browser
       window.addEventListener("resize", checkDevice);
+      */
 
       // Carica statistiche
       async function caricaStats() {

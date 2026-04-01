@@ -32,7 +32,8 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
       "descrizione": "Statua in pietra del grande faraone Ramesse II.",
-      "url": "https://collezioni.museoegizio.it/public/objects/images/0016U0_5F46330BD94B260326B5E06A63F2AA53_full.jpg",
+      "audioUrl": "/mobile/audio/it_ramesse01_3s.m4a",
+      "url": "https://collezioni.museoegizio.it/public/objects/images 0016U0_5F46330BD94B260326B5E06A63F2AA53_full.jpg",
       "autore": "autore1",
       "lunghezza": "3s",
       "linguaggio": "infantile",
@@ -48,6 +49,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
       "descrizione": "Guarda che re grandissimo! È Ramesse II, un faraone molto importante e forte dell'Antico Egitto, seduto tranquillo sul suo trono.",
+      "audioUrl": "/mobile/audio/it_ramesse02_15s.m4a",
       "url": "https://collezioni.museoegizio.it/public/objects/images/0016U0_5F46330BD94B260326B5E06A63F2AA53_full.jpg",
       "autore": "autore1",
       "lunghezza": "15s",
@@ -64,6 +66,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
       "descrizione": "In questa grande statua vediamo un re molto potente seduto sul suo trono. Indossa un vestito elegante e ha un viso sereno, quasi come se stesse sorridendo. Sulla testa porta un copricapo speciale che usavano solo i faraoni. Se guardi bene, sembra che ci stia osservando con calma, pronto a proteggere il suo popolo. È una statua antichissima ma ci fa ancora sognare i tempi magici delle piramidi e dei tesori nascosti sotto la sabbia del deserto.",
+      "audioUrl": "/mobile/audio/it_ramesse03_40s.m4a",
       "url": "https://collezioni.museoegizio.it/public/objects/images/0016U0_5F46330BD94B260326B5E06A63F2AA53_full.jpg",
       "autore": "autore1",
       "lunghezza": "40s",
@@ -79,7 +82,8 @@
       "operaId": "ME-001",
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
-      "descrizione": "Statua di Ramesse II seduto in trono.",
+      "descrizione": "Statua di Ramesse II seduto sul trono.",
+      "audioUrl": "/mobile/audio/it_ramesse04_3s.m4a",
       "url": "https://collezioni.museoegizio.it/public/objects/images/0016U0_5F46330BD94B260326B5E06A63F2AA53_full.jpg",
       "autore": "autore2",
       "lunghezza": "3s",
@@ -95,7 +99,8 @@
       "operaId": "ME-001",
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
-      "descrizione": "Questa è la celebre statua di Ramesse II, uno dei faraoni più famosi. È considerato un capolavoro per la dolcezza del volto e i dettagli della veste.",
+      "descrizione": "Un sovrano egizio rappresentato in un'atmosfera di solenne maestà. La figura, scolpita con estrema precisione nel basalto scuro, riflette l'equilibrio ideale tra il potere politico del faraone e una serenità quasi divina. È un esempio eccellente di come l'arte antica comunicasse forza e protezione attraverso il realismo del volto.",
+      "audioUrl": "/mobile/audio/it_ramesse05_15s.m4a",
       "url": "https://collezioni.museoegizio.it/public/objects/images/0016U0_5F46330BD94B260326B5E06A63F2AA53_full.jpg",
       "autore": "autore2",
       "lunghezza": "15s",
@@ -111,7 +116,8 @@
       "operaId": "ME-001",
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
-      "descrizione": "La statua di Ramesse II è uno dei capolavori assoluti del Museo Egizio. Il faraone è ritratto seduto sul trono, in una posa maestosa ma con un'espressione del volto sorprendentemente dolce e serena. La scultura si distingue per la cura incredibile nei dettagli, come le pieghe sottili della veste e i simboli del potere reale che stringe tra le mani. L'opera riesce a trasmettere non solo la forza di un sovrano che ha regnato a lungo, ma anche una profonda umanità, rendendola una delle immagini più iconiche dell'antico Egitto.",
+      "descrizione": "La celebre statua di Ramesse II, presenta il faraone seduto sul trono, immerso in una posa ieratica che domina lo spazio circostante. Lo stile è caratterizzato da una straordinaria accuratezza esecutiva: la veste di lino è resa con un panneggio finissimo che sembra quasi vibrare sulla pietra durissima. Il volto mostra un leggero sorriso, simbolo di una benevolenza consapevole, mentre la Corona Blu e lo scettro identificano chiaramente il suo ruolo di guida e guerriero. Ai lati del trono, figure più piccole della moglie e del figlio sottolineano l'importanza della continuità dinastica. L'uso del basalto nero, lucido e compatto, isola la figura e costruisce un clima di disciplina regale e spiritualità senza tempo, invitando l'osservatore a riflettere sulla grandezza della storia egizia.",
+      "audioUrl": "/mobile/audio/it_ramesse06_40s.m4a",
       "url": "https://collezioni.museoegizio.it/public/objects/images/0016U0_5F46330BD94B260326B5E06A63F2AA53_full.jpg",
       "autore": "autore2",
       "lunghezza": "40s",
@@ -128,6 +134,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
       "descrizione": "Scultura in diorite del faraone Ramesse II.",
+      "audioUrl": "/mobile/audio/it_ramesse07_3s.m4a",
       "url": "https://collezioni.museoegizio.it/public/objects/images/0016U0_5F46330BD94B260326B5E06A63F2AA53_full.jpg",
       "autore": "autore1",
       "lunghezza": "3s",
@@ -143,7 +150,8 @@
       "operaId": "ME-001",
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
-      "descrizione": "Scultura in diorite della XIX dinastia raffigurante Ramesse II in trono. L'opera si distingue per l'eccezionale politura della pietra e l'idealizzazione dei tratti fisionomici.",
+      "descrizione": "Il simulacro di Ramesse II, apice della statuaria della XIX dinastia, manifesta una raffinata perizia nella politura della diorite. L’opera sintetizza la regalità ramesside attraverso un'idealizzazione fisionomica che non sacrifica il naturalismo, traducendo il dogma della natura divina del faraone in una composizione di rigorosa compostezza ieratica e plastica fluidità del panneggio",
+      "audioUrl": "/mobile/audio/it_ramesse08_15s.m4a",
       "url": "https://collezioni.museoegizio.it/public/objects/images/0016U0_5F46330BD94B260326B5E06A63F2AA53_full.jpg",
       "autore": "autore1",
       "lunghezza": "15s",
@@ -159,7 +167,8 @@
       "operaId": "ME-001",
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
-      "descrizione": "La celebre statua in diorite di Ramesse II rappresenta un vertice assoluto della statuaria di epoca ramesside. Il sovrano, assiso in trono, è raffigurato con il copricapo khepresh e la veste finemente plissettata. L'opera si caratterizza per una calibrata proporzione dei volumi e per l'eccezionale levigatura della superficie, che esalta la plasticità del modellato e i giochi di luce. Il volto, dai tratti finemente idealizzati e dal tipico sorriso ramesside, risponde a precise esigenze di propaganda dinastica, sublimando la figura del faraone in una dimensione di serena e immutabile divinità terrena.",
+      "descrizione": "Il simulacro assiso di Ramesse II, costituisce l’esito plastico più maturo della statuaria di epoca ramesside. L’opera si impone per una rigorosa articolazione dei volumi e per l’eccezionale levigatura della diorite, la cui politura specchiante esalta il raffinato gioco chiaroscurale del panneggio plissettato. Il sovrano reca il copricapo cerimoniale khepresh, mentre il volto, pervaso dal tipico sorriso iconico, trasfigura i tratti fisionomici in un’idealizzazione atemporale. Tale soluzione formale non è puramente estetica, ma risponde a una precisa istanza di propaganda dinastica: la compressione spaziale del trono e la ieraticità della posa sublimano la figura del faraone, elevandolo a una dimensione di immutabile divinità terrena. Ogni dettaglio, dalla tensione psicologica dello sguardo alla presenza dei familiari in scala ridotta ai piedi del trono, concorre a definire un manifesto politico di stabilità e legittimazione divina, cristallizzato nella durezza eterna della pietra.",
+      "audioUrl": "/mobile/audio/it_ramesse09_40s.m4a",
       "url": "https://collezioni.museoegizio.it/public/objects/images/0016U0_5F46330BD94B260326B5E06A63F2AA53_full.jpg",
       "autore": "autore1",
       "lunghezza": "40s",
@@ -176,6 +185,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
       "descrizione": "Le grandi scatole colorate che custodiscono Kha e Merit.",
+      "audioUrl": "/mobile/audio/it_kha01_3s.m4a",
       "url": "https://mole24.it/wp-content/uploads/2025/07/tomba-di-kha-e-merit-museo-egizio-torino.jpg",
       "autore": "autore2",
       "lunghezza": "3s",
@@ -191,7 +201,8 @@
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
-      "descrizione": "Guarda queste bellissime custodie d'oro e legno! Servivano a proteggere i corpi di Kha e Merit per sempre nel loro viaggio.",
+      "descrizione": "Guarda queste bellissime custodie fatte di oro e di legno dipinto! Sono i sarcofagi di Kha e Merit e servivano a proteggere i loro corpi per sempre. Se guardi bene i loro volti, sembrano quasi sorridere: sono pronti per iniziare un viaggio magico e avventuroso verso il mondo dei segreti!",
+      "audioUrl": "/mobile/audio/it_kha02_15s.m4a",
       "url": "https://mole24.it/wp-content/uploads/2025/07/tomba-di-kha-e-merit-museo-egizio-torino.jpg",
       "autore": "autore2",
       "lunghezza": "15s",
@@ -207,7 +218,8 @@
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
-      "descrizione": "Immagina che questi grandi letti di legno siano come dei gusci magici fatti per proteggere Kha e Merit. Sono dipinti con un nero lucido e tantissimo oro che brilla come il sole. Se guardi bene i loro volti, sembrano quasi sorridere mentre dormono tranquilli. Tutto intorno ci sono scritte antiche che somigliano a piccoli disegni: sono preghiere speciali che servivano a cullarli durante il loro lunghissimo viaggio verso le stelle, dove avrebbero vissuto avventure fantastiche per sempre in un mondo pieno di luce.",
+      "descrizione": "Immagina che questi grandi letti di legno siano come dei gusci magici, fatti apposta per proteggere Kha e Merit per sempre. Sono dipinti con un nero lucido e tantissimo oro che brilla come il sole! Se guardi bene i loro volti, sembrano quasi sorridere mentre dormono tranquilli, felici di stare insieme. Tutto intorno ai loro corpi ci sono scritte antiche che somigliano a piccoli disegni: sono i geroglifici, delle preghiere speciali che servivano a cullarli durante il loro lunghissimo viaggio verso le stelle. In questo viaggio magico, avrebbero vissuto avventure fantastiche in un mondo pieno di luce e di tesori. Prova ad avvicinarti un pochino: riesci a vedere come brillano i loro occhi? Sembrano pronti a svegliarsi da un momento all'altro per raccontarci i segreti dell'Antico Egitto!",
+      "audioUrl": "/mobile/audio/it_kha03_40s.m4a",
       "url": "https://mole24.it/wp-content/uploads/2025/07/tomba-di-kha-e-merit-museo-egizio-torino.jpg",
       "autore": "autore2",
       "lunghezza": "40s",
@@ -224,6 +236,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
       "descrizione": "I sarcofagi antropoidi dell'architetto Kha e di sua moglie.",
+      "audioUrl": "/mobile/audio/it_kha04_3s.m4a",
       "url": "https://mole24.it/wp-content/uploads/2025/07/tomba-di-kha-e-merit-museo-egizio-torino.jpg",
       "autore": "autore1",
       "lunghezza": "3s",
@@ -239,7 +252,8 @@
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
-      "descrizione": "Questi sarcofagi a forma umana sono decorati con bitume nero e oro. Proteggevano le mummie garantendo loro una dimora eterna sicura.",
+      "descrizione": "Questi sarcofagi antropoidi, ossia a forma umana, sono finemente decorati con bitume nero e lamine d'oro. La loro funzione era quella di proteggere le mummie di Kha e Merit, garantendo ai defunti una dimora eterna sicura e preziosa per il loro viaggio nell'aldilà.",
+      "audioUrl": "/mobile/audio/it_kha05_15s.m4a",
       "url": "https://mole24.it/wp-content/uploads/2025/07/tomba-di-kha-e-merit-museo-egizio-torino.jpg",
       "autore": "autore1",
       "lunghezza": "15s",
@@ -255,7 +269,8 @@
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
-      "descrizione": "I sarcofagi di Kha e Merit, scoperti intatti nel 1906, rappresentano un esempio straordinario di arte funeraria egizia. Quello di Kha è composto da una serie di bare incastrate l'una nell'altra, mentre quello di Merit colpisce per la delicatezza dei tratti. Entrambi utilizzano il bitume nero come fondo, su cui risaltano le decorazioni in foglia d'oro. Questa combinazione cromatica non era solo estetica, ma simboleggiava la fertilità della terra del Nilo e la rinascita divina. Le iscrizioni geroglifiche che ricoprono le superfici servivano a guidare e proteggere lo spirito dei defunti nel complesso passaggio verso l'aldilà.",
+      "descrizione": "I sarcofagi di Kha e Merit, rinvenuti intatti nel 1906, rappresentano un esempio straordinario di arte funeraria egizia. Quello di Kha è composto da una serie di bare incastrate l'una nell'altra per proteggere la mummia, mentre quello di Merit colpisce per la particolare delicatezza dei tratti del volto.Entrambi utilizzano il bitume nero come fondo, su cui risaltano le splendide decorazioni realizzate in foglia d'oro. Questa combinazione cromatica non era solo una scelta estetica: il nero simboleggiava la fertile terra del Nilo e la rinascita, mentre l'oro richiamava la carne degli dei.Le iscrizioni geroglifiche che ricoprono le superfici non sono semplici decori, ma formule magiche che servivano a guidare e proteggere lo spirito dei defunti nel complesso passaggio verso l'aldilà. Osservando queste opere, possiamo percepire ancora oggi il profondo desiderio di eternità di questa antica coppia egizia",
+      "audioUrl": "/mobile/audio/it_kha06_40s.m4a",
       "url": "https://mole24.it/wp-content/uploads/2025/07/tomba-di-kha-e-merit-museo-egizio-torino.jpg",
       "autore": "autore1",
       "lunghezza": "40s",
@@ -272,6 +287,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
       "descrizione": "Sarcofagi antropoidi policromi della XVIII dinastia.",
+      "audioUrl": "/mobile/audio/it_kha07_3s.m4a",
       "url": "https://mole24.it/wp-content/uploads/2025/07/tomba-di-kha-e-merit-museo-egizio-torino.jpg",
       "autore": "autore2",
       "lunghezza": "3s",
@@ -287,7 +303,8 @@
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
-      "descrizione": "Bare antropoidi in legno stuccato e bitumato. Presentano un apparato testuale tratto dal Libro dei Morti, finalizzato alla preservazione del Ba nell'economia funeraria.",
+      "descrizione": "Queste strutture antropoidi in legno stuccato e bitumato costituiscono un dispositivo magico-protettivo di eccezionale valore. L’apparato testuale, con formule tratte dal Libro dei Morti, è strategicamente finalizzato alla preservazione del Ba e alla reintegrazione del defunto nell'economia funeraria, garantendo la transizione verso la dimensione osiriaca attraverso la simbologia del bitume",
+      "audioUrl": "/mobile/audio/it_kha08_15s.m4a",
       "url": "https://mole24.it/wp-content/uploads/2025/07/tomba-di-kha-e-merit-museo-egizio-torino.jpg",
       "autore": "autore2",
       "lunghezza": "15s",
@@ -303,7 +320,8 @@
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
-      "descrizione": "L'apparato dei sarcofagi antropoidi di Kha e Merit costituisce un vertice della storiografia materiale della XVIII dinastia. L'uso del bitume come pigmento di fondo, tipico dell'epoca ramesside, funge da supporto per un'elaborata carpenteria in legno stuccato e dorato. Il programma iconografico è rigorosamente codificato: il contrasto cromatico tra il nero ossidiano e l'oro simboleggia la trasfigurazione del defunto in una divinità solare. Le lunghe colonne di testo ieratico e geroglifico riportano formule di offerta e passaggi cruciali del Libro dei Morti, garantendo la coesione prosopografica tra il villaggio di Deir el-Medina e la dimensione astratta dell'eternità faraonica.",
+      "descrizione": "L'apparato dei sarcofagi antropoidi di Kha e Merit costituisce un vertice della storiografia materiale della XVIII dinastia. L'uso del bitume come pigmento di fondo funge da supporto per un'elaborata carpenteria in legno stuccato e dorato, riflettendo una tecnica decorativa di altissimo prestigio.Il programma iconografico è rigorosamente codificato: il contrasto cromatico tra il nero ossidiano e l'oro non è meramente estetico, ma simboleggia la trasfigurazione del defunto in una divinità solare, richiamando la rigenerazione osiriaca.Le lunghe colonne di testo geroglifico riportano formule di offerta e passaggi cruciali del Libro dei Morti, agendo come un dispositivo magico-rituale necessario alla preservazione del Ba. Questa configurazione garantisce la coesione prosopografica tra l'identità terrena dei defunti a Deir el-Medina e la dimensione astratta dell'eternità faraonica, cristallizzando il loro status sociale nella fissità della forma funeraria.",
+      "audioUrl": "/mobile/audio/it_kha09_40s.m4a",
       "url": "https://mole24.it/wp-content/uploads/2025/07/tomba-di-kha-e-merit-museo-egizio-torino.jpg",
       "autore": "autore2",
       "lunghezza": "40s",
@@ -320,6 +338,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
       "descrizione": "Un rotolo di carta antico con scritti dei nomi.",
+      "audioUrl": "/mobile/audio/it_papiro01_3s.m4a",
       "url": "https://abbonamentomusei.it/wp-content/uploads/2022/10/Papiro-dei-Re-1024x1024-1.jpeg",
       "autore": "autore1",
       "lunghezza": "3s",
@@ -335,7 +354,8 @@
       "operaId": "ME-003",
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
-      "descrizione": "Questo rotolo di carta è come un quaderno magico lunghissimo con sopra scritti i nomi di tutti i re egizi!",
+      "descrizione": "Questo rotolo di carta antichissima è come un quaderno magico lunghissimo! Sopra ci sono scritti i nomi di tutti i re egizi che hanno vissuto tantissimo tempo fa. È un tesoro speciale che ci aiuta a contare quanti anni sono passati e a conoscere i nomi di tutti i coraggiosi faraoni della storia!",
+      "audioUrl": "/mobile/audio/it_papiro02_15s.m4a",
       "url": "https://abbonamentomusei.it/wp-content/uploads/2022/10/Papiro-dei-Re-1024x1024-1.jpeg",
       "autore": "autore1",
       "lunghezza": "15s",
@@ -351,7 +371,8 @@
       "operaId": "ME-003",
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
-      "descrizione": "Ti immagini di dover ricordare i nomi di tutti i tuoi compagni di scuola? Gli antichi egizi avevano questo problema con i loro re! Questo rotolo di papiro antico, tutto giallo e un po' rovinato dal tempo, è come un gigantesco elenco telefonico. Sopra ci sono scritti i nomi di tantissimi faraoni, da quelli più famosi a quelli di cui avevamo quasi dimenticato l'esistenza. Anche se è fatto solo di carta delicata, per noi è un tesoro immenso perché ci racconta le storie di chi comandava in Egitto tantissimo tempo fa.",
+      "descrizione": "Ti immagini di dover ricordare a memoria i nomi di tutti i tuoi compagni di scuola? Gli antichi egizi avevano questo problema con i loro re! Questo rotolo di papiro antico, tutto giallo e un po' rovinato dal tempo, è come un gigantesco elenco telefonico di migliaia di anni fa. Sopra ci sono scritti i nomi di tantissimi faraoni: ci sono quelli famosissimi e quelli di cui avevamo quasi dimenticato l'esistenza. Anche se oggi appare come un pezzetto di carta molto delicata, per noi è un tesoro immenso! È come una macchina del tempo che ci racconta chi comandava in Egitto e per quanto tempo ogni re è rimasto sul suo trono. Senza questo 'quaderno' magico, avremmo perso per sempre i nomi di tantissimi protagonisti di questa storia fantastica!",
+      "audioUrl": "/mobile/audio/it_papiro03_40s.m4a",
       "url": "https://abbonamentomusei.it/wp-content/uploads/2022/10/Papiro-dei-Re-1024x1024-1.jpeg",
       "autore": "autore1",
       "lunghezza": "40s",
@@ -368,6 +389,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
       "descrizione": "Il Papiro dei Re, o Canone Reale di Torino.",
+      "audioUrl": "/mobile/audio/it_papiro04_3s.m4a",
       "url": "https://abbonamentomusei.it/wp-content/uploads/2022/10/Papiro-dei-Re-1024x1024-1.jpeg",
       "autore": "autore2",
       "lunghezza": "3s",
@@ -383,7 +405,8 @@
       "operaId": "ME-003",
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
-      "descrizione": "Noto anche come Canone Reale, questo documento elenca i faraoni e gli anni del loro regno. È fondamentale per capire la storia dell'Egitto.",
+      "descrizione": "Noto anche come Canone Reale, questo prezioso documento elenca i nomi dei faraoni e la durata esatta dei loro regni. Nonostante sia giunto a noi in frammenti, resta una fonte fondamentale per ricostruire la cronologia e l'intera storia dell'Antico Egitto",
+      "audioUrl": "/mobile/audio/it_papiro05_15s.m4a",
       "url": "https://abbonamentomusei.it/wp-content/uploads/2022/10/Papiro-dei-Re-1024x1024-1.jpeg",
       "autore": "autore2",
       "lunghezza": "15s",
@@ -399,7 +422,8 @@
       "operaId": "ME-003",
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
-      "descrizione": "Il Papiro dei Re, conosciuto anche come Canone Reale, è uno dei documenti storici più preziosi giunti fino a noi. Redatto con inchiostro nero e rosso, questo fragile manoscritto elenca i nomi dei faraoni egizi, a partire dalle divinità mitologiche fino ai re storici, precisando per ciascuno gli anni, i mesi e i giorni di regno. Sebbene il papiro sia giunto a noi molto frammentato, il paziente lavoro degli studiosi ha permesso di ricomporlo, rendendolo oggi lo strumento principale per calcolare la linea del tempo dell'antica civiltà egizia.",
+      "descrizione": "Il Papiro dei Re, conosciuto anche come Canone Reale, è uno dei documenti storici più preziosi giunti fino a noi dall'Antico Egitto. Redatto con inchiostro nero e rosso su un fragile supporto di papiro, questo manoscritto elenca i nomi di centinaia di faraoni, a partire dalle divinità mitologiche fino ai sovrani storici. Per ogni re, il documento precisa con incredibile dettaglio gli anni, i mesi e persino i giorni di regno. Sebbene il papiro sia arrivato a Torino molto frammentato, il paziente lavoro degli studiosi ha permesso di ricomporne i pezzi principali. Oggi, questo reperto è lo strumento fondamentale per calcolare la linea del tempo dell'intera civiltà egizia. Senza questo elenco, molte date e nomi di sovrani sarebbero rimasti per sempre un mistero avvolto nella sabbia del deserto.",
+      "audioUrl": "/mobile/audio/it_papiro06_40s.m4a",
       "url": "https://abbonamentomusei.it/wp-content/uploads/2022/10/Papiro-dei-Re-1024x1024-1.jpeg",
       "autore": "autore2",
       "lunghezza": "40s",
@@ -416,6 +440,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
       "descrizione": "Documento ieratico ramesside contenente la lista dei sovrani egizi.",
+      "audioUrl": "/mobile/audio/it_papiro07_3s.m4a",
       "url": "https://abbonamentomusei.it/wp-content/uploads/2022/10/Papiro-dei-Re-1024x1024-1.jpeg",
       "autore": "autore1",
       "lunghezza": "3s",
@@ -431,7 +456,8 @@
       "operaId": "ME-003",
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
-      "descrizione": "Documento ieratico risalente all'epoca ramesside. Nonostante le vaste lacune materiali, rappresenta la fonte storiografica primaria per la datazione assoluta del Medio e Nuovo Regno.",
+      "descrizione": "Documento in scrittura ieratica risalente all'epoca ramesside. Nonostante le vaste lacune materiali, il Canone rappresenta la fonte storiografica primaria per la datazione assoluta e la ricostruzione delle sequenze dinastiche del Medio e Nuovo Regno, integrando l'elemento cronologico con la durata precisa dei singoli periodi di stasi e governo",
+      "audioUrl": "/mobile/audio/it_papiro08_15s.m4a",
       "url": "https://abbonamentomusei.it/wp-content/uploads/2022/10/Papiro-dei-Re-1024x1024-1.jpeg",
       "autore": "autore1",
       "lunghezza": "15s",
@@ -448,6 +474,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
       "descrizione": "Il Canone Reale di Torino è un manoscritto amministrativo in corsivo ieratico compilato verosimilmente sotto Ramesse II. Scritto sul verso di un registro di tasse, il papiro riporta la successione dinastica dei sovrani d'Egitto, dai tempi mitici dominati dalle divinità fino al Secondo Periodo Intermedio. La sua importanza storiografica è inestimabile: la meticolosa annotazione della durata dei regni, calcolata in anni, mesi e giorni, fornisce l'ossatura cronologica fondamentale per la datazione delle dinastie faraoniche. La natura palinsesta e le lacune conservative richiedono tuttora un complesso lavoro di esegesi filologica.",
+      "audioUrl": "/mobile/audio/it_papiro09_40s.m4a",
       "url": "https://abbonamentomusei.it/wp-content/uploads/2022/10/Papiro-dei-Re-1024x1024-1.jpeg",
       "autore": "autore1",
       "lunghezza": "40s",
@@ -464,6 +491,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
       "descrizione": "Una statua di leone con la testa di uomo.",
+      "audioUrl": "/mobile/audio/it_sfinge01_3s.m4a",
       "url": "https://cdn.finestresullarte.info/rivista/immagini/2024/fn/torino-museo-egizio-sfinge-amon.jpg",
       "autore": "autore2",
       "lunghezza": "3s",
@@ -479,7 +507,8 @@
       "operaId": "ME-004",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
-      "descrizione": "Roar! Questa statua gigante ha il corpo di un leone forte e la testa di un uomo. Fa la guardia ai tesori del museo!",
+      "descrizione": "Roar! Questa statua gigante ha il corpo di un leone forte e la testa di un uomo coraggioso. È la Sfinge, una creatura magica che fa la guardia ai tesori del museo da tantissimo tempo. Guardala bene: sembra proprio che ci stia chiedendo di risolvere un segreto, vero?",
+      "audioUrl": "/mobile/audio/it_sfinge02_15s.m4a",
       "url": "https://cdn.finestresullarte.info/rivista/immagini/2024/fn/torino-museo-egizio-sfinge-amon.jpg",
       "autore": "autore2",
       "lunghezza": "15s",
@@ -495,7 +524,8 @@
       "operaId": "ME-004",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
-      "descrizione": "Guarda questa fantastica creatura magica! Si chiama Sfinge ed è fatta tutta di pietra dura. Ha il corpo possente di un leone, pronto a scattare, ma se la guardi in faccia vedrai che ha il volto di un re umano, con tanto di copricapo speciale. Gli antichi egizi mettevano queste statue fuori dai templi importanti per tenere lontani i cattivi e proteggere i luoghi segreti. Anche se sta ferma immobile da migliaia di anni, sembra ancora che stia facendo il suo lavoro di guardia in modo molto serio.",
+      "descrizione": "Guarda questa fantastica creatura magica! Si chiama Sfinge ed è fatta tutta di pietra durissima. Ha il corpo possente di un leone, pronto a scattare, ma se la guardi bene in faccia vedrai che ha il volto di un re umano, con tanto di copricapo speciale dei faraoni.Gli antichi egizi mettevano queste statue giganti fuori dai templi importanti per tenere lontani i cattivi e proteggere tutti i luoghi segreti. Anche se sta ferma immobile da migliaia di anni, sembra ancora che stia facendo il suo lavoro di guardia in modo molto serio! Prova a girarle intorno: non ti sembra che i suoi occhi di pietra ti seguano per controllare che tu sia un visitatore gentile? È qui per raccontarci che nell'antico Egitto la forza del leone e l'intelligenza dell'uomo stavano sempre insieme per proteggere il regno.",
+      "audioUrl": "/mobile/audio/it_sfinge03_40s.m4a",
       "url": "https://cdn.finestresullarte.info/rivista/immagini/2024/fn/torino-museo-egizio-sfinge-amon.jpg",
       "autore": "autore2",
       "lunghezza": "40s",
@@ -512,6 +542,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
       "descrizione": "Possente statua di sfinge in pietra.",
+      "audioUrl": "/mobile/audio/it_sfinge04_3s.m4a",
       "url": "https://cdn.finestresullarte.info/rivista/immagini/2024/fn/torino-museo-egizio-sfinge-amon.jpg",
       "autore": "autore1",
       "lunghezza": "3s",
@@ -527,7 +558,8 @@
       "operaId": "ME-004",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
-      "descrizione": "Una magnifica sfinge in pietra. Queste creature mitologiche rappresentavano il faraone e venivano posizionate in fila per proteggere l'ingresso dei templi sacri.",
+      "descrizione": "Questa magnifica sfinge in pietra unisce la forza del leone all'intelligenza del faraone. Nell'antico Egitto, queste creature mitologiche venivano spesso posizionate in lunghe file per proteggere simbolicamente l'ingresso dei templi sacri e dei palazzi reali.",
+      "audioUrl": "/mobile/audio/it_sfinge05_15s.m4a",
       "url": "https://cdn.finestresullarte.info/rivista/immagini/2024/fn/torino-museo-egizio-sfinge-amon.jpg",
       "autore": "autore1",
       "lunghezza": "15s",
@@ -543,7 +575,8 @@
       "operaId": "ME-004",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
-      "descrizione": "La sfinge è una delle figure più affascinanti della mitologia egizia. Questo grande scultura in pietra combina il corpo muscoloso e potente di un leone con la testa di un sovrano. L'unione di questi due elementi non è casuale: simboleggia l'intelligenza umana del faraone abbinata alla forza bruta dell'animale. Statue come questa venivano disposte lungo i viali di accesso ai grandi templi per creare una barriera protettiva contro le forze del male. I dettagli del copricapo, chiamato nemes, confermano la natura reale della figura rappresentata.",
+      "descrizione": "La sfinge è una delle figure più affascinanti della mitologia egizia. Questa grande scultura in pietra combina il corpo muscoloso e potente di un leone con la testa di un sovrano. L'unione di questi due elementi non è casuale: simboleggia l'intelligenza umana del faraone abbinata alla forza bruta dell'animale. Statue come questa venivano spesso disposte lungo i viali di accesso ai grandi templi per creare una barriera protettiva contro le forze del male. Se osservate attentamente i dettagli del copricapo, chiamato nemes, avrete la conferma della natura reale della figura rappresentata. Questa sfinge non è solo una guardia silenziosa, ma un potente simbolo di equilibrio e protezione che accoglieva i fedeli prima dell'ingresso nelle aree sacre, separando il mondo comune da quello divino.",
+      "audioUrl": "/mobile/audio/it_sfinge06_40s.m4a",
       "url": "https://cdn.finestresullarte.info/rivista/immagini/2024/fn/torino-museo-egizio-sfinge-amon.jpg",
       "autore": "autore1",
       "lunghezza": "40s",
@@ -611,6 +644,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
       "descrizione": "Un libro di carta antica con tanti disegni magici.",
+      "audioUrl": "/mobile/audio/it_libro01_3s.m4a",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d8/Book_of_the_Dead_of_Iuefankh%2C_papyrus_-_Museo_Egizio_Turin_C_1791_p02_crop.jpg",
       "autore": "autore1",
       "lunghezza": "3s",
@@ -626,7 +660,8 @@
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
-      "descrizione": "Questo è un libro magico lunghissimo! È pieno di disegni bellissimi e formule segrete per viaggiare sicuri nel mondo dei sogni e degli spiriti.",
+      "descrizione": "Questo è un libro magico lunghissimo! È un rotolo di papiro pieno di disegni bellissimi e formule segrete che servivano a viaggiare sicuri nel mondo degli spiriti. È come una mappa speciale che aiuta il suo proprietario a superare prove difficili e a raggiungere un posto meraviglioso pieno di luce!",
+      "audioUrl": "/mobile/audio/it_libro02_15s.m4a",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d8/Book_of_the_Dead_of_Iuefankh%2C_papyrus_-_Museo_Egizio_Turin_C_1791_p02_crop.jpg",
       "autore": "autore1",
       "lunghezza": "15s",
@@ -642,7 +677,8 @@
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
-      "descrizione": "Immagina di dover fare un viaggio in un posto misterioso e pieno di labirinti. Non avresti bisogno di una mappa speciale? Questo lunghissimo foglio di carta è proprio questo: una mappa magica che apparteneva a un signore di nome Iuefankh. Sopra ci sono disegnati dei, mostri buffi e porte segrete. Gli egizi credevano che leggendo le paroline scritte qui sopra, Iuefankh avrebbe potuto superare tutti gli ostacoli nel cielo e vivere per sempre felice in un mondo di stelle e luce.",
+      "descrizione": "Immagina di dover fare un viaggio in un posto misterioso e pieno di labirinti. Non avresti bisogno di una mappa speciale? Questo lunghissimo foglio di papiro è proprio questo: una mappa magica che apparteneva a un signore di nome Iuefankh. Sopra ci sono disegnati dei, mostri buffi e porte segrete da attraversare. Gli egizi credevano che leggendo le paroline scritte qui sopra, Iuefankh avrebbe potuto superare tutti gli ostacoli nel cielo e trovare la strada giusta. È un racconto a fumetti di tantissimi anni fa, dove ogni disegno spiega come fare amicizia con gli spiriti e come arrivare, finalmente, a vivere per sempre felice in un mondo fatto di stelle e di luce. Prova a guardare i colori: sono ancora così vivaci che sembra siano stati dipinti ieri, vero?",
+      "audioUrl": "/mobile/audio/it_libro03_40s.m4a",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d8/Book_of_the_Dead_of_Iuefankh%2C_papyrus_-_Museo_Egizio_Turin_C_1791_p02_crop.jpg",
       "autore": "autore1",
       "lunghezza": "40s",
@@ -659,6 +695,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
       "descrizione": "Il papiro funerario di Iuefankh.",
+      "audioUrl": "/mobile/audio/it_libro04_3s.m4a",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d8/Book_of_the_Dead_of_Iuefankh%2C_papyrus_-_Museo_Egizio_Turin_C_1791_p02_crop.jpg",
       "autore": "autore2",
       "lunghezza": "3s",
@@ -674,7 +711,8 @@
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
-      "descrizione": "Questo è uno dei papiri più lunghi al mondo. Contiene magnifiche illustrazioni e le formule magiche che aiutavano il defunto Iuefankh a superare le prove nell'aldilà.",
+      "descrizione": "Questo è uno dei papiri più lunghi al mondo. Contiene magnifiche illustrazioni e le formule magiche che aiutavano il defunto Iuefankh a superare le difficili prove nell'aldilà. Fungeva da vera e propria guida rituale per permettere all'anima di raggiungere la salvezza eterna.",
+      "audioUrl": "/mobile/audio/it_libro05_15s.m4a",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d8/Book_of_the_Dead_of_Iuefankh%2C_papyrus_-_Museo_Egizio_Turin_C_1791_p02_crop.jpg",
       "autore": "autore2",
       "lunghezza": "15s",
@@ -690,7 +728,8 @@
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
-      "descrizione": "Il Libro dei Morti era una raccolta di testi religiosi e magici fondamentale per gli antichi egizi. L'esemplare di Iuefankh, lungo ben 18 metri, è uno dei meglio conservati in assoluto. Scritto su papiro, il testo è accompagnato da splendide illustrazioni chiamate vignette, che mostrano il defunto mentre affronta le sfide del mondo sotterraneo. La scena più famosa e importante rappresentata è quella del peso del cuore: il cuore di Iuefankh viene pesato sulla bilancia della giustizia per decidere se merita o meno la vita eterna.",
+      "descrizione": "Il Libro dei Morti era una raccolta di testi religiosi e magici fondamentale per gli antichi egizi. L'esemplare di Iuefankh, lungo ben 18 metri, è uno dei meglio conservati in assoluto. Scritto su papiro, il testo è accompagnato da splendide illustrazioni chiamate vignette, che mostrano il defunto mentre affronta le sfide del mondo sotterraneo. La scena più famosa e importante rappresentata è quella della psicostasia, ovvero il peso del cuore: il cuore di Iuefankh viene pesato sulla bilancia della giustizia, contro la piuma della verità, per decidere se merita o meno la vita eterna. Osservando i dettagli, si può notare la precisione dei geroglifici e la vivacità dei colori, che servivano a dare forza alle formule magiche necessarie per superare ogni ostacolo nel viaggio verso l'aldilà.",
+      "audioUrl": "/mobile/audio/it_libro06_40s.m4a",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d8/Book_of_the_Dead_of_Iuefankh%2C_papyrus_-_Museo_Egizio_Turin_C_1791_p02_crop.jpg",
       "autore": "autore2",
       "lunghezza": "40s",
@@ -707,6 +746,7 @@
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
       "descrizione": "Esemplare tolemaico del Libro dei Morti lungo oltre 18 metri.",
+      "audioUrl": "/mobile/audio/it_libro07_3s.m4a",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d8/Book_of_the_Dead_of_Iuefankh%2C_papyrus_-_Museo_Egizio_Turin_C_1791_p02_crop.jpg",
       "autore": "autore1",
       "lunghezza": "3s",
@@ -722,7 +762,8 @@
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
-      "descrizione": "Esemplare di epoca tolemaica che documenta il corpus completo delle formule funerarie, illustrato con vignette di superba fattura, essenziale per lo studio della psicostasia.",
+      "descrizione": "Esemplare di epoca tolemaica che documenta il corpus completo delle formule funerarie, illustrato con vignette di superba fattura. Il papiro costituisce una fonte primaria per lo studio della psicostasia, integrando l'elemento testuale con quello iconografico per garantire l'efficacia rituale nel passaggio all'eternità.",
+      "audioUrl": "/mobile/audio/it_libro08_15s.m4a",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d8/Book_of_the_Dead_of_Iuefankh%2C_papyrus_-_Museo_Egizio_Turin_C_1791_p02_crop.jpg",
       "autore": "autore1",
       "lunghezza": "15s",
@@ -738,7 +779,8 @@
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
-      "descrizione": "Il papiro di Iuefankh, databile all'epoca tolemaica, è uno dei manufatti testuali più estesi della collezione, raggiungendo i 18 metri di lunghezza. Esso codifica in scrittura geroglifica corsiva la recensione saita del Libro per Uscire al Giorno. L'apparato iconografico, caratterizzato da vignette tratteggiate a inchiostro nero, funge da supporto performativo alle formule magico-religiose. Particolarmente densa di significati teologici è l'articolazione visiva del capitolo 125, incentrato sul rito della psicostasia, in cui la legittimazione morale del defunto viene sanzionata dal tribunale osiriaco, garantendone la trasfigurazione nell'akh.",
+      "descrizione": "Il papiro di Iuefankh, databile all'epoca tolemaica, rappresenta uno dei manufatti testuali più estesi della collezione, raggiungendo i 18 metri di lunghezza. Esso codifica in scrittura geroglifica corsiva la cosiddetta 'recensione saita' del Libro per Uscire al Giorno. L'apparato iconografico, caratterizzato da sofisticate vignette tratteggiate a inchiostro nero, non è meramente illustrativo, ma funge da supporto performativo alle formule magico-religiose. Particolarmente densa di significati teologici è l'articolazione visiva del capitolo 125, incentrato sul rito della psicostasia. In questa sezione, la legittimazione morale del defunto viene sanzionata dal tribunale osiriaco attraverso la pesatura del cuore, garantendone la trasfigurazione finale nell'akh, lo spirito luminoso. La conservazione integrale di questo rotolo permette uno studio analitico sulla continuità delle tradizioni funerarie egizie fino alla tarda antichità.",
+      "audioUrl": "/mobile/audio/it_libro09_40s.m4a",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d8/Book_of_the_Dead_of_Iuefankh%2C_papyrus_-_Museo_Egizio_Turin_C_1791_p02_crop.jpg",
       "autore": "autore1",
       "lunghezza": "40s",
@@ -752,12 +794,80 @@
   ],
   "visits": [
     {
+      "id": "visita_infantile_01",
+      "title": "Piccoli Esploratori dell'Egitto",
+      "image": "https://collezioni.museoegizio.it/public/objects/images/0016U0_5F46330BD94B260326B5E06A63F2AA53_full.jpg",
+      "type": "KIDS GUIDE",
+      "duration": "45 min",
+      "stops": 5,
+      "museo": "Museo Egizio di Torino",
+      "livello_base": "infantile",
+      "info_generale": "L'entrata del museo è in Via Accademia delle Scienze 6. Il biglietto per i bambini è ridotto ed è disponibile un servizio di guardaroba gratuito al piano interrato.",
+      "tappe": [
+        {
+          "ordine": 1,
+          "operaId": "ME-001",
+          "logistica": "Entra nella Galleria dei Re e cerca il re gigante seduto sul trono: è Ramesse II!",
+          "item_default": "it_ramesse_02",
+          "varianti_difficolta": {
+            "infantile": "it_ramesse_02",
+            "medio": "it_ramesse_05",
+            "avanzato": "it_ramesse_08"
+          }
+        },
+        {
+          "ordine": 2,
+          "operaId": "ME-004",
+          "logistica": "Cerca la statua con il corpo di leone che fa la guardia! Hai trovato la Sfinge?",
+          "item_default": "it_sfinge_02",
+          "varianti_difficolta": {
+            "infantile": "it_sfinge_02",
+            "medio": "it_sfinge_05",
+            "avanzato": "it_sfinge_08"
+          }
+        },
+        {
+          "ordine": 3,
+          "operaId": "ME-002",
+          "logistica": "Prosegui verso le grandi scatole d'oro che proteggevano Kha e Merit.",
+          "item_default": "it_kha_02",
+          "varianti_difficolta": {
+            "infantile": "it_kha_02",
+            "medio": "it_kha_05",
+            "avanzato": "it_kha_08"
+          }
+        },
+        {
+          "ordine": 4,
+          "operaId": "ME-003",
+          "logistica": "Trova il quaderno magico lunghissimo con i nomi di tutti i Re!",
+          "item_default": "it_papiro_02",
+          "varianti_difficolta": {
+            "infantile": "it_papiro_02",
+            "medio": "it_papiro_05",
+            "avanzato": "it_papiro_08"
+          }
+        },
+        {
+          "ordine": 5,
+          "operaId": "ME-005",
+          "logistica": "Concludi il viaggio davanti al grande rotolo pieno di disegni e segreti.",
+          "item_default": "it_libro_02",
+          "varianti_difficolta": {
+            "infantile": "it_libro_02",
+            "medio": "it_libro_05",
+            "avanzato": "it_libro_08"
+          }
+        }
+      ]
+    },
+    {
       "id": "visita_medium_egizio",
       "title": "I Tesori della Valle",
       "image": "https://mole24.it/wp-content/uploads/2025/07/tomba-di-kha-e-merit-museo-egizio-torino.jpg",
       "type": "AUDIO GUIDE",
       "duration": "60 min",
-      "stops": 4,
+      "stops": 5,
       "museo": "Museo Egizio di Torino",
       "livello_base": "medio",
       "info_generale": "Benvenuti. Il percorso inizia al piano terra. Si consiglia l'uso degli ascensori verso le sale superiori.",
@@ -765,7 +875,7 @@
         {
           "ordine": 1,
           "operaId": "ME-003",
-          "logistica": "Recatevi presso la sala dei papiri e individuate il Papiro dei Re.",
+          "logistica": "Iniziate la visita nella sala dei papiri per osservare il celebre Papiro dei Re.",
           "item_default": "it_papiro_05",
           "varianti_difficolta": {
             "infantile": "it_papiro_02",
@@ -786,24 +896,35 @@
         },
         {
           "ordine": 3,
-          "operaId": "ME-001",
-          "logistica": "Raggiungete la monumentale Statua di Ramesse II al centro della galleria.",
-          "item_default": "it_ramesse_05",
-          "varianti_difficolta": {
-            "infantile": "it_ramesse_02",
-            "medio": "it_ramesse_05",
-            "avanzato": "it_ramesse_08"
-          }
-        },
-        {
-          "ordine": 4,
           "operaId": "ME-005",
-          "logistica": "Concludete la visita davanti al Libro dei Morti.",
+          "logistica": "Raggiungete la sala che ospita il Libro dei Morti di Iuefankh.",
           "item_default": "it_libro_05",
           "varianti_difficolta": {
             "infantile": "it_libro_02",
             "medio": "it_libro_05",
             "avanzato": "it_libro_08"
+          }
+        },
+        {
+          "ordine": 4,
+          "operaId": "ME-004",
+          "logistica": "Dirigetevi verso la statua della Sfinge, simbolo di protezione dei luoghi sacri.",
+          "item_default": "it_sfinge_05",
+          "varianti_difficolta": {
+            "infantile": "it_sfinge_02",
+            "medio": "it_sfinge_05",
+            "avanzato": "it_sfinge_08"
+          }
+        },
+        {
+          "ordine": 5,
+          "operaId": "ME-001",
+          "logistica": "Concludete il percorso davanti alla maestosa Statua di Ramesse II.",
+          "item_default": "it_ramesse_05",
+          "varianti_difficolta": {
+            "infantile": "it_ramesse_02",
+            "medio": "it_ramesse_05",
+            "avanzato": "it_ramesse_08"
           }
         }
       ]
@@ -814,7 +935,7 @@
       "image": "https://cdn.finestresullarte.info/rivista/immagini/2024/fn/torino-museo-egizio-sfinge-amon.jpg",
       "type": "EXPERT GUIDE",
       "duration": "90 min",
-      "stops": 4,
+      "stops": 5,
       "museo": "Museo Egizio di Torino",
       "livello_base": "avanzato",
       "info_generale": "Percorso accademico. Si prega di sostare nelle zone meno affollate per l'ascolto delle analisi tecniche.",
@@ -832,6 +953,17 @@
         },
         {
           "ordine": 2,
+          "operaId": "ME-001",
+          "logistica": "Analisi della propaganda reale: raggiungete il simulacro in diorite di Ramesse II.",
+          "item_default": "it_ramesse_08",
+          "varianti_difficolta": {
+            "infantile": "it_ramesse_02",
+            "medio": "it_ramesse_05",
+            "avanzato": "it_ramesse_08"
+          }
+        },
+        {
+          "ordine": 3,
           "operaId": "ME-003",
           "logistica": "Studio della cronologia: spostatevi di fronte al Canone di Torino.",
           "item_default": "it_papiro_08",
@@ -842,56 +974,10 @@
           }
         },
         {
-          "ordine": 3,
-          "operaId": "ME-005",
-          "logistica": "Esame della ritualità: individuate il Libro dei Morti di Iuefankh.",
-          "item_default": "it_libro_08",
-          "varianti_difficolta": {
-            "infantile": "it_libro_02",
-            "medio": "it_libro_05",
-            "avanzato": "it_libro_08"
-          }
-        },
-        {
           "ordine": 4,
-          "operaId": "ME-001",
-          "logistica": "Conclusione filologica: tornate alla Galleria dei Re per la statua di Ramesse II.",
-          "item_default": "it_ramesse_08",
-          "varianti_difficolta": {
-            "infantile": "it_ramesse_02",
-            "medio": "it_ramesse_05",
-            "avanzato": "it_ramesse_08"
-          }
-        }
-      ]
-    },
-    {
-      "id": "visita_infantile_01",
-      "title": "Piccoli Esploratori dell'Egitto",
-      "image": "https://collezioni.museoegizio.it/public/objects/images/0016U0_5F46330BD94B260326B5E06A63F2AA53_full.jpg",
-      "type": "KIDS GUIDE",
-      "duration": "45 min",
-      "stops": 3,
-      "museo": "Museo Egizio di Torino",
-      "livello_base": "infantile",
-      "info_generale": "L'entrata del museo è in Via Accademia delle Scienze 6. Il biglietto per i bambini è ridotto ed è disponibile un servizio di guardaroba gratuito al piano interrato.",
-      "tappe": [
-        {
-          "ordine": 1,
-          "operaId": "ME-001",
-          "logistica": "Entra nella Galleria dei Re e cerca il re gigante seduto sul trono: è Ramesse II!",
-          "item_default": "it_ramesse_02",
-          "varianti_difficolta": {
-            "infantile": "it_ramesse_02",
-            "medio": "it_ramesse_05",
-            "avanzato": "it_ramesse_08"
-          }
-        },
-        {
-          "ordine": 2,
           "operaId": "ME-002",
-          "logistica": "Prosegui dritto verso le grandi scatole colorate che proteggevano Kha e Merit.",
-          "item_default": "it_kha_02",
+          "logistica": "Esegesi della cultura materiale: esaminate i sarcofagi di Kha e Merit.",
+          "item_default": "it_kha_08",
           "varianti_difficolta": {
             "infantile": "it_kha_02",
             "medio": "it_kha_05",
@@ -899,14 +985,14 @@
           }
         },
         {
-          "ordine": 3,
-          "operaId": "ME-004",
-          "logistica": "Cerca la statua con il corpo di leone che fa la guardia! Hai trovato la Sfinge?",
-          "item_default": "it_sfinge_02",
+          "ordine": 5,
+          "operaId": "ME-005",
+          "logistica": "Conclusione filologica presso il Libro dei Morti (recensione saita).",
+          "item_default": "it_libro_08",
           "varianti_difficolta": {
-            "infantile": "it_sfinge_02",
-            "medio": "it_sfinge_05",
-            "avanzato": "it_sfinge_08"
+            "infantile": "it_libro_02",
+            "medio": "it_libro_05",
+            "avanzato": "it_libro_08"
           }
         }
       ]

@@ -14,7 +14,10 @@ function App() {
   const [showIntro, setShowIntro] = useState(true); // Se vuoi l'intro, lasciala true inizialmente
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+    };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
