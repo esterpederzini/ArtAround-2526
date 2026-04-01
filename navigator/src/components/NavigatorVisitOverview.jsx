@@ -156,7 +156,12 @@ function NavigatorVisitOverview() {
                           </Card.Title>
                           <div className="audio-info mt-2">
                             <i className="bi bi-headphones me-2"></i>
-                            <span>{opera.lunghezza}</span>
+                            {/* Se esiste durata_reale (calcolata dal backend) usa quella, altrimenti usa l'etichetta di testo */}
+                            <span>
+                              {opera.durata_reale
+                                ? `${opera.durata_reale}s`
+                                : opera.lunghezza}
+                            </span>
                           </div>
                         </Card.Body>
                       </Col>

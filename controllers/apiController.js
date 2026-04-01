@@ -3,6 +3,9 @@ const Visita = require("../models/Visita");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const { createAuthToken } = require("../middleware/auth");
+const mm = require("music-metadata");
+const path = require("path");
+const fs = require("fs");
 
 // ─── UTILITY ────────────────────────────────────────────────
 const risposta = (res, status, data, messaggio = "") => {
@@ -281,6 +284,7 @@ exports.getVisite = async (req, res) => {
 
 exports.getVisitaById = async (req, res) => {
   try {
+    // 1. Recupero della visita dal database [cite: 420]
     const visita = await Visita.findOne({
       $or: [{ _id: req.params.id }, { id: req.params.id }],
     })
@@ -291,9 +295,48 @@ exports.getVisitaById = async (req, res) => {
         select:
           "titolo operaId lunghezza linguaggio url descrizione autore categoria prezzo licenza audioUrl",
       });
+
     if (!visita) return risposta(res, 404, null, "Visita non trovata");
-    risposta(res, 200, visita);
+
+    // Trasformiamo in oggetto JS semplice per poter aggiungere campi [cite: 263, 264]
+    const visitaObj = visita.toObject();
+
+    // 2. Ciclo sulle tappe per calcolare la durata reale [cite: 266]
+    if (visitaObj.tappe && Array.isArray(visitaObj.tappe)) {
+      for (let tappa of visitaObj.tappe) {
+        // Controllo di sicurezza: se l'item_default o l'audioUrl mancano, salta alla prossima tappa
+        if (!tappa.item_default || !tappa.item_default.audioUrl) continue;
+
+        try {
+          const audioFileName = tappa.item_default.audioUrl.split("/").pop();
+
+          // Costruiamo il percorso assoluto [cite: 239]
+          // NOTA: 'navigator/public/audio' è dove risiedono i file sorgente [cite: 239]
+          const audioFilePath = path.join(
+            process.cwd(),
+            "navigator",
+            "public",
+            "audio",
+            audioFileName,
+          );
+
+          if (fs.existsSync(audioFilePath)) {
+            const metadata = await mm.parseFile(audioFilePath);
+            tappa.item_default.durata_reale = Math.round(
+              metadata.format.duration,
+            );
+          }
+        } catch (audioErr) {
+          console.error("Errore lettura metadati audio:", audioErr.message);
+          // Non blocchiamo l'intera risposta se un singolo file audio ha problemi
+        }
+      }
+    }
+
+    // 3. Invio della risposta corretta [cite: 264]
+    risposta(res, 200, visitaObj);
   } catch (err) {
+    console.error("ERRORE CRITICO getVisitaById:", err.message);
     risposta(res, 500, null, err.message);
   }
 };
