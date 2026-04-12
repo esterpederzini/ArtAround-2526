@@ -49,8 +49,14 @@ app.use(express.urlencoded({ extended: true }));
 // 1. ROTTE API (Sempre per prime)
 app.use("/api", apiRouter);
 
+// In index.js hai già questo, assicurati che il file config.json esista:
 app.get("/api/config", (req, res) => {
-  res.sendFile(path.join(__dirname, "config.json"));
+  const configPath = path.join(__dirname, "config.json");
+  if (fs.existsSync(configPath)) {
+    res.sendFile(configPath);
+  } else {
+    res.status(404).json({ errore: "Configurazione museo non trovata" });
+  }
 });
 
 app.get("/db/create", async function (req, res) {

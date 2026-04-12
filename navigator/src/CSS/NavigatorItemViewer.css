@@ -386,6 +386,22 @@
   border: 0.06rem solid rgba(255, 255, 255, 0.2) !important;
 }
 
+.btn-museum-outline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.8rem !important;
+  font-size: 0.9rem;
+  background: transparent !important;
+  color: #fff !important;
+  border: 0.06rem solid rgba(225, 143, 55, 0.3) !important;
+}
+
+.btn-museum-outline i {
+  color: #e18f37;
+}
+
 /* --- BOTTOM NAVIGATION BAR --- */
 .bottom-nav-viewer {
   position: fixed;

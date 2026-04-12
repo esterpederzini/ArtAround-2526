@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Card, Modal, Spinner } from "react-bootstrap";
 import "../CSS/NavigatorItemViewer.css";
 
-// Configurazione Web Speech API
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = SpeechRecognition ? new SpeechRecognition() : null;
@@ -21,36 +20,44 @@ export default function NavigatorItemViewer() {
 
   const [visit, setVisit] = useState(null);
   const [currentItem, setCurrentItem] = useState(null);
+  const [museumConfig, setMuseumConfig] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [languageLevel, setLanguageLevel] = useState("medio");
   const [selectedDuration, setSelectedDuration] = useState("15s");
   const [isListening, setIsListening] = useState(false);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showAccessMenu, setShowAccessMenu] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
 
-  // Stato etichette: resettato ad ogni cambio opera
   const [uiLabels, setUiLabels] = useState({
     "3s": "3s",
     "15s": "15s",
     "40s": "40s",
   });
-
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showExitModal, setShowExitModal] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
   const audioRef = useRef(new Audio());
 
-  // --- 1. INITIAL FETCH & RESET ---
+  // --- 1. INITIAL FETCH ---
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
     setIsPlaying(false);
-
-    // Reset etichette quando cambia l'opera
     setUiLabels({ "3s": "3s", "15s": "15s", "40s": "40s" });
 
+    // Configurazione Museo
+    fetch("/api/config")
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted) setMuseumConfig(data);
+      })
+      .catch((err) => console.error("Errore config:", err));
+
+    // Dati Visita
     fetch(`/api/visite/${id}`)
       .then((res) => res.json())
       .then((json) => {
@@ -59,12 +66,10 @@ export default function NavigatorItemViewer() {
           setVisit(json.data);
           const stops = json.data.tappe ?? [];
           const defaultItem = stops[safeIndex]?.item_default;
-
           if (defaultItem) {
             setCurrentItem(defaultItem);
             setLanguageLevel(defaultItem.linguaggio || "medio");
             setSelectedDuration(defaultItem.lunghezza || "15s");
-
             if (defaultItem.durata_reale) {
               setUiLabels((prev) => ({
                 ...prev,
@@ -75,6 +80,9 @@ export default function NavigatorItemViewer() {
           }
         }
         setLoading(false);
+      })
+      .catch(() => {
+        if (isMounted) setLoading(false);
       });
 
     return () => {
@@ -82,9 +90,9 @@ export default function NavigatorItemViewer() {
     };
   }, [id, safeIndex]);
 
-  // --- 2. CORE LOGIC: UPDATE CONTENT (TONO/DURATA) ---
+  // --- 2. UPDATE CONTENT ---
   const updateContent = async (newLevel, newDuration) => {
-    if (!visit || !visit.tappe[safeIndex]) return;
+    if (!visit?.tappe?.[safeIndex]) return;
     setIsPlaying(false);
     const operaId = visit.tappe[safeIndex].operaId;
 
@@ -98,123 +106,45 @@ export default function NavigatorItemViewer() {
         setCurrentItem(newItem);
         setLanguageLevel(newLevel);
         setSelectedDuration(newDuration);
-
         if (newItem.durata_reale) {
           setUiLabels((prev) => ({
             ...prev,
             [newDuration]: `${newItem.durata_reale}s`,
           }));
         }
-
         setCurrentTime(0);
-        setDuration(0);
         setTimeout(() => setIsPlaying(true), 100);
       } else {
-        alert("Questa combinazione non è disponibile.");
+        alert("Combinazione non disponibile.");
       }
     } catch (err) {
-      console.error("Error fetching variant:", err);
+      console.error(err);
     }
   };
 
-  // --- 3. VOICE COMMAND LOGIC (RIPRISTINATA) ---
-  const toggleListening = () => {
-    if (!recognition) {
-      alert("Il tuo browser non supporta il riconoscimento vocale.");
-      return;
-    }
+  // --- 3. VOICE LOGIC & HELPERS ---
+  const handleSimplify = () => {
+    let newLevel =
+      languageLevel === "avanzato"
+        ? "medio"
+        : languageLevel === "medio"
+          ? "infantile"
+          : "infantile";
+    if (newLevel !== languageLevel) updateContent(newLevel, selectedDuration);
+    else alert("Versione più semplice già attiva.");
+  };
 
+  const toggleListening = () => {
+    if (!recognition) return alert("Riconoscimento vocale non supportato.");
     if (isListening) {
-      // Se sta già ascoltando, interrompiamo
       recognition.stop();
       setIsListening(false);
-      console.log("Riconoscimento vocale interrotto manualmente.");
     } else {
-      // Se non sta ascoltando, avviamo
+      setIsPlaying(false);
       setIsListening(true);
       recognition.start();
-      console.log("Riconoscimento vocale avviato.");
     }
   };
-
-  useEffect(() => {
-    if (!recognition) return;
-    recognition.onresult = (event) => {
-      const command = event.results[0][0].transcript.toLowerCase();
-      if (command.includes("avanti") || command.includes("prossimo"))
-        changeItem(safeIndex + 1);
-      else if (command.includes("indietro") || command.includes("precedente"))
-        changeItem(safeIndex - 1);
-      else if (
-        command.includes("di più") ||
-        command.includes("approfondisci")
-      ) {
-        if (selectedDuration === "15s") updateContent(languageLevel, "40s");
-        else if (selectedDuration === "3s") updateContent(languageLevel, "15s");
-      } else if (command.includes("semplice") || command.includes("meno")) {
-        updateContent("infantile", "15s");
-      } else if (command.includes("esci") || command.includes("uscita")) {
-        setShowExitModal(true);
-      }
-    };
-    recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => setIsListening(false);
-  }, [safeIndex, languageLevel, selectedDuration]);
-
-  // --- 4. AUDIO PLAYER LOGIC ---
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (currentItem?.audioUrl) {
-      audio.pause();
-      audio.src = currentItem.audioUrl;
-      audio.load();
-
-      const handleLoadedMetadata = () => {
-        setDuration(audio.duration);
-        setUiLabels((prev) => ({
-          ...prev,
-          [currentItem.lunghezza]: `${Math.round(audio.duration)}s`,
-        }));
-      };
-
-      const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
-      const handleEnded = () => {
-        setIsPlaying(false);
-        setCurrentTime(0);
-      };
-
-      audio.addEventListener("loadedmetadata", handleLoadedMetadata);
-      audio.addEventListener("timeupdate", handleTimeUpdate);
-      audio.addEventListener("ended", handleEnded);
-
-      if (isPlaying) {
-        audio
-          .play()
-          .catch((e) => console.log("Autoplay in attesa di interazione..."));
-      }
-
-      return () => {
-        audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
-        audio.removeEventListener("timeupdate", handleTimeUpdate);
-        audio.removeEventListener("ended", handleEnded);
-      };
-    }
-  }, [currentItem]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (isPlaying) audio.play().catch((e) => {});
-    else audio.pause();
-  }, [isPlaying]);
-
-  // Stop audio all'uscita definitiva
-  useEffect(() => {
-    return () => {
-      const audio = audioRef.current;
-      audio.pause();
-      audio.src = "";
-    };
-  }, []);
 
   const changeItem = (newIndex) => {
     setIsPlaying(false);
@@ -224,16 +154,113 @@ export default function NavigatorItemViewer() {
     }
   };
 
-  const formatTime = (time) => {
-    const mins = Math.floor(time / 60);
-    const secs = Math.floor(time % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  // --- VOICE COMMAND LOGIC (VOCABOLARIO CONTROLLATO) ---
+  useEffect(() => {
+    if (!recognition) return;
+
+    recognition.onresult = (event) => {
+      const command = event.results[0][0].transcript.toLowerCase();
+      console.log("Comando ricevuto:", command);
+
+      // --- NAVIGAZIONE ---
+      if (command.includes("avanti") || command.includes("prossimo")) {
+        changeItem(safeIndex + 1);
+      } else if (
+        command.includes("indietro") ||
+        command.includes("precedente")
+      ) {
+        changeItem(safeIndex - 1);
+      }
+
+      // --- LIVELLO DI DETTAGLIO ---
+      else if (
+        command.includes("di più") ||
+        command.includes("approfondisci")
+      ) {
+        if (selectedDuration === "3s") updateContent(languageLevel, "15s");
+        else if (selectedDuration === "15s")
+          updateContent(languageLevel, "40s");
+      } else if (command.includes("di meno") || command.includes("riduci")) {
+        if (selectedDuration === "40s") updateContent(languageLevel, "15s");
+        else if (selectedDuration === "15s") updateContent(languageLevel, "3s");
+      }
+
+      // --- COMPRENSIONE E SEMPLIFICAZIONE (LOGICA STEP-DOWN) ---
+      else if (
+        command.includes("non capisco") ||
+        command.includes("più semplice")
+      ) {
+        handleSimplify();
+      }
+
+      // --- METADATI ---
+      else if (command.includes("autore") || command.includes("artista")) {
+        setShowDetailsModal(true); // È meglio aprire il modal che un alert
+      }
+
+      // --- LOGISTICA ---
+      else if (command.includes("uscita") || command.includes("esci")) {
+        setShowExitModal(true);
+      } else if (command.includes("toilette") || command.includes("bagno")) {
+        alert(
+          museumConfig?.logistica_globale?.toilette ||
+            "Informazione non disponibile.",
+        );
+      } else if (command.includes("bar") || command.includes("shop")) {
+        alert(
+          museumConfig?.logistica_globale?.bar ||
+            "Informazione non disponibile.",
+        );
+      }
+    };
+
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+
+    // CRITICO: lo useEffect deve ricaricarsi quando cambiano questi stati
+    // per avere i valori aggiornati dentro la callback onresult
+  }, [safeIndex, languageLevel, selectedDuration, currentItem, museumConfig]);
+
+  // --- 4. AUDIO SYNC ---
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (currentItem?.audioUrl) {
+      audio.pause();
+      audio.src = currentItem.audioUrl;
+      audio.load();
+      const setMeta = () => setDuration(audio.duration);
+      const upTime = () => setCurrentTime(audio.currentTime);
+      const onEnd = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+      };
+      audio.addEventListener("loadedmetadata", setMeta);
+      audio.addEventListener("timeupdate", upTime);
+      audio.addEventListener("ended", onEnd);
+      if (isPlaying && !isListening) audio.play().catch(() => {});
+      return () => {
+        audio.removeEventListener("loadedmetadata", setMeta);
+        audio.removeEventListener("timeupdate", upTime);
+        audio.removeEventListener("ended", onEnd);
+      };
+    }
+  }, [currentItem, isListening]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (isPlaying && !isListening) audio.play().catch(() => {});
+    else audio.pause();
+  }, [isPlaying, isListening]);
+
+  const formatTime = (t) =>
+    `${Math.floor(t / 60)}:${Math.floor(t % 60)
+      .toString()
+      .padStart(2, "0")}`;
 
   if (loading)
     return (
       <div className="vh-100 d-flex justify-content-center align-items-center bg-dark text-white">
-        <Spinner animation="border" variant="light" />
+        <Spinner animation="border" />
       </div>
     );
 
@@ -245,7 +272,7 @@ export default function NavigatorItemViewer() {
           <i className="bi bi-chevron-left"></i>
         </button>
         <div className="top-nav-center">
-          <span className="top-nav-title">{visit?.title || visit?.titolo}</span>
+          <span className="top-nav-title">{visit?.titolo || "Visita"}</span>
         </div>
       </div>
 
@@ -259,9 +286,30 @@ export default function NavigatorItemViewer() {
           <div className="hero-overlay-gradient"></div>
           <div className="hero-caption">
             <p className="category-label">
-              {currentItem?.categoria || "Capolavoro"}
+              {currentItem?.categoria || "Opera"}
             </p>
-            <h1 className="hero-title">{currentItem?.titolo}</h1>
+            <h1 className="hero-title">
+              {currentItem?.titolo || "Titolo assente"}
+            </h1>
+            <button
+              className="btn-details-minimal mt-2"
+              onClick={() => setShowDetailsModal(true)}
+              style={{
+                background: "rgba(255,255,255,0.1)",
+                border: "1px solid rgba(255,255,255,0.3)",
+                color: "white",
+                borderRadius: "20px",
+                padding: "4px 15px",
+                fontSize: "0.8rem",
+                backdropFilter: "blur(5px)",
+              }}
+            >
+              <i
+                className="bi bi-info-circle me-2"
+                style={{ color: "#e18f37" }}
+              ></i>
+              Dettagli
+            </button>
           </div>
         </section>
 
@@ -270,9 +318,10 @@ export default function NavigatorItemViewer() {
             <Col xs={12} md={8} lg={6} className="p-0">
               <Card className="card-viewer shadow-none">
                 <Card.Body className="pt-0">
+                  {/* CONFIGURAZIONE */}
                   <div className="config-box mx-3 mb-4">
                     <div
-                      className="d-flex align-items-center justify-content-between cursor-pointer"
+                      className="d-flex align-items-center justify-content-between"
                       onClick={() => setIsConfigOpen(!isConfigOpen)}
                       style={{ cursor: "pointer" }}
                     >
@@ -286,7 +335,6 @@ export default function NavigatorItemViewer() {
                         className={`bi bi-chevron-${isConfigOpen ? "up" : "down"} transition-icon`}
                       ></i>
                     </div>
-
                     <div
                       className={`config-content ${isConfigOpen ? "is-open" : ""}`}
                     >
@@ -295,16 +343,13 @@ export default function NavigatorItemViewer() {
                           Livello di analisi
                         </p>
                         <div className="d-flex gap-2 mb-4">
-                          {["infantile", "medio", "avanzato"].map((level) => (
+                          {["infantile", "medio", "avanzato"].map((l) => (
                             <button
-                              key={level}
-                              className={`btn-difficolta-custom ${languageLevel === level ? "active" : ""}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                updateContent(level, selectedDuration);
-                              }}
+                              key={l}
+                              className={`btn-difficolta-custom ${languageLevel === l ? "active" : ""}`}
+                              onClick={() => updateContent(l, selectedDuration)}
                             >
-                              {level === "infantile" ? "semplice" : level}
+                              {l}
                             </button>
                           ))}
                         </div>
@@ -312,28 +357,31 @@ export default function NavigatorItemViewer() {
                           Durata Audio
                         </p>
                         <div className="d-flex gap-2">
-                          {["3s", "15s", "40s"].map((dur) => (
+                          {["3s", "15s", "40s"].map((d) => (
                             <button
-                              key={dur}
-                              className={`btn-duration-pill ${selectedDuration === dur ? "active" : ""}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                updateContent(languageLevel, dur);
-                              }}
+                              key={d}
+                              className={`btn-duration-pill ${selectedDuration === d ? "active" : ""}`}
+                              onClick={() => updateContent(languageLevel, d)}
                             >
-                              {uiLabels[dur]}
+                              {uiLabels[d]}
                             </button>
                           ))}
                         </div>
                       </div>
                     </div>
                   </div>
-
                   <div className="description-quote mx-3 mt-4">
-                    <p className="m-0">"{currentItem?.descrizione}"</p>
+                    <p className="m-0">
+                      "
+                      {currentItem?.descrizione ||
+                        "Nessuna descrizione disponibile."}
+                      "
+                    </p>
                   </div>
                 </Card.Body>
               </Card>
+
+              {/* PLAYER */}
               <div className="integrated-player-static mx-3">
                 <div className="progress-section">
                   <div className="progress-bar-container">
@@ -345,9 +393,9 @@ export default function NavigatorItemViewer() {
                       value={currentTime}
                       step="0.1"
                       onChange={(e) => {
-                        const time = parseFloat(e.target.value);
-                        audioRef.current.currentTime = time;
-                        setCurrentTime(time);
+                        audioRef.current.currentTime = parseFloat(
+                          e.target.value,
+                        );
                       }}
                     />
                     <div
@@ -362,7 +410,6 @@ export default function NavigatorItemViewer() {
                     <span>{formatTime(duration)}</span>
                   </div>
                 </div>
-
                 <div className="player-controls-row">
                   <button
                     className="btn-item-skip"
@@ -371,30 +418,14 @@ export default function NavigatorItemViewer() {
                   >
                     <i className="bi bi-skip-start"></i>
                   </button>
-                  <button
-                    className="btn-seek"
-                    onClick={() => (audioRef.current.currentTime -= 10)}
+                  <div
+                    className="play-sphere-main"
+                    onClick={() => setIsPlaying(!isPlaying)}
                   >
-                    <i className="bi bi-arrow-counterclockwise"></i>
-                    <span className="seek-val">10</span>
-                  </button>
-                  <div className="play-controls-center">
-                    <div
-                      className="play-sphere-main"
-                      onClick={() => setIsPlaying(!isPlaying)}
-                    >
-                      <i
-                        className={`bi ${isPlaying ? "bi-pause-fill" : "bi-play-fill"}`}
-                      ></i>
-                    </div>
+                    <i
+                      className={`bi ${isPlaying ? "bi-pause-fill" : "bi-play-fill"}`}
+                    ></i>
                   </div>
-                  <button
-                    className="btn-seek"
-                    onClick={() => (audioRef.current.currentTime += 10)}
-                  >
-                    <i className="bi bi-arrow-clockwise"></i>
-                    <span className="seek-val">10</span>
-                  </button>
                   <button
                     className="btn-item-skip"
                     onClick={() => changeItem(safeIndex + 1)}
@@ -404,19 +435,17 @@ export default function NavigatorItemViewer() {
                   </button>
                 </div>
               </div>
-
-              {/* SPACER FINALE PER NON FAR ATTACCARE IL PLAYER AL BORDO INFERIORE */}
               <div className="viewer-bottom-spacer"></div>
             </Col>
           </Row>
         </Container>
       </div>
 
+      {/* BOTTOM NAV */}
       <div className="bottom-nav-viewer">
-        <button className="nav-item">
+        <button className="nav-item" onClick={() => navigate("/mobile")}>
           <i className="bi bi-house-door"></i>
         </button>
-
         <div className="nav-item central">
           <button
             className={`btn-mic-nav ${isListening ? "is-listening" : ""}`}
@@ -425,11 +454,102 @@ export default function NavigatorItemViewer() {
             <i className={`bi ${isListening ? "bi-mic-fill" : "bi-mic"}`}></i>
           </button>
         </div>
-
-        <button className="nav-item">
-          <i className="bi bi-map"></i>
+        <button className="nav-item" onClick={() => setShowAccessMenu(true)}>
+          <i className="bi bi-plus-circle"></i>
         </button>
       </div>
+
+      {/* MODALS */}
+      <Modal
+        show={showDetailsModal}
+        onHide={() => setShowDetailsModal(false)}
+        centered
+        size="sm"
+        className="museum-modal"
+      >
+        <Modal.Body className="museum-modal-content py-4">
+          <div className="text-center mb-3">
+            <i
+              className="bi bi-palette"
+              style={{ fontSize: "2rem", color: "#e18f37" }}
+            ></i>
+          </div>
+          <h6 className="text-uppercase fw-bold mb-3 text-white text-center">
+            Scheda Tecnica
+          </h6>
+          <div className="small text-white opacity-90 px-2">
+            <p className="mb-2">
+              <strong>Autore:</strong> {currentItem?.artista || "Autore Ignoto"}
+            </p>
+            <p className="mb-2">
+              <strong>Periodo/Stile:</strong>{" "}
+              {currentItem?.stile || currentItem?.periodo || "Non disponibile"}
+            </p>
+            <p className="mb-2">
+              <strong>Licenza:</strong>{" "}
+              {typeof currentItem?.licenza === "object"
+                ? currentItem?.licenza?.tipo
+                : currentItem?.licenza || "Creative Commons"}
+            </p>
+            <hr style={{ borderColor: "rgba(255,255,255,0.1)" }} />
+            <p className="mb-0 text-muted" style={{ fontSize: "0.75rem" }}>
+              Testi di: {currentItem?.autore_visita || "Sistema"}
+            </p>
+          </div>
+          <button
+            className="btn-museum-primary w-100 mt-4"
+            onClick={() => setShowDetailsModal(false)}
+          >
+            Chiudi
+          </button>
+        </Modal.Body>
+      </Modal>
+
+      <Modal
+        show={showAccessMenu}
+        onHide={() => setShowAccessMenu(false)}
+        centered
+        className="museum-modal"
+      >
+        <Modal.Body className="museum-modal-content text-center">
+          <h6 className="text-white mb-4 text-uppercase">Assistente</h6>
+          <div className="d-grid gap-2">
+            <button
+              className="btn-museum-outline"
+              onClick={() => {
+                handleSimplify();
+                setShowAccessMenu(false);
+              }}
+            >
+              <i className="bi bi-person-arms-up me-2"></i>Semplifica
+            </button>
+            <button
+              className="btn-museum-outline"
+              onClick={() => {
+                alert(museumConfig?.logistica_globale?.toilette);
+                setShowAccessMenu(false);
+              }}
+            >
+              <i className="bi bi-badge-wc me-2"></i>Bagno
+            </button>
+            <button
+              className="btn-museum-outline"
+              onClick={() => {
+                alert(museumConfig?.logistica_globale?.bar);
+                setShowAccessMenu(false);
+              }}
+            >
+              <i className="bi bi-cup-hot me-2"></i>Bar
+            </button>
+            <button
+              className="btn-museum-primary mt-3"
+              onClick={() => setShowAccessMenu(false)}
+            >
+              Chiudi
+            </button>
+          </div>
+        </Modal.Body>
+      </Modal>
 
       <Modal
         show={showExitModal}
@@ -437,7 +557,7 @@ export default function NavigatorItemViewer() {
         centered
         className="museum-modal"
       >
-        <Modal.Body className="museum-modal-content">
+        <Modal.Body className="museum-modal-content text-center">
           <div className="museum-modal-icon">
             <i className="bi bi-door-open"></i>
           </div>
@@ -451,10 +571,7 @@ export default function NavigatorItemViewer() {
             </button>
             <button
               className="btn-museum-primary"
-              onClick={() => {
-                audioRef.current.pause();
-                navigate(`/visit/${id}`);
-              }}
+              onClick={() => navigate(`/visit/${id}`)}
             >
               Esci
             </button>

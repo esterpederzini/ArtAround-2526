@@ -10,7 +10,6 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
 
-<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg aa-navbar">
   <div class="container-fluid">
     <a class="navbar-brand" href="/">Art<span>Around</span></a>
@@ -37,12 +36,10 @@
 <div class="container-fluid py-4 px-4 flex-grow-1">
   <div class="row g-4">
 
-    <!-- SIDEBAR FILTRI -->
     <div class="col-lg-2 col-md-3">
       <div class="aa-sidebar">
         <div class="aa-sidebar-title"><i class="bi bi-funnel"></i> Filtri</div>
 
-        <!-- Museo -->
         <div class="mb-3">
           <div class="aa-sidebar-title" style="font-size:0.7rem">Museo</div>
           <div id="filtroMusei">
@@ -52,19 +49,17 @@
 
         <div class="divider"></div>
 
-        <!-- Linguaggio -->
         <div class="mb-3">
           <div class="aa-sidebar-title" style="font-size:0.7rem">Linguaggio</div>
           <button class="aa-filter-btn active" data-lang="">Tutti</button>
-          <button class="aa-filter-btn" data-lang="elementare">Elementare</button>
-          <button class="aa-filter-btn" data-lang="intermedio">Intermedio</button>
+          <button class="aa-filter-btn" data-lang="infantile">Infantile</button>
+          <button class="aa-filter-btn" data-lang="medio">Medio</button>
           <button class="aa-filter-btn" data-lang="avanzato">Avanzato</button>
           <button class="aa-filter-btn" data-lang="specialistico">Specialistico</button>
         </div>
 
         <div class="divider"></div>
 
-        <!-- Prezzo -->
         <div class="mb-3">
           <div class="aa-sidebar-title" style="font-size:0.7rem">Prezzo</div>
           <button class="aa-filter-btn active" data-prezzo="">Tutti</button>
@@ -74,7 +69,6 @@
 
         <div class="divider"></div>
 
-        <!-- Categoria -->
         <div class="mb-3">
           <div class="aa-sidebar-title" style="font-size:0.7rem">Categoria</div>
           <button class="aa-filter-btn active" data-cat="">Tutte</button>
@@ -92,7 +86,6 @@
         </button>
       </div>
 
-      <!-- Log Vendite (solo autori) -->
       <div class="aa-sidebar mt-3 d-none" id="sidebarLog">
         <div class="aa-sidebar-title"><i class="bi bi-receipt"></i> Log Vendite</div>
         <button class="btn-aa-outline w-100" style="font-size:0.8rem" onclick="apriLogModal()">
@@ -101,10 +94,8 @@
       </div>
     </div>
 
-    <!-- CONTENUTO PRINCIPALE -->
     <div class="col-lg-10 col-md-9">
 
-      <!-- TABS -->
       <div class="aa-tabs" id="tabsMain">
         <button class="aa-tab active" data-tab="items" onclick="switchTab('items', this)">
           <i class="bi bi-collection"></i> Catalogo Item
@@ -117,11 +108,10 @@
         </button>
       </div>
 
-      <!-- BARRA RICERCA -->
       <div class="d-flex gap-2 mb-4 flex-wrap align-items-center">
         <div class="aa-search-wrap flex-grow-1">
           <i class="bi bi-search search-icon"></i>
-          <input type="text" id="campoCerca" class="aa-input" placeholder="Cerca per titolo, autore, opera ID...">
+          <input type="text" id="campoCerca" class="aa-input" placeholder="Cerca per titolo, artista, stile o autore visita...">
         </div>
         <select id="selectLimit" class="aa-select" style="width:auto">
           <option value="12">12/pag</option>
@@ -133,7 +123,6 @@
         </a>
       </div>
 
-      <!-- TAB: ITEMS -->
       <div id="tabItems">
         <div id="itemsGrid" class="row g-3">
           <div class="col-12 text-center py-5"><div class="aa-spinner"></div> Caricamento...</div>
@@ -141,7 +130,6 @@
         <div id="paginazioneItems" class="aa-pagination"></div>
       </div>
 
-      <!-- TAB: VISITE -->
       <div id="tabVisite" class="d-none">
         <div class="aa-section-header">
           <div></div>
@@ -155,7 +143,6 @@
         <div id="paginazioneVisite" class="aa-pagination"></div>
       </div>
 
-      <!-- TAB: MIEI CONTENUTI -->
       <div id="tabMiei" class="d-none">
         <div id="mieiContenuti">
           <div class="aa-empty">
@@ -171,7 +158,6 @@
   </div>
 </div>
 
-<!-- MODAL DETTAGLIO ITEM -->
 <div id="itemModal" class="aa-modal-overlay d-none">
   <div class="aa-modal" style="max-width:640px">
     <div class="aa-modal-header">
@@ -183,7 +169,6 @@
   </div>
 </div>
 
-<!-- MODAL LOG VENDITE -->
 <div id="logModal" class="aa-modal-overlay d-none">
   <div class="aa-modal" style="max-width:780px">
     <div class="aa-modal-header">

@@ -1,6 +1,15 @@
 {
-  "museumName": "Museo Egizio di Torino",
-  "appName": "ArtAround",
-  "heroImage": "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?q=80&w=2070",
-  "motto": "I segreti dei Faraoni a portata di mano."
+  "museo": "Museo Egizio di Torino",
+  "logoUrl": "/mobile/img/logo-egizio.png",
+  "colori": {
+    "primario": "#b38b4d",
+    "secondario": "#2c2c2c"
+  },
+  "logistica_globale": {
+    "uscita": "L'uscita si trova al piano terra, superando lo shop.",
+    "toilette": "I servizi igienici sono disponibili ad ogni piano, vicino agli ascensori.",
+    "bar": "Il bar caffetteria è situato al piano -1.",
+    "shop": "Il bookshop è all'ingresso principale.",
+    "emergenza": "Seguire le luci verdi verso le scale di sicurezza."
+  }
 }

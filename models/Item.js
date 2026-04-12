@@ -16,12 +16,17 @@ const itemSchema = new mongoose.Schema(
     titolo: { type: String, required: true, trim: true },
     descrizione: { type: String, required: true },
     audioUrl: { type: String, default: "" },
-    autore: { type: String, required: true, trim: true },
-
-    // AGGIUNTO/MODIFICATO: Allineato al campo 'url' che hai su Atlas
+    autore_visita: { type: String, required: true },
+    stile: {
+      type: String,
+      required: false,
+      trim: true,
+      default: "Periodo storico non specificato",
+    },
+    artista: { type: String, default: "Ignoto" }, // L'antico egizio che ha scolpito
+    periodo: { type: String },
     url: { type: String, default: null },
     immagine: { type: String, default: null }, // Manteniamo immagine per compatibilità
-
     lunghezza: {
       type: String,
       // Allineato ai tuoi dati: "3s", "15s", "40s"
