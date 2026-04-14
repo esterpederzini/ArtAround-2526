@@ -30,6 +30,7 @@ export default function NavigatorItemViewer() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showAccessMenu, setShowAccessMenu] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
+  const recognitionRef = useRef(null);
 
   const [uiLabels, setUiLabels] = useState({
     "3s": "3s",
@@ -41,228 +42,276 @@ export default function NavigatorItemViewer() {
   const [duration, setDuration] = useState(0);
 
   const audioRef = useRef(new Audio());
+  const ttsIntervalRef = useRef(null); // Per gestire il progresso della sintesi vocale
 
-  // --- 1. INITIAL FETCH ---
+  // --- FETCH INIZIALE ---
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
     setIsPlaying(false);
-    setUiLabels({ "3s": "3s", "15s": "15s", "40s": "40s" });
 
-    // Configurazione Museo
     fetch("/api/config")
       .then((res) => res.json())
       .then((data) => {
         if (isMounted) setMuseumConfig(data);
-      })
-      .catch((err) => console.error("Errore config:", err));
+      });
 
-    // Dati Visita
     fetch(`/api/visite/${id}`)
       .then((res) => res.json())
       .then((json) => {
         if (!isMounted) return;
         if (json.successo && json.data) {
           setVisit(json.data);
-          const stops = json.data.tappe ?? [];
-          const defaultItem = stops[safeIndex]?.item_default;
+          const defaultItem = json.data.tappe?.[safeIndex]?.item_default;
           if (defaultItem) {
             setCurrentItem(defaultItem);
             setLanguageLevel(defaultItem.linguaggio || "medio");
             setSelectedDuration(defaultItem.lunghezza || "15s");
-            if (defaultItem.durata_reale) {
-              setUiLabels((prev) => ({
-                ...prev,
-                [defaultItem.lunghezza]: `${defaultItem.durata_reale}s`,
-              }));
-            }
-            setIsPlaying(true);
           }
         }
         setLoading(false);
       })
-      .catch(() => {
-        if (isMounted) setLoading(false);
-      });
+      .catch(() => setLoading(false));
 
     return () => {
       isMounted = false;
     };
   }, [id, safeIndex]);
 
-  // --- 2. UPDATE CONTENT ---
+  // --- GESTIONE LOGICA AUDIO E SINTESI ---
+  useEffect(() => {
+    const audio = audioRef.current;
+
+    // Reset totale ad ogni cambio item o stato
+    window.speechSynthesis.cancel();
+    clearInterval(ttsIntervalRef.current);
+
+    if (!isPlaying) {
+      audio.pause();
+      return;
+    }
+
+    if (currentItem?.audioUrl) {
+      // CASO A: File audio presente
+      audio.src = currentItem.audioUrl;
+      audio.play().catch((e) => console.log("Autoplay blocked", e));
+
+      const upMeta = () => setDuration(audio.duration);
+      const upTime = () => setCurrentTime(audio.currentTime);
+      const onEnd = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+      };
+
+      audio.addEventListener("loadedmetadata", upMeta);
+      audio.addEventListener("timeupdate", upTime);
+      audio.addEventListener("ended", onEnd);
+
+      return () => {
+        audio.removeEventListener("loadedmetadata", upMeta);
+        audio.removeEventListener("timeupdate", upTime);
+        audio.removeEventListener("ended", onEnd);
+      };
+    } else if (currentItem?.descrizione) {
+      // CASO B: Solo testo (Sintesi Vocale)
+      const utterance = new SpeechSynthesisUtterance(currentItem.descrizione);
+      utterance.lang = "it-IT";
+
+      // Simuliamo una durata basata sulla lunghezza del testo (circa 15 caratteri al secondo)
+      const estimatedDuration = currentItem.descrizione.length / 15;
+      setDuration(estimatedDuration);
+      setCurrentTime(0);
+
+      utterance.onend = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+        clearInterval(ttsIntervalRef.current);
+      };
+
+      window.speechSynthesis.speak(utterance);
+
+      // Facciamo avanzare la barra di progresso manualmente
+      ttsIntervalRef.current = setInterval(() => {
+        setCurrentTime((prev) => {
+          if (prev >= estimatedDuration) {
+            clearInterval(ttsIntervalRef.current);
+            return estimatedDuration;
+          }
+          return prev + 0.5;
+        });
+      }, 500);
+    }
+  }, [currentItem, isPlaying]);
+
+  // --- HELPER NAVIGAZIONE ---
+  const changeItem = (newIndex) => {
+    if (visit && newIndex >= 0 && newIndex < visit.tappe.length) {
+      // Fermiamo l'audio attuale prima di cambiare
+      setIsPlaying(false);
+      // Navighiamo alla nuova tappa
+      navigate(`/visit/${id}/${newIndex}`);
+      // Nota: l'autoplay effettivo avverrà grazie allo useEffect qui sotto
+    }
+  };
+
   const updateContent = async (newLevel, newDuration) => {
-    if (!visit?.tappe?.[safeIndex]) return;
-    setIsPlaying(false);
-    const operaId = visit.tappe[safeIndex].operaId;
+    const operaId = visit?.tappe?.[safeIndex]?.operaId;
+    if (!operaId) return;
 
     try {
-      const url = `/api/items?operaId=${operaId}&linguaggio=${newLevel}&lunghezza=${newDuration}&pubblicato=tutti`;
-      const response = await fetch(url);
-      const json = await response.json();
-
+      const res = await fetch(
+        `/api/items?operaId=${operaId}&linguaggio=${newLevel}&lunghezza=${newDuration}`,
+      );
+      const json = await res.json();
       if (json.successo && json.data.items.length > 0) {
-        const newItem = json.data.items[0];
-        setCurrentItem(newItem);
+        setCurrentItem(json.data.items[0]);
         setLanguageLevel(newLevel);
         setSelectedDuration(newDuration);
-        if (newItem.durata_reale) {
-          setUiLabels((prev) => ({
-            ...prev,
-            [newDuration]: `${newItem.durata_reale}s`,
-          }));
-        }
-        setCurrentTime(0);
-        setTimeout(() => setIsPlaying(true), 100);
-      } else {
-        alert("Combinazione non disponibile.");
+        setIsPlaying(true);
       }
     } catch (err) {
       console.error(err);
     }
   };
 
-  // --- 3. VOICE LOGIC & HELPERS ---
-  const handleSimplify = () => {
-    let newLevel =
-      languageLevel === "avanzato"
-        ? "medio"
-        : languageLevel === "medio"
-          ? "infantile"
-          : "infantile";
-    if (newLevel !== languageLevel) updateContent(newLevel, selectedDuration);
-    else alert("Versione più semplice già attiva.");
-  };
-
-  const toggleListening = () => {
-    if (!recognition) return alert("Riconoscimento vocale non supportato.");
-    if (isListening) {
-      recognition.stop();
-      setIsListening(false);
-    } else {
-      setIsPlaying(false);
-      setIsListening(true);
-      recognition.start();
+  useEffect(() => {
+    // Se l'item è stato caricato correttamente, avvia la riproduzione
+    if (currentItem) {
+      setIsPlaying(true);
     }
-  };
+  }, [currentItem]);
 
-  const changeItem = (newIndex) => {
-    setIsPlaying(false);
-    if (visit && newIndex >= 0 && newIndex < (visit.tappe?.length ?? 0)) {
-      navigate(`/visit/${id}/${newIndex}`);
-      window.scrollTo(0, 0);
-    }
-  };
-
-  // --- VOICE COMMAND LOGIC (VOCABOLARIO CONTROLLATO) ---
+  // --- COMANDI VOCALI ---
   useEffect(() => {
     if (!recognition) return;
 
-    recognition.onresult = (event) => {
-      const command = event.results[0][0].transcript.toLowerCase();
-      console.log("Comando ricevuto:", command);
+    // IMPORTANTE: Collega l'istanza globale al riferimento del componente
+    recognitionRef.current = recognition;
 
-      // --- NAVIGAZIONE ---
-      if (command.includes("avanti") || command.includes("prossimo")) {
+    recognition.onresult = (event) => {
+      const cmd = event.results[0][0].transcript.toLowerCase();
+      console.log("Comando vocale ricevuto:", cmd);
+
+      // 1. NAVIGAZIONE TRA OPERE
+      if (cmd.includes("prossimo") || cmd.includes("avanti")) {
         changeItem(safeIndex + 1);
-      } else if (
-        command.includes("indietro") ||
-        command.includes("precedente")
-      ) {
+      }
+      if (cmd.includes("precedente") || cmd.includes("indietro")) {
         changeItem(safeIndex - 1);
       }
 
-      // --- LIVELLO DI DETTAGLIO ---
-      else if (
-        command.includes("di più") ||
-        command.includes("approfondisci")
+      // 2. NAVIGAZIONE VERSO LA MAPPA (Nuovo!)
+      if (
+        cmd.includes("mappa") ||
+        cmd.includes("dove si trova") ||
+        cmd.includes("posizione")
       ) {
-        if (selectedDuration === "3s") updateContent(languageLevel, "15s");
-        else if (selectedDuration === "15s")
-          updateContent(languageLevel, "40s");
-      } else if (command.includes("di meno") || command.includes("riduci")) {
-        if (selectedDuration === "40s") updateContent(languageLevel, "15s");
-        else if (selectedDuration === "15s") updateContent(languageLevel, "3s");
+        navigate(`/visit/${id}/item/${safeIndex}/map`);
       }
 
-      // --- COMPRENSIONE E SEMPLIFICAZIONE (LOGICA STEP-DOWN) ---
-      else if (
-        command.includes("non capisco") ||
-        command.includes("più semplice")
+      // 3. CONTROLLO LIVELLO E LINGUAGGIO
+      if (cmd.includes("più semplice") || cmd.includes("non capisco")) {
+        const levels = ["infantile", "medio", "avanzato"];
+        const idx = levels.indexOf(languageLevel);
+        if (idx > 0) updateContent(levels[idx - 1], selectedDuration);
+      }
+
+      if (cmd.includes("dimmi di più") || cmd.includes("approfondisci")) {
+        const durations = ["3s", "15s", "40s"];
+        const idx = durations.indexOf(selectedDuration);
+        if (idx < durations.length - 1) {
+          updateContent(languageLevel, durations[idx + 1]);
+        }
+      }
+
+      // 4. CONTROLLO DEL PLAYER AUDIO
+      if (cmd.includes("ferma") || cmd.includes("pausa")) {
+        setIsPlaying(false);
+      }
+      if (
+        cmd.includes("riprendi") ||
+        cmd.includes("play") ||
+        cmd.includes("continua")
       ) {
-        handleSimplify();
+        setIsPlaying(true);
       }
 
-      // --- METADATI ---
-      else if (command.includes("autore") || command.includes("artista")) {
-        setShowDetailsModal(true); // È meglio aprire il modal che un alert
-      }
-
-      // --- LOGISTICA ---
-      else if (command.includes("uscita") || command.includes("esci")) {
-        setShowExitModal(true);
-      } else if (command.includes("toilette") || command.includes("bagno")) {
+      // 5. INFORMAZIONI LOGISTICHE (dal config.json)
+      if (cmd.includes("bagno") || cmd.includes("toilette")) {
         alert(
           museumConfig?.logistica_globale?.toilette ||
-            "Informazione non disponibile.",
+            "Informazione non disponibile",
         );
-      } else if (command.includes("bar") || command.includes("shop")) {
+      }
+      if (cmd.includes("uscita")) {
+        alert(
+          museumConfig?.logistica_globale?.uscita ||
+            "Segui le indicazioni per l'uscita principale",
+        );
+      }
+      if (cmd.includes("bar")) {
         alert(
           museumConfig?.logistica_globale?.bar ||
-            "Informazione non disponibile.",
+            "Il bar si trova al piano terra",
+        );
+      }
+
+      // 6. METADATI E DETTAGLI OPERA
+      if (cmd.includes("chi è l'autore") || cmd.includes("chi è l'artista")) {
+        alert(`L'autore è ${currentItem?.artista || "sconosciuto"}`);
+      }
+      if (cmd.includes("periodo") || cmd.includes("quando è stato fatto")) {
+        alert(
+          `L'opera risale al periodo: ${currentItem?.periodo || "non specificato"}`,
+        );
+      }
+
+      // 7. AIUTO
+      if (cmd.includes("aiuto") || cmd.includes("cosa posso dire")) {
+        alert(
+          "Puoi dire: avanti, indietro, mappa, più semplice, dimmi di più, pausa, riprendi, o chiedere del bagno e del periodo.",
         );
       }
     };
 
-    recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => {
+      setIsListening(false);
+    };
 
-    // CRITICO: lo useEffect deve ricaricarsi quando cambiano questi stati
-    // per avere i valori aggiornati dentro la callback onresult
-  }, [safeIndex, languageLevel, selectedDuration, currentItem, museumConfig]);
+    // Aggiungiamo tutte le variabili che servono all'interno della funzione per evitare dati "vecchi"
+  }, [
+    safeIndex,
+    languageLevel,
+    selectedDuration,
+    currentItem,
+    museumConfig,
+    navigate,
+    id,
+  ]);
 
-  // --- 4. AUDIO SYNC ---
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (currentItem?.audioUrl) {
-      audio.pause();
-      audio.src = currentItem.audioUrl;
-      audio.load();
-      const setMeta = () => setDuration(audio.duration);
-      const upTime = () => setCurrentTime(audio.currentTime);
-      const onEnd = () => {
-        setIsPlaying(false);
-        setCurrentTime(0);
-      };
-      audio.addEventListener("loadedmetadata", setMeta);
-      audio.addEventListener("timeupdate", upTime);
-      audio.addEventListener("ended", onEnd);
-      if (isPlaying && !isListening) audio.play().catch(() => {});
-      return () => {
-        audio.removeEventListener("loadedmetadata", setMeta);
-        audio.removeEventListener("timeupdate", upTime);
-        audio.removeEventListener("ended", onEnd);
-      };
+  const formatTime = (seconds) => {
+    if (!seconds || isNaN(seconds)) return "0:00";
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      // DISATTIVA AUDIO PRIMA DI ASCOLTARE [cite: 718]
+      setIsPlaying(false);
+
+      try {
+        recognitionRef.current?.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error("Errore attivazione riconoscimento vocale:", err);
+      }
     }
-  }, [currentItem, isListening]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (isPlaying && !isListening) audio.play().catch(() => {});
-    else audio.pause();
-  }, [isPlaying, isListening]);
-
-  const formatTime = (t) =>
-    `${Math.floor(t / 60)}:${Math.floor(t % 60)
-      .toString()
-      .padStart(2, "0")}`;
-
-  if (loading)
-    return (
-      <div className="vh-100 d-flex justify-content-center align-items-center bg-dark text-white">
-        <Spinner animation="border" />
-      </div>
-    );
+  };
 
   return (
     <div className="navigator-viewer-layout">
@@ -482,8 +531,11 @@ export default function NavigatorItemViewer() {
               <strong>Autore:</strong> {currentItem?.artista || "Autore Ignoto"}
             </p>
             <p className="mb-2">
-              <strong>Periodo/Stile:</strong>{" "}
-              {currentItem?.stile || currentItem?.periodo || "Non disponibile"}
+              <strong>Periodo:</strong>{" "}
+              {currentItem?.periodo || "Non specificato"}
+            </p>
+            <p className="mb-2">
+              <strong>Stile:</strong> {currentItem?.stile || "Non specificato"}
             </p>
             <p className="mb-2">
               <strong>Licenza:</strong>{" "}

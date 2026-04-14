@@ -293,7 +293,7 @@ exports.getVisitaById = async (req, res) => {
         path: "tappe.item_default",
         model: "Item",
         select:
-          "titolo operaId lunghezza linguaggio url descrizione autore categoria prezzo licenza audioUrl",
+          "titolo operaId lunghezza linguaggio url descrizione autore categoria prezzo licenza audioUrl periodo stile mappa_x mappa_y piano",
       });
 
     if (!visita) return risposta(res, 404, null, "Visita non trovata");
