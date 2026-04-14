@@ -4,13 +4,41 @@
 
 // ─── INIT ────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+  // Se non è un autore, fermiamo tutto e mostriamo il messaggio
   if (!richiedeAutore()) {
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 600);
-    return;
+    const container = document.querySelector('.container') || document.querySelector('.container-fluid');
+    
+    if (container) {
+      container.innerHTML = `
+        <div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+          <div class="col-md-8 col-lg-6 text-center">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">🎨</div>
+            <h2 style="color: var(--aa-gold); font-family: 'Playfair Display', serif;">
+              L'ispirazione ha bussato, ma serve il pass!
+            </h2>
+            <p class="lead mt-3 text-slate">
+              Attualmente stai esplorando ArtAround come <strong>Visitatore</strong>.
+            </p>
+            <p class="mb-4">
+              Solo gli utenti con il ruolo di <strong>Autore</strong> possono scolpire nuovi contenuti, progettare percorsi museali e condividerli con la community.
+            </p>
+            <div class="aa-card p-4 mb-4 text-center" style="background: var(--aa-cream); border: 1px dashed var(--aa-gold);">
+              <i class="bi bi-lightbulb text-gold fs-4 mb-2 d-block"></i>
+              <small>
+                Vuoi diventare un creatore? Contatta l'amministratore del museo per richiedere l'upgrade del tuo account e iniziare a plasmare la cultura!
+              </small>
+            </div>
+            <a href="/dashboard" class="btn-aa-primary mt-2">
+              <i class="bi bi-arrow-left"></i> Torna alla Dashboard
+            </a>
+          </div>
+        </div>
+      `;
+    }
+    return; // Interrompe il caricamento del resto della pagina
   }
 
+  // ... (Da qui in giù lascia il resto del codice originale: caricaAutori(), ecc.)
   await caricaAutori();
   await caricaMuseiDatalist();
 

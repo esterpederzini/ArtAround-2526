@@ -74,24 +74,18 @@
               Scopri contenuti audio per ogni livello: dai percorsi per bambini
               alle analisi per esperti. Crea la tua guida personalizzata o
               adotta i contenuti della community.
-            </p>
-            <div class="d-flex gap-3 mt-4 flex-wrap">
-              <a href="/dashboard" class="btn-aa-gold">
-                <i class="bi bi-grid-3x3-gap"></i> Vai al Marketplace
-              </a>
-              <a
-                href="/editor-visita"
-                id="btnCreaVisitaHero"
-                class="btn-aa-outline"
-                onclick="return vaiAEditorVisita(event);"
-                style="
-                  color: var(--aa-cream);
-                  border-color: rgba(255, 255, 255, 0.25);
-                "
-              >
-                <i class="bi bi-plus-circle"></i> Crea Visita
-              </a>
-            </div>
+            </p>  
+              <div class="d-flex gap-3 mt-4 flex-wrap" style="position: relative; z-index: 10;">
+              
+                <a href="/dashboard" class="btn-aa-gold">
+                  <i class="bi bi-search"></i> Esplora Catalogo
+                </a>
+              
+                <a href="/editor-visita" class="btn-aa-outline"
+                  style="color: var(--aa-cream); border-color: rgba(255, 255, 255, 0.25);">
+                  <i class="bi bi-plus-circle"></i> Crea Visita
+                </a>              
+              </div>
           </div>
           <div class="col-lg-5 d-none d-lg-block text-end">
             <div style="font-size: 9rem; opacity: 0.12; line-height: 1">🏛️</div>
@@ -256,7 +250,7 @@
           <div class="col-md-4">
             <div class="aa-visita-card">
               <div class="vcard-header">
-                <h5>${v.titolo}</h5>
+                <h5>${v.title}</h5>
                 <small style="opacity:0.65">${v.museo}</small>
               </div>
               <div class="vcard-body">
@@ -271,8 +265,9 @@
                      .join("")}
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                  <span class="${v.prezzo === 0 ? "aa-badge aa-badge-free" : "aa-price"}">
-                    ${v.prezzo === 0 ? "Gratuita" : "€" + v.prezzo.toFixed(2)}
+                  <span class="${v.prezzo ? "aa-price" : "aa-badge aa-badge-free"}">
+                      ${v.prezzo ? "€" + v.prezzo.toFixed(2) : "Gratuita"}
+                    </span>
                   </span>
                   <span class="text-slate small">${(v.tappe || []).length} tappe</span>
                 </div>
@@ -302,6 +297,7 @@
         });
         if (data) {
           localStorage.setItem("aa_utente", JSON.stringify(data.user || data));
+          localStorage.setItem("aa_token", data.token);
           chiudiLogin();
           aggiornaUtenteUI();
           showToast(`Benvenuto!`, "success");

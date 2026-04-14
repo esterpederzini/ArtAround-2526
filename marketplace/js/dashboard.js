@@ -300,6 +300,82 @@ async function acquistaItem(itemId) {
   }
 }
 
+// ─── MODAL VISITA DETTAGLIO ────────────────────────────
+async function apriVisitaModal(id) {
+  const modal = document.getElementById("visitaModal");
+  modal.classList.remove("d-none");
+  document.getElementById("modalVisitaTitolo").textContent = "Caricamento…";
+  document.getElementById("modalVisitaBody").innerHTML = '<div class="text-center py-4"><div class="aa-spinner"></div></div>';
+  document.getElementById("modalVisitaFooter").innerHTML = "";
+
+  // Scarica i dettagli completi della visita dal server
+  const v = await apiFetch(`/api/visite/${id}`);
+  if (!v) {
+    modal.classList.add("d-none");
+    return;
+  }
+
+  document.getElementById("modalVisitaTitolo").textContent = v.titolo || v.title || "Visita";
+
+  // Costruisce la lista delle tappe del percorso
+  let tappeHtml = '<em class="text-slate small">Nessuna tappa inserita nel percorso.</em>';
+  if (v.tappe && v.tappe.length > 0) {
+    tappeHtml = v.tappe.map(t => {
+      // Il backend invia l'item "popolato" con titolo e operaId
+      const infoItem = t.item_default || {}; 
+      const nomeTappa = infoItem.titolo || "Tappa inesistente";
+      const idOpera = infoItem.operaId || "";
+      return `<div class="d-flex align-items-center gap-2 mb-2 p-2 rounded" style="background:var(--aa-cream)">
+                <span class="aa-badge aa-badge-len" style="background:white">${t.ordine}</span>
+                <div class="flex-grow-1" style="font-size:0.85rem">
+                  <strong>${nomeTappa}</strong> <span class="text-slate mx-1">·</span> <small>${idOpera}</small>
+                </div>
+                ${t.opzionale ? '<span style="font-size:0.7rem; color:var(--aa-slate)">Opzionale</span>' : ''}
+              </div>`;
+    }).join('');
+  }
+
+  // Costruisce il corpo del Modal
+  document.getElementById("modalVisitaBody").innerHTML = `
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <span class="aa-badge aa-badge-len">🏛️ ${v.museo || "Nessun museo"}</span>
+      <span class="aa-badge aa-badge-len"><i class="bi bi-clock"></i> ~${v.durataTotaleStimata || 60} min</span>
+    </div>
+    <p style="line-height:1.7">${v.descrizione || "Nessuna descrizione disponibile."}</p>
+    <div class="divider"></div>
+    <div class="row g-2 text-sm mb-3">
+      <div class="col-6"><span class="aa-label">Autore</span><div>${v.creatorId?.username || "–"}</div></div>
+      <div class="col-6"><span class="aa-label">Licenza</span><div>${v.licenza?.tipo || "–"}</div></div>
+    </div>
+    ${v.tags?.length ? `<div class="mb-3">${v.tags.map(t => `<span class="aa-badge aa-badge-len me-1">${t}</span>`).join("")}</div>` : ""}
+    
+    <div class="aa-sidebar-title mt-4" style="font-size: 0.72rem"><i class="bi bi-geo-alt"></i> Percorso della visita</div>
+    <div style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+        ${tappeHtml}
+    </div>
+  `;
+
+  // Costruisce i bottoni in basso (Footer)
+  const u = getUtenteCorrente();
+  let footerHtml = `<button class="btn-aa-outline" onclick="chiudiVisitaModal()">Chiudi</button>`;
+
+  footerHtml += `<button class="btn-aa-primary" onclick="adottaVisita('${v._id}'); chiudiVisitaModal();">
+    <i class="bi bi-bookmark-plus"></i> Adotta ${v.prezzo ? '€' + Number(v.prezzo).toFixed(2) : 'Gratis'}
+  </button>`;
+
+  if (u && (u._id === v.creatorId?._id || u._id === v.creatorId)) {
+    footerHtml += `<a href="/editor-visita?id=${v._id}" class="btn-aa-outline">
+      <i class="bi bi-pencil"></i> Modifica
+    </a>`;
+  }
+
+  document.getElementById("modalVisitaFooter").innerHTML = footerHtml;
+}
+
+function chiudiVisitaModal() {
+  document.getElementById("visitaModal").classList.add("d-none");
+}
+
 // ─── TAB VISITE ──────────────────────────────────────
 async function caricaVisiteTab(pagina = stato.paginaVisite) {
   stato.paginaVisite = pagina;
@@ -330,31 +406,31 @@ async function caricaVisiteTab(pagina = stato.paginaVisite) {
 }
 
 function renderVisitaCard(v) {
-  const itemsObbligatori = v.items?.filter((i) => !i.opzionale).length || 0;
-  const itemsOpzionali = v.items?.filter((i) => i.opzionale).length || 0;
+  const itemsObbligatori = v.tappe?.filter((i) => !i.opzionale).length || v.items?.filter((i) => !i.opzionale).length || 0;
+  const itemsOpzionali = v.tappe?.filter((i) => i.opzionale).length || v.items?.filter((i) => i.opzionale).length || 0;
 
   return `
     <div class="col-md-6 col-xl-4">
-      <div class="aa-visita-card">
+      <div class="aa-visita-card" style="cursor:pointer" onclick="apriVisitaModal('${v._id}')">
         <div class="vcard-header">
-          <h5>${v.titolo}</h5>
-          <small style="opacity:0.65">${v.museo}</small>
+          <h5>${v.titolo || v.title || "Visita Senza Nome"}</h5>
+          <small style="opacity:0.65">${v.museo || "Nessun museo"}</small>
         </div>
         <div class="vcard-body">
-          <p class="small text-slate mb-3" style="line-height:1.5">${v.descrizione || "Nessuna descrizione."}</p>
+          <p class="small text-slate mb-3" style="line-height:1.5">${(v.descrizione || "Nessuna descrizione.").substring(0, 100)}...</p>
           <div class="d-flex gap-3 mb-3 text-slate" style="font-size:0.8rem">
-            <span><i class="bi bi-list-ol"></i> ${itemsObbligatori} obbligatori</span>
-            <span><i class="bi bi-dash-circle"></i> ${itemsOpzionali} opzionali</span>
-            <span><i class="bi bi-clock"></i> ~${v.durataTotaleStimata} min</span>
+            <span><i class="bi bi-list-ol"></i> ${itemsObbligatori} obb.</span>
+            <span><i class="bi bi-dash-circle"></i> ${itemsOpzionali} opz.</span>
+            <span><i class="bi bi-clock"></i> ~${v.durataTotaleStimata || 60} min</span>
           </div>
           ${v.tags?.length ? `<div class="mb-3">${v.tags.map((t) => `<span class="aa-badge aa-badge-len">${t}</span>`).join("")}</div>` : ""}
           <div class="d-flex justify-content-between align-items-center">
             ${badgePrezzo(v.prezzo)}
             <div class="d-flex gap-1">
-              <button class="btn-aa-outline" style="font-size:0.78rem;padding:0.3rem 0.7rem" onclick="adottaVisita('${v._id}')">
+              <button class="btn-aa-outline" style="font-size:0.78rem;padding:0.3rem 0.7rem" onclick="event.stopPropagation(); adottaVisita('${v._id}')">
                 <i class="bi bi-bookmark-plus"></i> Adotta
               </button>
-              <a href="/editor-visita?id=${v._id}" class="btn-aa-outline" style="font-size:0.78rem;padding:0.3rem 0.7rem">
+              <a href="/editor-visita?id=${v._id}" class="btn-aa-outline" style="font-size:0.78rem;padding:0.3rem 0.7rem" onclick="event.stopPropagation()">
                 <i class="bi bi-pencil"></i>
               </a>
             </div>
