@@ -31,6 +31,8 @@ export default function NavigatorItemViewer() {
   const [showAccessMenu, setShowAccessMenu] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const recognitionRef = useRef(null);
+  const [logisticsMsg, setLogisticsMsg] = useState("");
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   const [uiLabels, setUiLabels] = useState({
     "3s": "3s",
@@ -43,6 +45,40 @@ export default function NavigatorItemViewer() {
 
   const audioRef = useRef(new Audio());
   const ttsIntervalRef = useRef(null); // Per gestire il progresso della sintesi vocale
+
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [selectedMapFloor, setSelectedMapFloor] = useState(
+    currentItem?.piano || "0",
+  );
+
+  const showLogistics = (msg) => {
+    setLogisticsMsg(msg);
+    // Requisito base: la logistica dovrebbe essere anche udibile
+    const utterance = new SpeechSynthesisUtterance(msg);
+    utterance.lang = "it-IT";
+    window.speechSynthesis.speak(utterance);
+
+    // Scompare dopo 5 secondi
+    setTimeout(() => setLogisticsMsg(""), 5000);
+  };
+
+  const handleLogistics = (msg) => {
+    if (!msg) return;
+    setLogisticsMsg(msg);
+
+    // Sintesi vocale (opzionale ma consigliata per il base)
+    const utterance = new SpeechSynthesisUtterance(msg);
+    utterance.lang = "it-IT";
+    window.speechSynthesis.speak(utterance);
+
+    // Scompare dopo 5 secondi
+    setTimeout(() => setLogisticsMsg(""), 5000);
+  };
+
+  // Aggiorna il piano visualizzato quando cambia l'opera
+  useEffect(() => {
+    if (currentItem?.piano) setSelectedMapFloor(currentItem.piano);
+  }, [currentItem]);
 
   // --- FETCH INIZIALE ---
   useEffect(() => {
@@ -206,7 +242,13 @@ export default function NavigatorItemViewer() {
         cmd.includes("dove si trova") ||
         cmd.includes("posizione")
       ) {
-        navigate(`/visit/${id}/item/${safeIndex}/map`);
+        // Invece di navigate(...), apriamo il Modal
+        setShowMapModal(true);
+
+        // Opzionale: facciamo in modo che mostri subito il piano dell'opera attuale
+        if (currentItem?.piano) {
+          setSelectedMapFloor(currentItem.piano);
+        }
       }
 
       // 3. CONTROLLO LIVELLO E LINGUAGGIO
@@ -236,41 +278,43 @@ export default function NavigatorItemViewer() {
         setIsPlaying(true);
       }
 
-      // 5. INFORMAZIONI LOGISTICHE (dal config.json)
+      // 5. INFORMAZIONI LOGISTICHE (COMANDI VOCALI)
       if (cmd.includes("bagno") || cmd.includes("toilette")) {
-        alert(
+        handleLogistics(
           museumConfig?.logistica_globale?.toilette ||
             "Informazione non disponibile",
         );
       }
       if (cmd.includes("uscita")) {
-        alert(
+        handleLogistics(
           museumConfig?.logistica_globale?.uscita ||
             "Segui le indicazioni per l'uscita principale",
         );
       }
       if (cmd.includes("bar")) {
-        alert(
+        handleLogistics(
           museumConfig?.logistica_globale?.bar ||
             "Il bar si trova al piano terra",
         );
       }
 
-      // 6. METADATI E DETTAGLI OPERA
+      // 6. METADATI (Sostituisci alert con handleLogistics se vuoi coerenza visiva)
       if (cmd.includes("chi è l'autore") || cmd.includes("chi è l'artista")) {
-        alert(`L'autore è ${currentItem?.artista || "sconosciuto"}`);
+        handleLogistics(`L'autore è ${currentItem?.artista || "sconosciuto"}`);
       }
       if (cmd.includes("periodo") || cmd.includes("quando è stato fatto")) {
-        alert(
+        handleLogistics(
           `L'opera risale al periodo: ${currentItem?.periodo || "non specificato"}`,
         );
       }
 
       // 7. AIUTO
-      if (cmd.includes("aiuto") || cmd.includes("cosa posso dire")) {
-        alert(
-          "Puoi dire: avanti, indietro, mappa, più semplice, dimmi di più, pausa, riprendi, o chiedere del bagno e del periodo.",
-        );
+      if (
+        cmd.includes("aiuto") ||
+        cmd.includes("comandi") ||
+        cmd.includes("cosa posso dire")
+      ) {
+        setShowHelpModal(true);
       }
     };
 
@@ -489,11 +533,16 @@ export default function NavigatorItemViewer() {
           </Row>
         </Container>
       </div>
-
+      {logisticsMsg && (
+        <div className="logistics-toast">
+          <i className="bi bi-info-circle-fill me-2"></i>
+          {logisticsMsg}
+        </div>
+      )}
       {/* BOTTOM NAV */}
       <div className="bottom-nav-viewer">
-        <button className="nav-item" onClick={() => navigate("/mobile")}>
-          <i className="bi bi-house-door"></i>
+        <button className="nav-item" onClick={() => setShowMapModal(true)}>
+          <i className="bi bi-map"></i>
         </button>
         <div className="nav-item central">
           <button
@@ -578,16 +627,17 @@ export default function NavigatorItemViewer() {
             <button
               className="btn-museum-outline"
               onClick={() => {
-                alert(museumConfig?.logistica_globale?.toilette);
+                handleLogistics(museumConfig?.logistica_globale?.bagno); // <--- CAMBIATO QUI
                 setShowAccessMenu(false);
               }}
             >
-              <i className="bi bi-badge-wc me-2"></i>Bagno
+              <i className="bi bi-water me-2"></i>Bagno
             </button>
+
             <button
               className="btn-museum-outline"
               onClick={() => {
-                alert(museumConfig?.logistica_globale?.bar);
+                handleLogistics(museumConfig?.logistica_globale?.bar); // <--- CAMBIATO QUI
                 setShowAccessMenu(false);
               }}
             >
@@ -628,6 +678,91 @@ export default function NavigatorItemViewer() {
               Esci
             </button>
           </div>
+        </Modal.Body>
+      </Modal>
+      <Modal
+        show={showMapModal}
+        onHide={() => setShowMapModal(false)}
+        centered
+        className="museum-map-modal"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title className="fs-5">
+            Mappa - Piano {selectedMapFloor}
+          </Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body className="p-0">
+          <div className="map-floor-selector d-flex justify-content-center">
+            {["-1", "0", "1", "2"].map((f) => (
+              <button
+                key={f}
+                className={`btn btn-sm ${selectedMapFloor === f ? "active" : ""}`}
+                onClick={() => setSelectedMapFloor(f)}
+              >
+                P{f}
+              </button>
+            ))}
+          </div>
+
+          <div className="map-container">
+            <img
+              src={`/mobile/maps/mappa-museo-piano_${selectedMapFloor}.png`}
+              alt={`Piano ${selectedMapFloor}`}
+            />
+
+            {/* Il marker usa le coordinate % che abbiamo salvato nel DB */}
+            {currentItem?.piano === selectedMapFloor && (
+              <div
+                className="map-marker-ping"
+                style={{
+                  left: `${currentItem.mappa_x}%`,
+                  top: `${currentItem.mappa_y}%`,
+                }}
+              />
+            )}
+          </div>
+        </Modal.Body>
+      </Modal>
+      <Modal
+        show={showHelpModal}
+        onHide={() => setShowHelpModal(false)}
+        centered
+        className="museum-modal"
+      >
+        <Modal.Header closeButton className="bg-museum text-white">
+          <Modal.Title>Cosa puoi chiedermi?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="bg-dark text-white p-4">
+          <ul className="list-unstyled">
+            <li className="mb-3">
+              <i className="bi bi-play-circle me-2 text-warning"></i>{" "}
+              <strong>Navigazione:</strong> "Prossimo", "Precedente"
+            </li>
+            <li className="mb-3">
+              <i className="bi bi-info-square me-2 text-warning"></i>{" "}
+              <strong>Dettagli:</strong> "Chi è l'autore", "Qual è lo stile",
+              "Cos'è questo"
+            </li>
+            <li className="mb-3">
+              <i className="bi bi-map me-2 text-warning"></i>{" "}
+              <strong>Mappa:</strong> "Mappa", "Dove mi trovo"
+            </li>
+            <li className="mb-3">
+              <i className="bi bi-gear me-2 text-warning"></i>{" "}
+              <strong>Livello:</strong> "Più semplice", "Più corto", "Più lungo"
+            </li>
+            <li className="mb-3">
+              <i className="bi bi-geo-alt me-2 text-warning"></i>{" "}
+              <strong>Logistica:</strong> "Dov'è il bagno", "Dov'è l'uscita"
+            </li>
+          </ul>
+          <button
+            className="btn btn-museum-primary w-100 mt-3"
+            onClick={() => setShowHelpModal(false)}
+          >
+            Ho capito
+          </button>
         </Modal.Body>
       </Modal>
     </div>
