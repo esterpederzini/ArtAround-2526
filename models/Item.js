@@ -9,7 +9,6 @@ const logVenditaSchema = new mongoose.Schema({
 
 const itemSchema = new mongoose.Schema(
   {
-    // AGGIUNTO: Permette di usare stringhe personalizzate come "it_ramesse_01"
     _id: { type: String },
     operaId: { type: String, required: true, trim: true, index: true },
     museo: { type: String, required: true, trim: true, index: true },
@@ -17,25 +16,37 @@ const itemSchema = new mongoose.Schema(
     descrizione: { type: String, required: true },
     audioUrl: { type: String, default: "" },
     autore_visita: { type: String, required: true },
+    piano: { 
+      type: String, 
+      default: "0",
+      enum: ["-1", "0", "1", "2"] // Coerente con il tuo config.json
+    },
+    mappa_x: { 
+      type: Number, 
+      default: 0 
+    },
+    mappa_y: { 
+      type: Number, 
+      default: 0 
+    },
+
     stile: {
       type: String,
       required: false,
       trim: true,
       default: "Periodo storico non specificato",
     },
-    artista: { type: String, default: "Ignoto" }, // L'antico egizio che ha scolpito
+    artista: { type: String, default: "Ignoto" },
     periodo: { type: String },
     url: { type: String, default: null },
-    immagine: { type: String, default: null }, // Manteniamo immagine per compatibilità
+    immagine: { type: String, default: null },
     lunghezza: {
       type: String,
-      // Allineato ai tuoi dati: "3s", "15s", "40s"
       enum: ["3s", "15s", "30s", "40s", "1m", "3m", "5m", "10m"],
       required: true,
     },
     linguaggio: {
       type: String,
-      // Allineato ai tuoi dati: "infantile", "medio", "avanzato"
       enum: [
         "infantile",
         "medio",
@@ -54,17 +65,14 @@ const itemSchema = new mongoose.Schema(
     },
     prezzo: { type: Number, default: 0 },
     pubblicato: { type: Boolean, default: true },
-
-    // Se su Atlas non hai messo creatorId a mano, rendilo NON obbligatorio
     creatorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: false,
     },
-
     profonditaContenuto: { type: String, default: "standard" },
   },
-  { timestamps: true, strict: false }, // strict: false è vitale per i dati inseriti a mano
+  { timestamps: true, strict: false }
 );
 
 itemSchema.index({ museo: 1, pubblicato: 1 });

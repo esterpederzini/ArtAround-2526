@@ -480,3 +480,115 @@
 .scrollable-viewer-content {
   padding-bottom: 10vh; /* Aumentato per non far coprire il player dalla nav */
 }
+
+/* --- MAP MODAL RESPONSIVE --- */
+.museum-map-modal .modal-dialog {
+  margin: 0.5rem; /* Margine minimo dai bordi dello schermo */
+  max-width: 95vw; /* Larghezza massima quasi a tutto schermo */
+}
+
+.museum-map-modal .modal-content {
+  background-color: #1a1a1d;
+  border: 1px solid #e18f37;
+  color: white;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.map-floor-selector {
+  background-color: #2a2a2e !important;
+  border-bottom: 1px solid rgba(225, 143, 55, 0.3);
+  padding: 0.75rem;
+  gap: 0.5rem;
+  overflow-x: auto; /* Permette lo scorrimento orizzontale se i tasti non ci stanno */
+}
+
+.map-floor-selector .btn {
+  border-radius: 2rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  min-width: 3.5rem; /* Garantisce che il tasto sia cliccabile */
+  border-color: #e18f37;
+  color: #e18f37;
+}
+
+.map-floor-selector .btn.active {
+  background-color: #e18f37;
+  color: #1a1a1d;
+}
+
+/* --- CONTENITORE MAPPA RESPONSIVE --- */
+.map-container {
+  background-color: #000;
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh; /* Altezza minima basata sulla visuale */
+}
+
+.map-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* --- PALLINO MAPPA (USA PERCENTUALI) --- */
+.map-marker-ping {
+  position: absolute;
+  /* La posizione left/top viene gestita inline nel JSX in % */
+  width: 5vw; /* Dimensione basata sulla larghezza schermo */
+  height: 5vw;
+  max-width: 25px; /* Ma con un limite per schermi giganti */
+  max-height: 25px;
+  background-color: #ff0000;
+  border: 2px solid white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  animation: pulse-responsive 2s infinite;
+}
+
+@keyframes pulse-responsive {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+}
+
+.logistics-toast {
+  position: absolute;
+  bottom: 12vh; /* Appena sopra la barra di navigazione */
+  left: 5%;
+  right: 5%;
+  background-color: #e18f37;
+  color: #1a1a1d;
+  padding: 1rem;
+  border-radius: 12px;
+  font-weight: bold;
+  text-align: center;
+  z-index: 1050;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
