@@ -8,17 +8,42 @@ let dragSrc = null;
 
 // ─── INIT ────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
-  if (!richiedeAutore()) {
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 600);
-    return;
+  const utente = getUtenteCorrente();
+
+  // Se l'utente non ha fatto il login (è un ospite anonimo)
+  if (!utente) {
+    const container = document.querySelector('.container-fluid');
+    if (container) {
+      container.innerHTML = `
+        <div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+          <div class="col-md-8 col-lg-6 text-center">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">🗺️</div>
+            <h2 style="color: var(--aa-gold); font-family: 'Playfair Display', serif;">
+              Crea il tuo percorso su misura!
+            </h2>
+            <p class="lead mt-3 text-slate">
+              Vuoi diventare un curatore virtuale e progettare la tua visita museale perfetta?
+            </p>
+            <p class="mb-4">
+              Devi effettuare l'accesso per poter mescolare i contenuti del catalogo, creare il tuo itinerario e modificarlo quando vuoi.
+            </p>
+            <button class="btn-aa-primary mt-2" onclick="window.location='/'">
+              <i class="bi bi-person"></i> Torna alla Home per accedere
+            </button>
+          </div>
+        </div>
+      `;
+    }
+    return; // Interrompe il caricamento dell'editor
   }
 
+  // Se l'utente è loggato (Visitatore o Autore), procediamo con il caricamento normale!
   await caricaMusei();
   await caricaAutori();
   await caricaTuttiItems();
   await caricaVisiteList();
+
+  applicaRestrizioniVisitatore();
 
   // Query param: modifica visita
   const params = new URLSearchParams(window.location.search);
@@ -96,11 +121,11 @@ function renderCatalogo(filtro = "") {
   const container = document.getElementById("catalogoItems");
   const items = filtro
     ? tuttiItems.filter(
-        (i) =>
-          i.titolo.toLowerCase().includes(filtro) ||
-          i.operaId.toLowerCase().includes(filtro) ||
-          (i.tags || []).some((t) => t.toLowerCase().includes(filtro)),
-      )
+      (i) =>
+        i.titolo.toLowerCase().includes(filtro) ||
+        i.operaId.toLowerCase().includes(filtro) ||
+        (i.tags || []).some((t) => t.toLowerCase().includes(filtro)),
+    )
     : tuttiItems;
 
   if (!items.length) {
@@ -123,11 +148,10 @@ function renderCatalogo(filtro = "") {
           <div style="font-size:0.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.titolo}</div>
           <div style="font-size:0.72rem;color:var(--aa-slate)">${item.linguaggio} · ${item.lunghezza} · ${item.operaId}</div>
         </div>
-        <button class="btn-aa-outline" style="font-size:0.75rem;padding:3px 10px;flex-shrink:0;${giàAggiunto ? "opacity:0.4;cursor:default" : ""}"
-                onclick="${giàAggiunto ? "" : ""}" 
-                ${giàAggiunto ? 'disabled title="Già aggiunto"' : ""} 
-                onclick="aggiungiItemAlPercorso('${item._id}')">
-          ${giàAggiunto ? "✓" : "+ Add"}
+        <button class="btn-aa-outline" 
+        style="font-size:0.75rem;padding:3px 10px;flex-shrink:0;${giàAggiunto ? "opacity:0.4;cursor:default" : ""}"
+        ${giàAggiunto ? 'disabled title="Già aggiunto"' : `onclick="aggiungiItemAlPercorso('${item._id}')"`}>
+        ${giàAggiunto ? "✓" : "+ Add"}
         </button>
       </div>
     `;
@@ -201,8 +225,10 @@ function renderPercorso() {
     (acc, i) => acc + lunghezzaInMinuti(i.lunghezza),
     0,
   );
-  document.getElementById("durataCalcolata").textContent =
-    `Durata: ~${Math.round(durataMin)} min`;
+  const durataEl = document.getElementById("durataCalcolata");
+  if (durataEl) {
+    durataEl.textContent = `Durata: ~${Math.round(durataMin)} min`;
+  }
 
   if (!itemsNelPercorso.length) {
     list.innerHTML = `<div class="aa-empty" style="padding:1.5rem"><div class="aa-empty-icon" style="font-size:2rem">📭</div><p class="mb-0" style="font-size:0.85rem">Aggiungi item dal catalogo sottostante</p></div>`;
@@ -307,6 +333,7 @@ async function salvaVisita() {
   const museo = document.getElementById("visitaMuseo").value;
   const autoreId = document.getElementById("visitaAutore").value;
   const desc = document.getElementById("visitaDescrizione").value.trim();
+  const default_image = '/img/default_item_image.jpg';
   const tags = document
     .getElementById("visitaTags")
     .value.split(",")
@@ -326,6 +353,14 @@ async function salvaVisita() {
   if (!itemsNelPercorso.length)
     return showToast("Aggiungi almeno un item al percorso", "error");
 
+  let thumbnail = default_image;
+  if (itemsNelPercorso.length > 0) {
+    const primoItem = tuttiItems.find(i => i._id === itemsNelPercorso[0].itemId);
+    if (primoItem && primoItem.immagine) {
+      thumbnail = primoItem.immagine;
+    }
+  }
+
   // `tappe` is what Navigator reads; API also accepts legacy `items` and normalizes.
   const tappe = buildTappeFromPath(itemsNelPercorso);
 
@@ -335,6 +370,7 @@ async function salvaVisita() {
     title: titolo,
     museo,
     descrizione: desc,
+    immagine: thumbnail,
     tags,
     durataTotaleStimata: durata,
     licenza: { tipo: licenza },
@@ -449,4 +485,45 @@ function resetEditor() {
   itemsNelPercorso = [];
   renderPercorso();
   renderCatalogo("");
+}
+
+// ─── GESTIONE PERMESSI EDITOR ────────────────────────
+function applicaRestrizioniVisitatore() {
+  const u = getUtenteCorrente();
+  // Se non è loggato, non dovrebbe essere qui (gestito nell'init)
+  if (!u) return;
+
+  // Se è un autore o admin, ha accesso completo
+  if (["autore", "admin"].includes(u.ruolo)) return;
+
+  // Se è un visitatore, blocchiamo i campi "sensibili"
+  console.log("Modalità Visitatore: blocco campi sensibili.");
+
+  // Campi da bloccare (sola lettura/disabilitati)
+  const campiDaBloccare = [
+    "visitaPrezzo",
+    "visitaLicenza",
+    "visitaPubblica"
+  ];
+
+  campiDaBloccare.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.disabled = true; // Disabilita l'input
+      // Aggiungiamo un feedback visivo per far capire perché è bloccato
+      el.title = "Solo gli Autori possono modificare questo campo";
+      el.style.opacity = "0.7";
+      el.style.cursor = "not-allowed";
+    }
+  });
+
+  // Mostriamo un avviso nell'interfaccia
+  const header = document.querySelector(".aa-card-header");
+  if (header) {
+    const badge = document.createElement("span");
+    badge.className = "aa-badge aa-badge-lang-infantile ms-2"; // Usa uno stile esistente (es. giallo/arancio)
+    badge.style.fontSize = "0.7rem";
+    badge.innerHTML = '<i class="bi bi-info-circle"></i> Modalità Personalizzazione';
+    header.appendChild(badge);
+  }
 }

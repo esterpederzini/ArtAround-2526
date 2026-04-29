@@ -4,18 +4,46 @@
 
 // ─── INIT ────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+  // Se non è un autore, fermiamo tutto e mostriamo il messaggio
   if (!richiedeAutore()) {
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 600);
-    return;
+    const container = document.querySelector('.container') || document.querySelector('.container-fluid');
+
+    if (container) {
+      container.innerHTML = `
+        <div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+          <div class="col-md-8 col-lg-6 text-center">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">🎨</div>
+            <h2 style="color: var(--aa-gold); font-family: 'Playfair Display', serif;">
+              L'ispirazione ha bussato, ma serve il pass!
+            </h2>
+            <p class="lead mt-3 text-slate">
+              Attualmente stai esplorando ArtAround come <strong>Visitatore</strong>.
+            </p>
+            <p class="mb-4">
+              Solo gli utenti con il ruolo di <strong>Autore</strong> possono scolpire nuovi contenuti, progettare percorsi museali e condividerli con la community.
+            </p>
+            <div class="aa-card p-4 mb-4 text-center" style="background: var(--aa-cream); border: 1px dashed var(--aa-gold);">
+              <i class="bi bi-lightbulb text-gold fs-4 mb-2 d-block"></i>
+              <small>
+                Vuoi diventare un creatore? Contatta l'amministratore del museo per richiedere l'upgrade del tuo account e iniziare a plasmare la cultura!
+              </small>
+            </div>
+            <a href="/dashboard" class="btn-aa-primary mt-2">
+              <i class="bi bi-arrow-left"></i> Torna alla Dashboard
+            </a>
+          </div>
+        </div>
+      `;
+    }
+    return; // Interrompe il caricamento del resto della pagina
   }
 
+  // ... (Da qui in giù lascia il resto del codice originale: caricaAutori(), ecc.)
   await caricaAutori();
   await caricaMuseiDatalist();
 
   // Live preview
-  ['titolo','descrizione','lunghezza','linguaggio','licenzaTipo','prezzo','immagineUrl'].forEach(id => {
+  ['titolo', 'descrizione', 'lunghezza', 'linguaggio', 'licenzaTipo', 'prezzo', 'immagineUrl'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', aggiornaPreview);
   });
 
@@ -52,7 +80,7 @@ async function caricaAutori() {
   const utenti = await apiFetch('/api/utenti');
   const sel = document.getElementById('autoreId');
   if (!utenti) return;
-  utenti.filter(u => ['autore','admin'].includes(u.ruolo)).forEach(u => {
+  utenti.filter(u => ['autore', 'admin'].includes(u.ruolo)).forEach(u => {
     const opt = document.createElement('option');
     opt.value = u._id; opt.textContent = `${u.username}`;
     sel.appendChild(opt);
@@ -74,29 +102,29 @@ async function caricaMuseiDatalist() {
 
 // ─── PREVIEW ────────────────────────────────────────
 function aggiornaPreview() {
-  const titolo    = document.getElementById('titolo').value || 'Titolo item';
-  const desc      = document.getElementById('descrizione').value || 'La descrizione apparirà qui...';
-  const linguaggio= document.getElementById('linguaggio').value;
+  const titolo = document.getElementById('titolo').value || 'Titolo item';
+  const desc = document.getElementById('descrizione').value || 'La descrizione apparirà qui...';
+  const linguaggio = document.getElementById('linguaggio').value;
   const lunghezza = document.getElementById('lunghezza').value;
-  const prezzo    = Number(document.getElementById('prezzo').value);
-  const licenza   = document.getElementById('licenzaTipo').value;
-  const imgUrl    = document.getElementById('immagineUrl').value.trim();
+  const prezzo = Number(document.getElementById('prezzo').value);
+  const licenza = document.getElementById('licenzaTipo').value;
+  const imgUrl = document.getElementById('immagineUrl').value.trim();
 
-  document.getElementById('prevTitolo').textContent  = titolo;
-  document.getElementById('prevDesc').textContent    = desc.substring(0,120)+(desc.length>120?'…':'');
-  document.getElementById('prevLen').textContent     = lunghezza;
+  document.getElementById('prevTitolo').textContent = titolo;
+  document.getElementById('prevDesc').textContent = desc.substring(0, 120) + (desc.length > 120 ? '…' : '');
+  document.getElementById('prevLen').textContent = lunghezza;
   document.getElementById('prevLicenza').textContent = licenza;
 
   const prevLang = document.getElementById('prevLang');
   prevLang.textContent = linguaggio;
-  prevLang.className   = `aa-badge aa-badge-lang-${linguaggio}`;
+  prevLang.className = `aa-badge aa-badge-lang-${linguaggio}`;
 
   const prevPrice = document.getElementById('prevPrice');
   if (prezzo === 0) {
-    prevPrice.className   = 'aa-badge aa-badge-free';
+    prevPrice.className = 'aa-badge aa-badge-free';
     prevPrice.textContent = 'Gratuito';
   } else {
-    prevPrice.className   = 'aa-price';
+    prevPrice.className = 'aa-price';
     prevPrice.textContent = `€ ${prezzo.toFixed(2)}`;
   }
 
@@ -109,9 +137,9 @@ function aggiornaPreview() {
 }
 
 function stimaProfondita(len) {
-  if (len < 100)  return 'superficiale';
-  if (len < 300)  return 'standard';
-  if (len < 700)  return 'approfondito';
+  if (len < 100) return 'superficiale';
+  if (len < 300) return 'standard';
+  if (len < 700) return 'approfondito';
   return 'accademico';
 }
 
@@ -146,47 +174,51 @@ async function cercaVarianti(operaId) {
 
 // ─── SALVA ITEM ──────────────────────────────────────
 async function salvaItem() {
-  const operaId   = document.getElementById('operaId').value.trim();
-  const museo     = document.getElementById('museo').value.trim();
-  const titolo    = document.getElementById('titolo').value.trim();
-  const autoreId  = document.getElementById('autoreId').value;
-  const desc      = document.getElementById('descrizione').value.trim();
+  const operaId = document.getElementById('operaId').value.trim();
+  const museo = document.getElementById('museo').value.trim();
+  const titolo = document.getElementById('titolo').value.trim();
+  const autoreId = document.getElementById('autoreId').value;
+  const desc = document.getElementById('descrizione').value.trim();
   const lunghezza = document.getElementById('lunghezza').value;
-  const linguaggio= document.getElementById('linguaggio').value;
+  const linguaggio = document.getElementById('linguaggio').value;
   const categoria = document.getElementById('categoria').value;
-  const profondita= document.getElementById('profonditaContenuto').value;
-  const tagsRaw   = document.getElementById('tags').value;
-  const tags      = tagsRaw.split(',').map(t=>t.trim()).filter(Boolean);
-  const immagine  = document.getElementById('immagineUrl').value.trim() || null;
+  const profondita = document.getElementById('profonditaContenuto').value;
+  const tagsRaw = document.getElementById('tags').value;
+  const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+  const immagine = document.getElementById('immagineUrl').value.trim() || null;
   const licenzaTipo = document.getElementById('licenzaTipo').value;
   const licenzaNote = document.getElementById('licenzaNote').value.trim();
-  const prezzo    = Number(document.getElementById('prezzo').value) || 0;
-  const pubblicato= document.getElementById('pubblicato').checked;
-  const id        = document.getElementById('itemId').value;
+  const prezzo = Number(document.getElementById('prezzo').value) || 0;
+  const pubblicato = document.getElementById('pubblicato').checked;
+  const id = document.getElementById('itemId').value;
+  const default_image = '/img/default_item_image.jpg';
 
   // Validazione
   if (!operaId) return showToast('operaId obbligatorio', 'error');
-  if (!museo)   return showToast('Museo obbligatorio', 'error');
-  if (!titolo)  return showToast('Titolo obbligatorio', 'error');
-  if (!autoreId)return showToast('Seleziona un autore', 'error');
-  if (!desc)    return showToast('Descrizione obbligatoria', 'error');
+  if (!museo) return showToast('Museo obbligatorio', 'error');
+  if (!titolo) return showToast('Titolo obbligatorio', 'error');
+  if (!autoreId) return showToast('Seleziona un autore', 'error');
+  if (!desc) return showToast('Descrizione obbligatoria', 'error');
+
+  const selectedImage = document.getElementById('immagineUrl').value.trim();
+  const image = selectedImage || default_image;
 
   const payload = {
     operaId, museo, titolo, autoreId, descrizione: desc,
     lunghezza, linguaggio, categoria,
     profonditaContenuto: profondita,
-    tags, immagine,
+    tags, immagine: image,
     licenza: { tipo: licenzaTipo, note: licenzaNote },
     prezzo, pubblicato,
     creatorId: autoreId
   };
 
   const metodo = id ? 'PUT' : 'POST';
-  const url    = id ? `/api/items/${id}` : '/api/items';
+  const url = id ? `/api/items/${id}` : '/api/items';
 
   const ok = await apiFetch(url, {
     method: metodo,
-    headers: {'Content-Type':'application/json'},
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
 
@@ -204,25 +236,25 @@ async function caricaItemPerModifica(id) {
   const item = await apiFetch(`/api/items/${id}`);
   if (!item) return;
 
-  document.getElementById('itemId').value           = item._id;
-  document.getElementById('operaId').value          = item.operaId;
-  document.getElementById('museo').value            = item.museo;
-  document.getElementById('titolo').value           = item.titolo;
-  document.getElementById('autoreId').value         = item.creatorId?._id || item.creatorId || '';
-  document.getElementById('descrizione').value      = item.descrizione;
-  document.getElementById('lunghezza').value        = item.lunghezza;
-  document.getElementById('linguaggio').value       = item.linguaggio;
-  document.getElementById('categoria').value        = item.categoria;
+  document.getElementById('itemId').value = item._id;
+  document.getElementById('operaId').value = item.operaId;
+  document.getElementById('museo').value = item.museo;
+  document.getElementById('titolo').value = item.titolo;
+  document.getElementById('autoreId').value = item.creatorId?._id || item.creatorId || '';
+  document.getElementById('descrizione').value = item.descrizione;
+  document.getElementById('lunghezza').value = item.lunghezza;
+  document.getElementById('linguaggio').value = item.linguaggio;
+  document.getElementById('categoria').value = item.categoria;
   document.getElementById('profonditaContenuto').value = item.profonditaContenuto;
-  document.getElementById('tags').value             = (item.tags||[]).join(', ');
-  document.getElementById('immagineUrl').value      = item.immagine || '';
-  document.getElementById('licenzaTipo').value      = item.licenza?.tipo || 'gratuito';
-  document.getElementById('licenzaNote').value      = item.licenza?.note || '';
-  document.getElementById('prezzo').value           = item.prezzo || 0;
-  document.getElementById('pubblicato').checked     = item.pubblicato;
+  document.getElementById('tags').value = (item.tags || []).join(', ');
+  document.getElementById('immagineUrl').value = item.immagine || '';
+  document.getElementById('licenzaTipo').value = item.licenza?.tipo || 'gratuito';
+  document.getElementById('licenzaNote').value = item.licenza?.note || '';
+  document.getElementById('prezzo').value = item.prezzo || 0;
+  document.getElementById('pubblicato').checked = item.pubblicato;
 
   // UI
-  document.getElementById('charCount').textContent  = item.descrizione.length;
+  document.getElementById('charCount').textContent = item.descrizione.length;
   document.getElementById('profonditaPreview').textContent = stimaProfondita(item.descrizione.length);
   document.getElementById('formTitolo').textContent = ` Modifica: ${item.titolo}`;
 
@@ -237,19 +269,19 @@ async function caricaItemPerModifica(id) {
 }
 
 function resetForm() {
-  ['operaId','museo','titolo','descrizione','tags','immagineUrl','licenzaNote'].forEach(id => {
+  ['operaId', 'museo', 'titolo', 'descrizione', 'tags', 'immagineUrl', 'licenzaNote'].forEach(id => {
     document.getElementById(id).value = '';
   });
-  document.getElementById('lunghezza').value  = '3m';
+  document.getElementById('lunghezza').value = '3m';
   document.getElementById('linguaggio').value = 'intermedio';
-  document.getElementById('categoria').value  = 'pittura';
+  document.getElementById('categoria').value = 'pittura';
   document.getElementById('profonditaContenuto').value = 'standard';
-  document.getElementById('licenzaTipo').value= 'gratuito';
-  document.getElementById('prezzo').value     = 0;
+  document.getElementById('licenzaTipo').value = 'gratuito';
+  document.getElementById('prezzo').value = 0;
   document.getElementById('pubblicato').checked = false;
-  document.getElementById('itemId').value     = '';
+  document.getElementById('itemId').value = '';
   document.getElementById('formTitolo').textContent = ' Nuovo Contenuto (Item)';
-  document.getElementById('charCount').textContent  = '0';
+  document.getElementById('charCount').textContent = '0';
   document.getElementById('profonditaPreview').textContent = '–';
   document.getElementById('imgPreview').innerHTML = '🖼️';
   document.getElementById('variantiList').innerHTML = '<em class="text-slate small">Inserisci un operaId per vedere le varianti</em>';
