@@ -121,11 +121,11 @@ function renderCatalogo(filtro = "") {
   const container = document.getElementById("catalogoItems");
   const items = filtro
     ? tuttiItems.filter(
-        (i) =>
-          i.titolo.toLowerCase().includes(filtro) ||
-          i.operaId.toLowerCase().includes(filtro) ||
-          (i.tags || []).some((t) => t.toLowerCase().includes(filtro)),
-      )
+      (i) =>
+        i.titolo.toLowerCase().includes(filtro) ||
+        i.operaId.toLowerCase().includes(filtro) ||
+        (i.tags || []).some((t) => t.toLowerCase().includes(filtro)),
+    )
     : tuttiItems;
 
   if (!items.length) {
@@ -226,7 +226,7 @@ function renderPercorso() {
     0,
   );
   const durataEl = document.getElementById("durataCalcolata");
-  if (durataEl){
+  if (durataEl) {
     durataEl.textContent = `Durata: ~${Math.round(durataMin)} min`;
   }
 
@@ -333,6 +333,7 @@ async function salvaVisita() {
   const museo = document.getElementById("visitaMuseo").value;
   const autoreId = document.getElementById("visitaAutore").value;
   const desc = document.getElementById("visitaDescrizione").value.trim();
+  const default_image = '/img/default_item_image.jpg';
   const tags = document
     .getElementById("visitaTags")
     .value.split(",")
@@ -352,6 +353,14 @@ async function salvaVisita() {
   if (!itemsNelPercorso.length)
     return showToast("Aggiungi almeno un item al percorso", "error");
 
+  let thumbnail = default_image;
+  if (itemsNelPercorso.length > 0) {
+    const primoItem = tuttiItems.find(i => i._id === itemsNelPercorso[0].itemId);
+    if (primoItem && primoItem.immagine) {
+      thumbnail = primoItem.immagine;
+    }
+  }
+
   // `tappe` is what Navigator reads; API also accepts legacy `items` and normalizes.
   const tappe = buildTappeFromPath(itemsNelPercorso);
 
@@ -361,6 +370,7 @@ async function salvaVisita() {
     title: titolo,
     museo,
     descrizione: desc,
+    immagine: thumbnail,
     tags,
     durataTotaleStimata: durata,
     licenza: { tipo: licenza },
