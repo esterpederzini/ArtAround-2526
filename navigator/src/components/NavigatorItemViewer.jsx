@@ -115,6 +115,18 @@ export default function NavigatorItemViewer() {
   }, [id, safeIndex]);
 
   // --- GESTIONE LOGICA AUDIO E SINTESI ---
+
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+      if (ttsIntervalRef.current) clearInterval(ttsIntervalRef.current);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const audio = audioRef.current;
 
@@ -282,19 +294,19 @@ export default function NavigatorItemViewer() {
       if (cmd.includes("bagno") || cmd.includes("toilette")) {
         handleLogistics(
           museumConfig?.logistica_globale?.toilette ||
-            "Informazione non disponibile",
+          "Informazione non disponibile",
         );
       }
       if (cmd.includes("uscita")) {
         handleLogistics(
           museumConfig?.logistica_globale?.uscita ||
-            "Segui le indicazioni per l'uscita principale",
+          "Segui le indicazioni per l'uscita principale",
         );
       }
       if (cmd.includes("bar")) {
         handleLogistics(
           museumConfig?.logistica_globale?.bar ||
-            "Il bar si trova al piano terra",
+          "Il bar si trova al piano terra",
         );
       }
 

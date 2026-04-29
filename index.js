@@ -3,11 +3,11 @@ const path = require("path");
 const fs = require("fs");
 const mongoose = require("mongoose");
 const cors = require("cors");
-app.use(express.static(path.join(__dirname, 'public')));
 
 const mymongo = require("./scripts/mongo.js");
 const apiRouter = require("./routes/api");
 const app = express();
+app.use(express.static(path.join(__dirname, 'public')));
 
 global.rootDir = process.cwd();
 
