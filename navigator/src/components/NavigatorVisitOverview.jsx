@@ -5,7 +5,6 @@ import {
   Row,
   Col,
   Card,
-  CardSubtitle,
   Navbar,
   Button,
   Modal,
@@ -21,13 +20,24 @@ function NavigatorVisitOverview() {
   const [loading, setLoading] = useState(true);
   const [showExitModal, setShowExitModal] = useState(false);
 
+  // ---------- FURTHEST INDEX ----------
+  // -1 means the user has never started this visit
+  const [furthestIndex, setFurthestIndex] = useState(-1);
+
+  useEffect(() => {
+    if (!id) return;
+    const key = `artaround_furthest_${id}`;
+    const stored = localStorage.getItem(key);
+    if (stored !== null) {
+      setFurthestIndex(parseInt(stored));
+    }
+  }, [id]);
+
   useEffect(() => {
     setLoading(true);
-    // Puntiamo alla rotta definita in api.js: router.get("/visite/:id", ctrl.getVisitaById);
     fetch(`/api/visite/${id}`)
       .then((res) => res.json())
       .then((json) => {
-        // Il tuo controller restituisce { successo: true, data: { ... } }
         if (json.successo && json.data) {
           setVisit(json.data);
         }
@@ -41,7 +51,17 @@ function NavigatorVisitOverview() {
 
   const handleShow = () => setShowExitModal(true);
   const handleClose = () => setShowExitModal(false);
-  const handleConfirmExit = () => navigate("/");
+  const handleConfirmExit = () => {
+    if (id) localStorage.removeItem(`artaround_furthest_${id}`);
+    setFurthestIndex(-1);
+    navigate("/");
+  }
+
+  // FIX 3: resume from last seen item instead of always starting from 0
+  const handleStartOrResume = () => {
+    const resumeIndex = furthestIndex >= 0 ? furthestIndex : 0;
+    navigate(`/visit/${id}/${resumeIndex}`);
+  };
 
   if (loading) {
     return (
@@ -65,22 +85,12 @@ function NavigatorVisitOverview() {
         style={{ height: "6vh", backgroundColor: "#242326" }}
       >
         <div className="ms-3 position-absolute start-0">
-          <Button
-            variant="link"
-            className="p-0 shadow-none"
-            onClick={handleShow}
-          >
-            <i
-              className="bi bi-arrow-left"
-              style={{ fontSize: "1.6rem", color: "#FAF7F1" }}
-            ></i>
+          <Button variant="link" className="p-0 shadow-none" onClick={handleShow}>
+            <i className="bi bi-arrow-left" style={{ fontSize: "1.6rem", color: "#FAF7F1" }}></i>
           </Button>
         </div>
         <div className="w-100 d-flex justify-content-center">
-          <span
-            className="fw-bold"
-            style={{ fontSize: "1.2rem", color: "#FAF7F1" }}
-          >
+          <span className="fw-bold" style={{ fontSize: "1.2rem", color: "#FAF7F1" }}>
             Tour preview
           </span>
         </div>
@@ -88,7 +98,6 @@ function NavigatorVisitOverview() {
 
       <Container fluid className="full-container px-4">
         <div className="itinerary-header mt-4 mb-3">
-          {/* Supporto sia per 'title' che 'titolo' in base a come hai salvato su Atlas */}
           <h3 className="text-white fw-bold">{visit.title || visit.titolo}</h3>
           <p className="text-secondary small">{visit.museo}</p>
         </div>
@@ -96,13 +105,16 @@ function NavigatorVisitOverview() {
         <div className="d-grid mb-4">
           <Button
             className="start-visit-btn d-flex align-items-center justify-content-center gap-3"
-            onClick={() => navigate(`/visit/${id}/0`)}
+            onClick={handleStartOrResume}
             disabled={!(visit.tappe && visit.tappe.length)}
           >
             <div className="play-icon-circle">
               <i className="bi bi-play-fill"></i>
             </div>
-            <span className="fw-bold">Inizia la visita</span>
+            {/* FIX 2: show "Riprendi" if the user has started, "Inizia" otherwise */}
+            <span className="fw-bold">
+              {furthestIndex >= 0 ? "Riprendi la visita" : "Inizia la visita"}
+            </span>
           </Button>
         </div>
 
@@ -113,12 +125,12 @@ function NavigatorVisitOverview() {
           </p>
         ) : null}
 
-        {/* tappe è l'array nel modello Visita che contiene itemId */}
         {visit.tappe &&
           visit.tappe.map((tappa, index) => {
-            // Grazie al .populate() del controller, itemId non è più solo una stringa ma l'intero oggetto Item
             const opera = tappa.item_default || {};
-            console.log("Dati opera caricata:", opera);
+            const isReached = index <= furthestIndex;
+            const isFurthest = index === furthestIndex;
+
             return (
               <Row
                 key={index}
@@ -126,17 +138,16 @@ function NavigatorVisitOverview() {
                 onClick={() => navigate(`/visit/${id}/${index}`)}
                 style={{ cursor: "pointer" }}
               >
-                <Col
-                  xs={2}
-                  className="d-flex flex-column align-items-center position-relative"
-                >
-                  <div
-                    className={`list-num-circle ${index === 0 ? "active" : ""}`}
-                  >
-                    {index + 1}
+                <Col xs={2} className="d-flex flex-column align-items-center position-relative">
+                  <div className={`list-num-circle ${isReached ? "active" : ""} ${isFurthest ? "furthest" : ""}`}>
+                    {index < furthestIndex ? (
+                      <i className="bi bi-check-lg" style={{ fontSize: "0.9rem" }}></i>
+                    ) : (
+                      index + 1
+                    )}
                   </div>
                   {index < visit.tappe.length - 1 && (
-                    <div className="timeline-line"></div>
+                    <div className={`timeline-line ${isReached ? "reached" : ""}`}></div>
                   )}
                 </Col>
 
@@ -145,22 +156,17 @@ function NavigatorVisitOverview() {
                     <Row className="g-0 align-items-center">
                       <Col xs={4} className="p-2">
                         <Card.Img
-                          src={opera.url || "/img/placeholder.jpg"} // Usiamo 'url' come nel tuo JSON items
+                          src={opera.url || "/img/placeholder.jpg"}
                           className="img-list-new"
                         />
                       </Col>
                       <Col xs={8}>
                         <Card.Body className="py-2 px-3">
-                          <Card.Title className="opera-title">
-                            {opera.titolo}
-                          </Card.Title>
+                          <Card.Title className="opera-title">{opera.titolo}</Card.Title>
                           <div className="audio-info mt-2">
                             <i className="bi bi-headphones me-2"></i>
-                            {/* Se esiste durata_reale (calcolata dal backend) usa quella, altrimenti usa l'etichetta di testo */}
                             <span>
-                              {opera.durata_reale
-                                ? `${opera.durata_reale}s`
-                                : opera.lunghezza}
+                              {opera.durata_reale ? `${opera.durata_reale}s` : opera.lunghezza}
                             </span>
                           </div>
                         </Card.Body>
@@ -173,31 +179,19 @@ function NavigatorVisitOverview() {
           })}
       </Container>
 
-      <Modal
-        show={showExitModal}
-        onHide={handleClose}
-        centered
-        className="museum-modal-overview"
-      >
+      <Modal show={showExitModal} onHide={handleClose} centered className="museum-modal-overview">
         <Modal.Body className="museum-modal-content-overview">
           <div className="museum-modal-icon-overview">
             <i className="bi bi-exclamation-circle"></i>
           </div>
-
           <h5 className="museum-modal-title-overview">Conferma uscita</h5>
-
           <p className="museum-modal-text-overview">
             Sei sicuro di voler interrompere la visita e tornare alla Home?
           </p>
-
           <div className="museum-modal-actions-overview">
-            <button
-              className="btn-overview-confirm"
-              onClick={handleConfirmExit}
-            >
+            <button className="btn-overview-confirm" onClick={handleConfirmExit}>
               Esci dalla visita
             </button>
-
             <button className="btn-overview-cancel" onClick={handleClose}>
               Annulla
             </button>
