@@ -194,16 +194,22 @@ export default function NavigatorItemViewer() {
     const operaId = visit?.tappe?.[safeIndex]?.operaId;
     if (!operaId) return;
 
+    // IMPORTANTE: Fermiamo tutto prima di cambiare
+    setIsPlaying(false);
+    window.speechSynthesis.cancel();
+
     try {
       const res = await fetch(
         `/api/items?operaId=${operaId}&linguaggio=${newLevel}&lunghezza=${newDuration}`,
       );
       const json = await res.json();
+
       if (json.successo && json.data.items.length > 0) {
-        setCurrentItem(json.data.items[0]);
         setLanguageLevel(newLevel);
         setSelectedDuration(newDuration);
-        setIsPlaying(true);
+        setCurrentItem(json.data.items[0]);
+        // Non forzare setIsPlaying(true) qui se il browser ti blocca,
+        // lascia che sia l'utente a premere il tasto Play centrale se necessario.
       }
     } catch (err) {
       console.error(err);
