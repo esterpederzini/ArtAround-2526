@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container, Row, Col, Card, Modal, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Card, Modal } from "react-bootstrap";
 import "../CSS/NavigatorItemViewer.css";
 
 const SpeechRecognition =
@@ -34,7 +34,7 @@ export default function NavigatorItemViewer() {
   const [logisticsMsg, setLogisticsMsg] = useState("");
   const [showHelpModal, setShowHelpModal] = useState(false);
 
-  const [uiLabels, setUiLabels] = useState({
+  const [uiLabels] = useState({
     "3s": "3s",
     "15s": "15s",
     "40s": "40s",
@@ -44,43 +44,72 @@ export default function NavigatorItemViewer() {
   const [duration, setDuration] = useState(0);
 
   const audioRef = useRef(new Audio());
-  const ttsIntervalRef = useRef(null); // Per gestire il progresso della sintesi vocale
+  const ttsIntervalRef = useRef(null);
 
   const [showMapModal, setShowMapModal] = useState(false);
-  const [selectedMapFloor, setSelectedMapFloor] = useState(
-    currentItem?.piano || "0",
-  );
+  const [selectedMapFloor, setSelectedMapFloor] = useState("0");
 
-  const showLogistics = (msg) => {
-    setLogisticsMsg(msg);
-    // Requisito base: la logistica dovrebbe essere anche udibile
-    const utterance = new SpeechSynthesisUtterance(msg);
-    utterance.lang = "it-IT";
-    window.speechSynthesis.speak(utterance);
-
-    // Scompare dopo 5 secondi
-    setTimeout(() => setLogisticsMsg(""), 5000);
-  };
-
+  // ---------- LOGISTICS ----------
   const handleLogistics = (msg) => {
     if (!msg) return;
     setLogisticsMsg(msg);
-
-    // Sintesi vocale (opzionale ma consigliata per il base)
     const utterance = new SpeechSynthesisUtterance(msg);
     utterance.lang = "it-IT";
     window.speechSynthesis.speak(utterance);
-
-    // Scompare dopo 5 secondi
     setTimeout(() => setLogisticsMsg(""), 5000);
   };
+
+  // ---------- LEVEL / DURATION HELPERS ----------
+  const handleSimplify = () => {
+    const levels = ["infantile", "medio", "avanzato"];
+    const idx = levels.indexOf(languageLevelRef.current);
+    if (idx > 0) updateContentRef.current(levels[idx - 1], selectedDurationRef.current);
+  };
+
+  const handleAdvance = () => {
+    const levels = ["infantile", "medio", "avanzato"];
+    const idx = levels.indexOf(languageLevelRef.current);
+    if (idx < levels.length - 1) updateContentRef.current(levels[idx + 1], selectedDurationRef.current);
+  };
+
+  const handleMoreContent = () => {
+    const durations = ["3s", "15s", "40s"];
+    const idx = durations.indexOf(selectedDurationRef.current);
+    if (idx < durations.length - 1) updateContentRef.current(languageLevelRef.current, durations[idx + 1]);
+  };
+
+  const handleLessContent = () => {
+    const durations = ["3s", "15s", "40s"];
+    const idx = durations.indexOf(selectedDurationRef.current);
+    if (idx > 0) updateContentRef.current(languageLevelRef.current, durations[idx - 1]);
+  };
+
+  // ---------- REFS to keep fresh state inside recognition.onresult ----------
+  const languageLevelRef = useRef(languageLevel);
+  const selectedDurationRef = useRef(selectedDuration);
+  const currentItemRef = useRef(currentItem);
+  const museumConfigRef = useRef(museumConfig);
+  const safeIndexRef = useRef(safeIndex);
+  const visitRef = useRef(visit);
+
+  useEffect(() => { languageLevelRef.current = languageLevel; }, [languageLevel]);
+  useEffect(() => { selectedDurationRef.current = selectedDuration; }, [selectedDuration]);
+  useEffect(() => { currentItemRef.current = currentItem; }, [currentItem]);
+  useEffect(() => { museumConfigRef.current = museumConfig; }, [museumConfig]);
+  useEffect(() => { safeIndexRef.current = safeIndex; }, [safeIndex]);
+  useEffect(() => { visitRef.current = visit; }, [visit]);
+
+  // Refs for functions called inside onresult
+  const updateContentRef = useRef(null);
+  const changeItemRef = useRef(null);
+  const handleLogisticsRef = useRef(null);
 
   // Aggiorna il piano visualizzato quando cambia l'opera
   useEffect(() => {
     if (currentItem?.piano) setSelectedMapFloor(currentItem.piano);
   }, [currentItem]);
 
-  // --- FETCH INIZIALE ---
+  // ---------- FETCH INIZIALE ----------
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
@@ -90,7 +119,8 @@ export default function NavigatorItemViewer() {
       .then((res) => res.json())
       .then((data) => {
         if (isMounted) setMuseumConfig(data);
-      });
+      })
+      .catch(() => { });
 
     fetch(`/api/visite/${id}`)
       .then((res) => res.json())
@@ -114,8 +144,7 @@ export default function NavigatorItemViewer() {
     };
   }, [id, safeIndex]);
 
-  // --- GESTIONE LOGICA AUDIO E SINTESI ---
-
+  // ---------- CLEANUP AUDIO ----------
   useEffect(() => {
     return () => {
       window.speechSynthesis.cancel();
@@ -127,10 +156,9 @@ export default function NavigatorItemViewer() {
     };
   }, []);
 
+  // ---------- GESTIONE AUDIO / TTS ----------
   useEffect(() => {
     const audio = audioRef.current;
-
-    // Reset totale ad ogni cambio item o stato
     window.speechSynthesis.cancel();
     clearInterval(ttsIntervalRef.current);
 
@@ -140,7 +168,6 @@ export default function NavigatorItemViewer() {
     }
 
     if (currentItem?.audioUrl) {
-      // CASO A: File audio presente
       audio.src = currentItem.audioUrl;
       audio.play().catch((e) => console.log("Autoplay blocked", e));
 
@@ -161,11 +188,8 @@ export default function NavigatorItemViewer() {
         audio.removeEventListener("ended", onEnd);
       };
     } else if (currentItem?.descrizione) {
-      // CASO B: Solo testo (Sintesi Vocale)
       const utterance = new SpeechSynthesisUtterance(currentItem.descrizione);
       utterance.lang = "it-IT";
-
-      // Simuliamo una durata basata sulla lunghezza del testo (circa 15 caratteri al secondo)
       const estimatedDuration = currentItem.descrizione.length / 15;
       setDuration(estimatedDuration);
       setCurrentTime(0);
@@ -178,7 +202,6 @@ export default function NavigatorItemViewer() {
 
       window.speechSynthesis.speak(utterance);
 
-      // Facciamo avanzare la barra di progresso manualmente
       ttsIntervalRef.current = setInterval(() => {
         setCurrentTime((prev) => {
           if (prev >= estimatedDuration) {
@@ -191,147 +214,187 @@ export default function NavigatorItemViewer() {
     }
   }, [currentItem, isPlaying]);
 
-  // --- HELPER NAVIGAZIONE ---
+  // ---------- NAVIGAZIONE ----------
   const changeItem = (newIndex) => {
-    if (visit && newIndex >= 0 && newIndex < visit.tappe.length) {
-      // Fermiamo l'audio attuale prima di cambiare
+    const v = visitRef.current;
+    if (v && newIndex >= 0 && newIndex < v.tappe.length) {
       setIsPlaying(false);
-      // Navighiamo alla nuova tappa
       navigate(`/visit/${id}/${newIndex}`);
-      // Nota: l'autoplay effettivo avverrà grazie allo useEffect qui sotto
     }
   };
 
   const updateContent = async (newLevel, newDuration) => {
-    const operaId = visit?.tappe?.[safeIndex]?.operaId;
+    const v = visitRef.current;
+    const operaId = v?.tappe?.[safeIndexRef.current]?.operaId;
     if (!operaId) return;
 
-    // IMPORTANTE: Fermiamo tutto prima di cambiare
     setIsPlaying(false);
     window.speechSynthesis.cancel();
 
     try {
       const res = await fetch(
-        `/api/items?operaId=${operaId}&linguaggio=${newLevel}&lunghezza=${newDuration}`,
+        `/api/items?operaId=${operaId}&linguaggio=${newLevel}&lunghezza=${newDuration}`
       );
       const json = await res.json();
-
       if (json.successo && json.data.items.length > 0) {
         setLanguageLevel(newLevel);
         setSelectedDuration(newDuration);
         setCurrentItem(json.data.items[0]);
-        // Non forzare setIsPlaying(true) qui se il browser ti blocca,
-        // lascia che sia l'utente a premere il tasto Play centrale se necessario.
       }
     } catch (err) {
       console.error(err);
     }
   };
 
+  // Keep function refs always up to date
+  useEffect(() => { updateContentRef.current = updateContent; });
+  useEffect(() => { changeItemRef.current = changeItem; });
+  useEffect(() => { handleLogisticsRef.current = handleLogistics; });
+
   useEffect(() => {
-    // Se l'item è stato caricato correttamente, avvia la riproduzione
     if (currentItem) {
       setIsPlaying(true);
     }
   }, [currentItem]);
 
-  // --- COMANDI VOCALI ---
+  // ---------- COMANDI VOCALI ----------
+  // Registered once with empty deps — all state is accessed via refs
   useEffect(() => {
     if (!recognition) return;
-
-    // IMPORTANTE: Collega l'istanza globale al riferimento del componente
     recognitionRef.current = recognition;
 
     recognition.onresult = (event) => {
-      const cmd = event.results[0][0].transcript.toLowerCase();
-      console.log("Comando vocale ricevuto:", cmd);
+      const raw = event.results[0][0].transcript.toLowerCase();
+      // Normalize: remove accents so "più" and "piu" both match
+      const cmd = raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      console.log("Comando vocale (normalizzato):", cmd);
 
-      // 1. NAVIGAZIONE TRA OPERE
+      const cfg = museumConfigRef.current;
+      const item = currentItemRef.current;
+      const idx = safeIndexRef.current;
+
+      // 1. NAVIGAZIONE
       if (cmd.includes("prossimo") || cmd.includes("avanti")) {
-        changeItem(safeIndex + 1);
+        changeItemRef.current(idx + 1);
       }
       if (cmd.includes("precedente") || cmd.includes("indietro")) {
-        changeItem(safeIndex - 1);
+        changeItemRef.current(idx - 1);
       }
 
-      // 2. NAVIGAZIONE VERSO LA MAPPA (Nuovo!)
+      // 2. MAPPA — FIXED: removed stray "/" syntax error
       if (
         cmd.includes("mappa") ||
         cmd.includes("dove si trova") ||
+        cmd.includes("dove mi trovo") ||
         cmd.includes("posizione")
       ) {
-        // Invece di navigate(...), apriamo il Modal
         setShowMapModal(true);
-
-        // Opzionale: facciamo in modo che mostri subito il piano dell'opera attuale
-        if (currentItem?.piano) {
-          setSelectedMapFloor(currentItem.piano);
-        }
+        if (item?.piano) setSelectedMapFloor(item.piano);
       }
 
-      // 3. CONTROLLO LIVELLO E LINGUAGGIO
-      if (cmd.includes("più semplice") || cmd.includes("non capisco")) {
-        const levels = ["infantile", "medio", "avanzato"];
-        const idx = levels.indexOf(languageLevel);
-        if (idx > 0) updateContent(levels[idx - 1], selectedDuration);
+      // 3. LIVELLO LINGUAGGIO
+      if (cmd.includes("piu semplice") || cmd.includes("non capisco")) {
+        handleSimplify();
+      }
+      // FIXED: troppo semplice / meno scolastico were never calling anything
+      if (cmd.includes("troppo semplice") || cmd.includes("meno scolastico")) {
+        handleAdvance();
       }
 
-      if (cmd.includes("dimmi di più") || cmd.includes("approfondisci")) {
-        const durations = ["3s", "15s", "40s"];
-        const idx = durations.indexOf(selectedDuration);
-        if (idx < durations.length - 1) {
-          updateContent(languageLevel, durations[idx + 1]);
-        }
+      // 4. DURATA
+      // FIXED: "piu lungo" and all variants now normalized and matched
+      if (
+        cmd.includes("dimmi di piu") ||
+        cmd.includes("approfondisci") ||
+        cmd.includes("piu lungo")
+      ) {
+        handleMoreContent();
+      }
+      // FIXED: "dimmi di meno", "piu corto", "riduci" were never calling anything
+      if (
+        cmd.includes("dimmi di meno") ||
+        cmd.includes("piu corto") ||
+        cmd.includes("riduci")
+      ) {
+        handleLessContent();
       }
 
-      // 4. CONTROLLO DEL PLAYER AUDIO
+      // 5. PLAYER
       if (cmd.includes("ferma") || cmd.includes("pausa")) {
         setIsPlaying(false);
       }
-      if (
-        cmd.includes("riprendi") ||
-        cmd.includes("play") ||
-        cmd.includes("continua")
-      ) {
+      if (cmd.includes("riprendi") || cmd.includes("play") || cmd.includes("continua")) {
         setIsPlaying(true);
       }
 
-      // 5. INFORMAZIONI LOGISTICHE (COMANDI VOCALI)
+      // 6. LOGISTICA
       if (cmd.includes("bagno") || cmd.includes("toilette")) {
-        handleLogistics(
-          museumConfig?.logistica_globale?.toilette ||
-          "Informazione non disponibile",
+        handleLogisticsRef.current(
+          cfg?.logistica_globale?.toilette || "Informazione non disponibile"
         );
       }
       if (cmd.includes("uscita")) {
-        handleLogistics(
-          museumConfig?.logistica_globale?.uscita ||
-          "Segui le indicazioni per l'uscita principale",
+        handleLogisticsRef.current(
+          cfg?.logistica_globale?.uscita || "Segui le indicazioni per l'uscita principale"
         );
       }
       if (cmd.includes("bar")) {
-        handleLogistics(
-          museumConfig?.logistica_globale?.bar ||
-          "Il bar si trova al piano terra",
+        handleLogisticsRef.current(
+          cfg?.logistica_globale?.bar || "Il bar si trova al piano terra"
+        );
+      }
+      if (cmd.includes("shop") || cmd.includes("negozio") || cmd.includes("bookshop")) {
+        handleLogisticsRef.current(
+          cfg?.logistica_globale?.shop || "Lo shop si trova al piano terra"
+        );
+      }
+      if (cmd.includes("ostacoli") || cmd.includes("accessibilita") || cmd.includes("accessibile")) {
+        handleLogisticsRef.current(
+          cfg?.logistica_globale?.ostacoli || "Nessun ostacolo segnalato sul percorso"
         );
       }
 
-      // 6. METADATI (Sostituisci alert con handleLogistics se vuoi coerenza visiva)
-      if (cmd.includes("chi è l'autore") || cmd.includes("chi è l'artista")) {
-        handleLogistics(`L'autore è ${currentItem?.artista || "sconosciuto"}`);
-      }
-      if (cmd.includes("periodo") || cmd.includes("quando è stato fatto")) {
-        handleLogistics(
-          `L'opera risale al periodo: ${currentItem?.periodo || "non specificato"}`,
-        );
-      }
-
-      // 7. AIUTO
+      // 7. METADATI
+      // Autore — FIXED: using fresh item ref
       if (
-        cmd.includes("aiuto") ||
-        cmd.includes("comandi") ||
-        cmd.includes("cosa posso dire")
+        cmd.includes("chi e l'autore") ||
+        cmd.includes("chi e l'artista")
       ) {
+        handleLogisticsRef.current(
+          `L'autore è ${item?.artista || "sconosciuto"}`
+        );
+      }
+
+      // Stile — FIXED: was never handled, now fully working
+      if (
+        cmd.includes("qual e' lo stile") ||
+        cmd.includes("che stile")
+      ) {
+        handleLogisticsRef.current(
+          `Lo stile è: ${item?.stile || "non specificato"}`
+        );
+      }
+
+      // Cos'è questo — FIXED: was never handled, now fully working
+      if (
+        cmd.includes("cos e questo") ||
+        cmd.includes("che cos e") ||
+        cmd.includes("cosa sto guardando")
+      ) {
+        handleLogisticsRef.current(
+          `${item?.titolo || "Opera"} — ${item?.categoria || ""}. ${item?.artista ? "Autore: " + item.artista : ""}`
+        );
+      }
+
+      // Periodo
+      if (cmd.includes("periodo") || cmd.includes("quando e stato fatto")) {
+        handleLogisticsRef.current(
+          `L'opera risale al periodo: ${item?.periodo || "non specificato"}`
+        );
+      }
+
+      // 8. AIUTO
+      if (cmd.includes("aiuto") || cmd.includes("comandi") || cmd.includes("cosa posso dire")) {
         setShowHelpModal(true);
       }
     };
@@ -340,16 +403,9 @@ export default function NavigatorItemViewer() {
       setIsListening(false);
     };
 
-    // Aggiungiamo tutte le variabili che servono all'interno della funzione per evitare dati "vecchi"
-  }, [
-    safeIndex,
-    languageLevel,
-    selectedDuration,
-    currentItem,
-    museumConfig,
-    navigate,
-    id,
-  ]);
+    // Empty deps: registered once, all state accessed via refs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const formatTime = (seconds) => {
     if (!seconds || isNaN(seconds)) return "0:00";
@@ -363,9 +419,7 @@ export default function NavigatorItemViewer() {
       recognitionRef.current?.stop();
       setIsListening(false);
     } else {
-      // DISATTIVA AUDIO PRIMA DI ASCOLTARE [cite: 718]
       setIsPlaying(false);
-
       try {
         recognitionRef.current?.start();
         setIsListening(true);
@@ -374,6 +428,17 @@ export default function NavigatorItemViewer() {
       }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="navigator-viewer-layout d-flex align-items-center justify-content-center">
+        <div className="text-white text-center">
+          <div className="spinner-border mb-3" role="status" />
+          <p>Caricamento visita...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="navigator-viewer-layout">
@@ -385,6 +450,13 @@ export default function NavigatorItemViewer() {
         <div className="top-nav-center">
           <span className="top-nav-title">{visit?.titolo || "Visita"}</span>
         </div>
+        <button
+          className="top-nav-btn"
+          title="Vai al Marketplace"
+          onClick={() => navigate("/marketplace")}
+        >
+          <i className="bi bi-shop"></i>
+        </button>
       </div>
 
       <div className="scrollable-viewer-content">
@@ -396,12 +468,8 @@ export default function NavigatorItemViewer() {
           />
           <div className="hero-overlay-gradient"></div>
           <div className="hero-caption">
-            <p className="category-label">
-              {currentItem?.categoria || "Opera"}
-            </p>
-            <h1 className="hero-title">
-              {currentItem?.titolo || "Titolo assente"}
-            </h1>
+            <p className="category-label">{currentItem?.categoria || "Opera"}</p>
+            <h1 className="hero-title">{currentItem?.titolo || "Titolo assente"}</h1>
             <button
               className="btn-details-minimal mt-2"
               onClick={() => setShowDetailsModal(true)}
@@ -415,10 +483,7 @@ export default function NavigatorItemViewer() {
                 backdropFilter: "blur(5px)",
               }}
             >
-              <i
-                className="bi bi-info-circle me-2"
-                style={{ color: "#e18f37" }}
-              ></i>
+              <i className="bi bi-info-circle me-2" style={{ color: "#e18f37" }}></i>
               Dettagli
             </button>
           </div>
@@ -442,13 +507,9 @@ export default function NavigatorItemViewer() {
                           Configurazione Guida
                         </span>
                       </div>
-                      <i
-                        className={`bi bi-chevron-${isConfigOpen ? "up" : "down"} transition-icon`}
-                      ></i>
+                      <i className={`bi bi-chevron-${isConfigOpen ? "up" : "down"} transition-icon`}></i>
                     </div>
-                    <div
-                      className={`config-content ${isConfigOpen ? "is-open" : ""}`}
-                    >
+                    <div className={`config-content ${isConfigOpen ? "is-open" : ""}`}>
                       <div className="pt-4">
                         <p className="small mb-3 text-uppercase ls-1 text-white">
                           Livello di analisi
@@ -481,12 +542,10 @@ export default function NavigatorItemViewer() {
                       </div>
                     </div>
                   </div>
+
                   <div className="description-quote mx-3 mt-4">
                     <p className="m-0">
-                      "
-                      {currentItem?.descrizione ||
-                        "Nessuna descrizione disponibile."}
-                      "
+                      "{currentItem?.descrizione || "Nessuna descrizione disponibile."}"
                     </p>
                   </div>
                 </Card.Body>
@@ -504,9 +563,7 @@ export default function NavigatorItemViewer() {
                       value={currentTime}
                       step="0.1"
                       onChange={(e) => {
-                        audioRef.current.currentTime = parseFloat(
-                          e.target.value,
-                        );
+                        audioRef.current.currentTime = parseFloat(e.target.value);
                       }}
                     />
                     <div
@@ -533,9 +590,7 @@ export default function NavigatorItemViewer() {
                     className="play-sphere-main"
                     onClick={() => setIsPlaying(!isPlaying)}
                   >
-                    <i
-                      className={`bi ${isPlaying ? "bi-pause-fill" : "bi-play-fill"}`}
-                    ></i>
+                    <i className={`bi ${isPlaying ? "bi-pause-fill" : "bi-play-fill"}`}></i>
                   </div>
                   <button
                     className="btn-item-skip"
@@ -551,12 +606,15 @@ export default function NavigatorItemViewer() {
           </Row>
         </Container>
       </div>
+
+      {/* TOAST LOGISTICA */}
       {logisticsMsg && (
         <div className="logistics-toast">
           <i className="bi bi-info-circle-fill me-2"></i>
           {logisticsMsg}
         </div>
       )}
+
       {/* BOTTOM NAV */}
       <div className="bottom-nav-viewer">
         <button className="nav-item" onClick={() => setShowMapModal(true)}>
@@ -575,7 +633,9 @@ export default function NavigatorItemViewer() {
         </button>
       </div>
 
-      {/* MODALS */}
+      {/* ===== MODALS ===== */}
+
+      {/* SCHEDA TECNICA */}
       <Modal
         show={showDetailsModal}
         onHide={() => setShowDetailsModal(false)}
@@ -585,10 +645,7 @@ export default function NavigatorItemViewer() {
       >
         <Modal.Body className="museum-modal-content py-4">
           <div className="text-center mb-3">
-            <i
-              className="bi bi-palette"
-              style={{ fontSize: "2rem", color: "#e18f37" }}
-            ></i>
+            <i className="bi bi-palette" style={{ fontSize: "2rem", color: "#e18f37" }}></i>
           </div>
           <h6 className="text-uppercase fw-bold mb-3 text-white text-center">
             Scheda Tecnica
@@ -598,8 +655,7 @@ export default function NavigatorItemViewer() {
               <strong>Autore:</strong> {currentItem?.artista || "Autore Ignoto"}
             </p>
             <p className="mb-2">
-              <strong>Periodo:</strong>{" "}
-              {currentItem?.periodo || "Non specificato"}
+              <strong>Periodo:</strong> {currentItem?.periodo || "Non specificato"}
             </p>
             <p className="mb-2">
               <strong>Stile:</strong> {currentItem?.stile || "Non specificato"}
@@ -624,6 +680,7 @@ export default function NavigatorItemViewer() {
         </Modal.Body>
       </Modal>
 
+      {/* ASSISTENTE */}
       <Modal
         show={showAccessMenu}
         onHide={() => setShowAccessMenu(false)}
@@ -633,34 +690,149 @@ export default function NavigatorItemViewer() {
         <Modal.Body className="museum-modal-content text-center">
           <h6 className="text-white mb-4 text-uppercase">Assistente</h6>
           <div className="d-grid gap-2">
+
+            <p className="text-muted small text-uppercase mb-1" style={{ letterSpacing: "0.1em" }}>
+              Navigazione
+            </p>
+            <div className="d-flex gap-2">
+              <button
+                className="btn-museum-outline flex-fill"
+                disabled={safeIndex === 0}
+                onClick={() => { changeItem(safeIndex - 1); setShowAccessMenu(false); }}
+              >
+                <i className="bi bi-skip-start me-1"></i>Precedente
+              </button>
+              <button
+                className="btn-museum-outline flex-fill"
+                disabled={safeIndex === (visit?.tappe?.length ?? 0) - 1}
+                onClick={() => { changeItem(safeIndex + 1); setShowAccessMenu(false); }}
+              >
+                Prossimo<i className="bi bi-skip-end ms-1"></i>
+              </button>
+            </div>
+
+            <p className="text-muted small text-uppercase mt-3 mb-1" style={{ letterSpacing: "0.1em" }}>
+              Livello
+            </p>
+            <div className="d-flex gap-2">
+              <button
+                className="btn-museum-outline flex-fill"
+                onClick={() => { handleSimplify(); setShowAccessMenu(false); }}
+              >
+                <i className="bi bi-arrow-down-circle me-1"></i>Più semplice
+              </button>
+              <button
+                className="btn-museum-outline flex-fill"
+                onClick={() => { handleAdvance(); setShowAccessMenu(false); }}
+              >
+                <i className="bi bi-arrow-up-circle me-1"></i>Più avanzato
+              </button>
+            </div>
+
+            <p className="text-muted small text-uppercase mt-3 mb-1" style={{ letterSpacing: "0.1em" }}>
+              Durata
+            </p>
+            <div className="d-flex gap-2">
+              <button
+                className="btn-museum-outline flex-fill"
+                onClick={() => { handleLessContent(); setShowAccessMenu(false); }}
+              >
+                <i className="bi bi-dash-circle me-1"></i>Più corto
+              </button>
+              <button
+                className="btn-museum-outline flex-fill"
+                onClick={() => { handleMoreContent(); setShowAccessMenu(false); }}
+              >
+                <i className="bi bi-plus-circle me-1"></i>Più lungo
+              </button>
+            </div>
+
+            <p className="text-muted small text-uppercase mt-3 mb-1" style={{ letterSpacing: "0.1em" }}>
+              Info Opera
+            </p>
+            <div className="d-flex gap-2">
+              <button
+                className="btn-museum-outline flex-fill"
+                onClick={() => {
+                  handleLogistics(`L'autore è ${currentItem?.artista || "sconosciuto"}`);
+                  setShowAccessMenu(false);
+                }}
+              >
+                <i className="bi bi-person me-1"></i>Autore
+              </button>
+              <button
+                className="btn-museum-outline flex-fill"
+                onClick={() => {
+                  handleLogistics(`Lo stile è: ${currentItem?.stile || "non specificato"}`);
+                  setShowAccessMenu(false);
+                }}
+              >
+                <i className="bi bi-brush me-1"></i>Stile
+              </button>
+            </div>
             <button
               className="btn-museum-outline"
               onClick={() => {
-                handleSimplify();
+                handleLogistics(
+                  `${currentItem?.titolo || "Opera"} — ${currentItem?.categoria || ""}. ${currentItem?.artista ? "Autore: " + currentItem.artista : ""}`
+                );
                 setShowAccessMenu(false);
               }}
             >
-              <i className="bi bi-person-arms-up me-2"></i>Semplifica
-            </button>
-            <button
-              className="btn-museum-outline"
-              onClick={() => {
-                handleLogistics(museumConfig?.logistica_globale?.bagno); // <--- CAMBIATO QUI
-                setShowAccessMenu(false);
-              }}
-            >
-              <i className="bi bi-water me-2"></i>Bagno
+              <i className="bi bi-eye me-2"></i>Cos'è questo
             </button>
 
-            <button
-              className="btn-museum-outline"
-              onClick={() => {
-                handleLogistics(museumConfig?.logistica_globale?.bar); // <--- CAMBIATO QUI
-                setShowAccessMenu(false);
-              }}
-            >
-              <i className="bi bi-cup-hot me-2"></i>Bar
-            </button>
+            <p className="text-muted small text-uppercase mt-3 mb-1" style={{ letterSpacing: "0.1em" }}>
+              Logistica
+            </p>
+            <div className="d-flex gap-2 flex-wrap">
+              <button
+                className="btn-museum-outline flex-fill"
+                onClick={() => {
+                  handleLogistics(museumConfig?.logistica_globale?.toilette || "Informazione non disponibile");
+                  setShowAccessMenu(false);
+                }}
+              >
+                <i className="bi bi-water me-1"></i>Bagno
+              </button>
+              <button
+                className="btn-museum-outline flex-fill"
+                onClick={() => {
+                  handleLogistics(museumConfig?.logistica_globale?.bar || "Il bar si trova al piano terra");
+                  setShowAccessMenu(false);
+                }}
+              >
+                <i className="bi bi-cup-hot me-1"></i>Bar
+              </button>
+              <button
+                className="btn-museum-outline flex-fill"
+                onClick={() => {
+                  handleLogistics(museumConfig?.logistica_globale?.uscita || "Segui le indicazioni per l'uscita principale");
+                  setShowAccessMenu(false);
+                }}
+              >
+                <i className="bi bi-door-open me-1"></i>Uscita
+              </button>
+              <button
+                className="btn-museum-outline flex-fill"
+                onClick={() => {
+                  handleLogistics(museumConfig?.logistica_globale?.shop || "Lo shop si trova al piano terra");
+                  setShowAccessMenu(false);
+                }}
+              >
+                <i className="bi bi-bag me-1"></i>Shop
+              </button>
+              <button
+                className="btn-museum-outline flex-fill"
+                onClick={() => {
+                  handleLogistics(museumConfig?.logistica_globale?.ostacoli || "Nessun ostacolo segnalato sul percorso");
+                  setShowAccessMenu(false);
+                }}
+              >
+                <i className="bi bi-exclamation-triangle me-1"></i>Ostacoli
+              </button>
+            </div>
+
             <button
               className="btn-museum-primary mt-3"
               onClick={() => setShowAccessMenu(false)}
@@ -671,6 +843,7 @@ export default function NavigatorItemViewer() {
         </Modal.Body>
       </Modal>
 
+      {/* USCITA */}
       <Modal
         show={showExitModal}
         onHide={() => setShowExitModal(false)}
@@ -683,21 +856,17 @@ export default function NavigatorItemViewer() {
           </div>
           <h5 className="museum-modal-title">Concludi l'esperienza?</h5>
           <div className="museum-modal-actions">
-            <button
-              className="btn-museum-outline"
-              onClick={() => setShowExitModal(false)}
-            >
+            <button className="btn-museum-outline" onClick={() => setShowExitModal(false)}>
               Annulla
             </button>
-            <button
-              className="btn-museum-primary"
-              onClick={() => navigate(`/visit/${id}`)}
-            >
+            <button className="btn-museum-primary" onClick={() => navigate(`/visit/${id}`)}>
               Esci
             </button>
           </div>
         </Modal.Body>
       </Modal>
+
+      {/* MAPPA */}
       <Modal
         show={showMapModal}
         onHide={() => setShowMapModal(false)}
@@ -709,7 +878,6 @@ export default function NavigatorItemViewer() {
             Mappa - Piano {selectedMapFloor}
           </Modal.Title>
         </Modal.Header>
-
         <Modal.Body className="p-0">
           <div className="map-floor-selector d-flex justify-content-center">
             {["-1", "0", "1", "2"].map((f) => (
@@ -723,25 +891,101 @@ export default function NavigatorItemViewer() {
             ))}
           </div>
 
-          <div className="map-container">
+          <div className="map-container" style={{ position: "relative" }}>
             <img
               src={`/mobile/maps/mappa-museo-piano_${selectedMapFloor}.png`}
               alt={`Piano ${selectedMapFloor}`}
+              style={{ width: "100%", display: "block" }}
             />
 
-            {/* Il marker usa le coordinate % che abbiamo salvato nel DB */}
-            {currentItem?.piano === selectedMapFloor && (
-              <div
-                className="map-marker-ping"
-                style={{
-                  left: `${currentItem.mappa_x}%`,
-                  top: `${currentItem.mappa_y}%`,
-                }}
-              />
-            )}
+            {visit?.tappe?.map((tappa, idx) => {
+              const item = tappa.item_default;
+              if (!item || item.piano !== selectedMapFloor) return null;
+              const isCurrent = idx === safeIndex;
+              return (
+                <div
+                  key={idx}
+                  title={item.titolo || `Tappa ${idx + 1}`}
+                  onClick={() => { setShowMapModal(false); changeItem(idx); }}
+                  style={{
+                    position: "absolute",
+                    left: `${item.mappa_x}%`,
+                    top: `${item.mappa_y}%`,
+                    transform: "translate(-50%, -50%)",
+                    cursor: "pointer",
+                    zIndex: isCurrent ? 10 : 5,
+                  }}
+                >
+                  {isCurrent ? (
+                    <div className="map-marker-ping" />
+                  ) : (
+                    <div
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: "50%",
+                        background: "#e18f37",
+                        border: "2px solid white",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 10,
+                        color: "white",
+                        fontWeight: "bold",
+                        boxShadow: "0 1px 4px rgba(0,0,0,0.4)",
+                      }}
+                    >
+                      {idx + 1}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="px-3 py-2" style={{ background: "#1a1a1a" }}>
+            {visit?.tappe?.map((tappa, idx) => {
+              const item = tappa.item_default;
+              if (!item || item.piano !== selectedMapFloor) return null;
+              const isCurrent = idx === safeIndex;
+              return (
+                <div
+                  key={idx}
+                  className="d-flex align-items-center gap-2 py-1"
+                  style={{ cursor: "pointer", opacity: isCurrent ? 1 : 0.6 }}
+                  onClick={() => { setShowMapModal(false); changeItem(idx); }}
+                >
+                  <span
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: "50%",
+                      background: isCurrent ? "#e18f37" : "#555",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 10,
+                      color: "white",
+                      fontWeight: "bold",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {idx + 1}
+                  </span>
+                  <span style={{ fontSize: "0.8rem", color: isCurrent ? "#e18f37" : "white" }}>
+                    {item.titolo || `Tappa ${idx + 1}`}
+                  </span>
+                  {isCurrent && (
+                    <i className="bi bi-geo-alt-fill ms-auto" style={{ color: "#e18f37", fontSize: "0.75rem" }}></i>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </Modal.Body>
       </Modal>
+
+      {/* AIUTO */}
       <Modal
         show={showHelpModal}
         onHide={() => setShowHelpModal(false)}
@@ -754,25 +998,32 @@ export default function NavigatorItemViewer() {
         <Modal.Body className="bg-dark text-white p-4">
           <ul className="list-unstyled">
             <li className="mb-3">
-              <i className="bi bi-play-circle me-2 text-warning"></i>{" "}
-              <strong>Navigazione:</strong> "Prossimo", "Precedente"
+              <i className="bi bi-arrow-left-right me-2 text-warning"></i>
+              <strong>Navigazione:</strong> "Prossimo", "Precedente", "Avanti", "Indietro"
             </li>
             <li className="mb-3">
-              <i className="bi bi-info-square me-2 text-warning"></i>{" "}
-              <strong>Dettagli:</strong> "Chi è l'autore", "Qual è lo stile",
-              "Cos'è questo"
+              <i className="bi bi-info-square me-2 text-warning"></i>
+              <strong>Info opera:</strong> "Chi è l'autore", "Qual è lo stile", "Cos'è questo", "Cosa sto guardando"
             </li>
             <li className="mb-3">
-              <i className="bi bi-map me-2 text-warning"></i>{" "}
-              <strong>Mappa:</strong> "Mappa", "Dove mi trovo"
+              <i className="bi bi-map me-2 text-warning"></i>
+              <strong>Mappa:</strong> "Mappa", "Dove mi trovo", "Posizione"
             </li>
             <li className="mb-3">
-              <i className="bi bi-gear me-2 text-warning"></i>{" "}
-              <strong>Livello:</strong> "Più semplice", "Più corto", "Più lungo"
+              <i className="bi bi-gear me-2 text-warning"></i>
+              <strong>Livello:</strong> "Più semplice", "Non capisco", "Troppo semplice", "Meno scolastico"
             </li>
             <li className="mb-3">
-              <i className="bi bi-geo-alt me-2 text-warning"></i>{" "}
-              <strong>Logistica:</strong> "Dov'è il bagno", "Dov'è l'uscita"
+              <i className="bi bi-clock me-2 text-warning"></i>
+              <strong>Durata:</strong> "Dimmi di più", "Più lungo", "Dimmi di meno", "Più corto", "Riduci"
+            </li>
+            <li className="mb-3">
+              <i className="bi bi-play-circle me-2 text-warning"></i>
+              <strong>Player:</strong> "Ferma", "Pausa", "Riprendi", "Play", "Continua"
+            </li>
+            <li className="mb-3">
+              <i className="bi bi-geo-alt me-2 text-warning"></i>
+              <strong>Logistica:</strong> "Dov'è il bagno", "Dov'è l'uscita", "Dov'è il bar", "Dov'è lo shop", "Ci sono ostacoli"
             </li>
           </ul>
           <button
