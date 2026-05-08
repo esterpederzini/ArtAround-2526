@@ -143,6 +143,9 @@
   border-radius: 1.2rem;
   color: #fff;
   transition: all 0.3s ease;
+  pointer-events: all;
+  position: relative;
+  z-index: 10;
 }
 
 .config-content {
@@ -180,6 +183,7 @@
   font-weight: 600;
   font-size: 0.8rem;
   transition: 0.3s;
+  z-index: 20;
 }
 
 .btn-difficolta-custom.active {
@@ -478,7 +482,7 @@
 
 /* Assicurati che lo scrollable content non venga coperto dalla barra */
 .scrollable-viewer-content {
-  padding-bottom: 10vh; /* Aumentato per non far coprire il player dalla nav */
+  padding-bottom: 20vh; /* Aumentato per non far coprire il player dalla nav */
 }
 
 /* --- MAP MODAL RESPONSIVE --- */
