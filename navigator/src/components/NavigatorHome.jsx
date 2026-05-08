@@ -98,11 +98,6 @@ const NavigatorHome = () => {
             <i className="bi bi-shop"></i>
             <span>Marketplace</span>
           </div>
-
-          <div className="side-nav-item" onClick={() => handleNav("/map")}>
-            <i className="bi bi-map"></i>
-            <span>Floor Map</span>
-          </div>
         </nav>
         <div className="side-bar-footer">
           <button
@@ -118,15 +113,14 @@ const NavigatorHome = () => {
 
       <header className="home-header">
         <i className="bi bi-list menu-icon" onClick={toggleSidebar}></i>
-        <span className="brand-name">{config?.museumName || "Loading..."}</span>
+        <span className="brand-name">{"ArtAround"}</span>
       </header>
 
       <section className="hero-modern">
         <div className="hero-content">
-          <h1 className="hero-title">{config?.appName || "ArtAround"}</h1>
+          <h1 className="hero-title">{config?.museo || "ArtAround"}</h1>
           <p className="hero-subtitle">
-            {config?.motto ||
-              "Curated journeys through the finest collections."}
+            {config?.motto || "Curated journeys through the finest collections."}
           </p>
 
           <div className="search-bar">
@@ -143,17 +137,7 @@ const NavigatorHome = () => {
 
       <section className="visits-section">
         <div className="section-header">
-          <h2>{searchTerm ? "Risultati" : "Explore Visits"}</h2>
-
-          {/* NUOVO: Pulsante rapido Marketplace */}
-          {!searchTerm && (
-            <button
-              className="view-all-btn"
-              onClick={() => (window.location.href = "/")}
-            >
-              Get More <i className="bi bi-plus-circle"></i>
-            </button>
-          )}
+          <h2>{searchTerm ? "Risultati" : "Esplora visite"}</h2>
         </div>
 
         <div className="horizontal-scroll">
@@ -170,12 +154,18 @@ const NavigatorHome = () => {
                     <img
                       src={
                         visita.image ||
-                        "https://images.unsplash.com/photo-1518998053502-53cc83e9ce78?q=80&w=1000"
+                        "/img/default_item_image.jpg"
                       }
                       alt={visita.title}
                     />
                     <span className="card-badge">
-                      {visita.type || "AUDIO GUIDE"}
+                      {visita.type
+                        ? visita.type
+                        : visita.linguaggio === "infantile"
+                          ? "KIDS GUIDE"
+                          : visita.linguaggio === "avanzato"
+                            ? "EXPERT GUIDE"
+                            : "CLASSIC GUIDE"}
                     </span>
                   </div>
                   <h3>{visita.title || visita.titolo}</h3>

@@ -1,111 +1,159 @@
-/* Container principale con sfondo artistico */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap");
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --gold: #e18f37;
+  --gold-glow: rgba(225, 143, 55, 0.25);
+  --gold-border: rgba(225, 143, 55, 0.4);
+  --bg: #111113;
+  --card-bg: rgba(22, 22, 26, 0.88);
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --text: #f4f0ea;
+  --text-muted: #6e6a64;
+  --text-soft: #a8a49e;
+  --error: #e05c5c;
+}
+
+/* ── BACKGROUND ── */
 .login-container {
-  background-image: url("https://img.freepik.com/premium-photo/closeup-black-paint-strokes-canvas-abstract-art-background-with-intricate-brush-marks_1268487-10036.jpg?semt=ais_hybrid&w=740&q=80");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+  padding: 24px 16px;
+  background-color: var(--bg);
+  background-image:
+    url("https://img.freepik.com/premium-photo/closeup-black-paint-strokes-canvas-abstract-art-background-with-intricate-brush-marks_1268487-10036.jpg?semt=ais_hybrid&w=740&q=80");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  font-family: "DM Sans", sans-serif;
 }
 
-/* Card con effetto Glassmorphism scuro */
+/* dark overlay so text stays readable */
+.login-container::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 12, 0.78);
+  z-index: 0;
+}
+
+/* ── CARD ── */
 .login-card {
-  background: rgba(13, 17, 23, 0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(48, 54, 61, 0.8);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 1;
   width: 100%;
-  max-width: 400px;
-  padding: 40px;
-  border-radius: 24px; /* Arrotondamento perfetto su tutti i lati */
+  max-width: 420px;
+  background: var(--card-bg);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 44px 36px 36px;
   text-align: center;
-  color: #f0f6fc;
+  box-shadow:
+    0 0 0 1px rgba(225, 143, 55, 0.08),
+    0 32px 64px -16px rgba(0, 0, 0, 0.7);
 }
 
+/* subtle gold top-edge accent */
+.login-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  border-radius: 1px;
+}
+
+/* ── LOGO ICON ── */
 .logo-icon {
-  background: rgba(31, 111, 235, 0.2);
-  border: 1px solid rgba(31, 111, 235, 0.4);
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--gold-glow);
+  border: 1px solid var(--gold-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 24px;
-  font-size: 24px;
-  color: #2f81f7;
+  margin: 0 auto 28px;
+  font-size: 26px;
+  color: var(--gold);
+  box-shadow: 0 0 24px var(--gold-glow);
 }
 
-h1 {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #ffffff;
+/* ── HEADINGS ── */
+.login-card h1 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.01em;
+  margin-bottom: 6px;
+  line-height: 1.1;
 }
 
 .subtitle {
-  color: #8b949e;
-  margin-bottom: 32px;
-  font-size: 16px;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 36px;
 }
 
-/* Gestione Input e Label */
-.input-group {
+/* ── FORM FIELDS ── */
+.login-field {
   text-align: left;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
-.label-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.login-field label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   margin-bottom: 8px;
 }
 
-.input-group label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #c9d1d9;
-}
-
-.forgot-link {
-  font-size: 12px;
-  color: #2f81f7;
-  text-decoration: none;
-}
-
-.email {
-  width: 60%;
-}
-
-input {
+.login-field input {
   width: 100%;
   padding: 14px 16px;
-  background: rgba(1, 4, 9, 0.5);
-  border: 1px solid #30363d;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 12px;
-  color: #ffffff;
-  box-sizing: border-box;
-  font-size: 15px;
-  transition: all 0.2s ease;
+  color: var(--text);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-input:focus {
+.login-field input::placeholder {
+  color: var(--text-muted);
+}
+
+.login-field input:focus {
   outline: none;
-  border-color: #2f81f7;
-  background: rgba(1, 4, 9, 0.8);
-  box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.3);
+  border-color: var(--gold);
+  background: rgba(225, 143, 55, 0.04);
+  box-shadow: 0 0 0 3px var(--gold-glow);
 }
 
-/* Container Password con icona interna */
+/* ── PASSWORD TOGGLE ── */
 .password-input-container {
   position: relative;
   display: flex;
@@ -113,95 +161,89 @@ input:focus {
 }
 
 .password-input-container input {
-  padding-right: 45px; /* Spazio per non coprire il testo con l'icona */
+  padding-right: 46px;
 }
 
 .password-toggle-icon {
   position: absolute;
-  right: 16px;
-  color: #8b949e;
+  right: 14px;
+  color: var(--text-muted);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   display: flex;
   align-items: center;
+  transition: color 0.2s;
   z-index: 2;
 }
 
 .password-toggle-icon:hover {
-  color: #f0f6fc;
+  color: var(--gold);
 }
 
-/* Bottoni e Decorazioni */
+/* ── ERROR ── */
+.error-msg {
+  color: var(--error);
+  font-size: 0.82rem;
+  margin-top: -8px;
+  margin-bottom: 14px;
+  text-align: left;
+  padding-left: 2px;
+}
+
+/* ── LOGIN BUTTON ── */
 .login-btn {
   width: 100%;
-  padding: 14px;
-  background: #1f6feb;
-  color: white;
+  padding: 15px;
+  margin-top: 8px;
+  background: var(--gold);
+  color: #111113;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.95rem;
   font-weight: 600;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  margin-top: 10px;
-  font-size: 16px;
-  transition: background 0.2s;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .login-btn:hover {
-  background: #388bfd;
+  background: #eda04a;
+  box-shadow: 0 4px 20px rgba(225, 143, 55, 0.35);
 }
 
-.divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  color: #484f58;
-  font-size: 12px;
-  margin: 24px 0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+.login-btn:active {
+  transform: scale(0.985);
 }
 
-.divider::before,
-.divider::after {
-  content: "";
-  flex: 1;
-  border-bottom: 1px solid #30363d;
-}
-
-.divider::before {
-  margin-right: 10px;
-}
-.divider::after {
-  margin-left: 10px;
-}
-
-.social-login-group {
-  display: flex;
-  gap: 12px;
-}
-
-.social-btn {
-  flex: 1;
-  padding: 12px;
-  background: rgba(22, 27, 34, 0.8);
-  border: 1px solid #30363d;
-  border-radius: 10px;
-  color: #ffffff;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.error-msg {
-  color: #f85149;
-  font-size: 13px;
-  margin-top: -10px;
-  margin-bottom: 10px;
-}
-
+/* ── FOOTER ── */
 .footer-text {
-  margin-top: 40px;
-  font-size: 11px;
-  color: #484f58;
-  letter-spacing: 1.5px;
+  margin-top: 32px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+/* ── RESPONSIVE — desktop gets a wider feel ── */
+@media (min-width: 768px) {
+  .login-card {
+    max-width: 460px;
+    padding: 52px 48px 44px;
+  }
+
+  .login-card h1 {
+    font-size: 2.6rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .login-container {
+    /* subtle left-offset on large screens for visual interest */
+    justify-content: center;
+  }
+
+  .login-card {
+    max-width: 480px;
+  }
 }

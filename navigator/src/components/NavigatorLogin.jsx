@@ -2,14 +2,10 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../CSS/NavigatorLogin.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faEye,
-  faEyeSlash,
-  faUniversity,
-} from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash, faUniversity } from "@fortawesome/free-solid-svg-icons";
 
 const NavigatorLogin = () => {
-  const [identifier, setIdentifier] = useState(""); // Chiamiamolo identifier invece di email per chiarezza
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -33,7 +29,7 @@ const NavigatorLogin = () => {
         const sessionData = {
           user: userData,
           token,
-          loginTimestamp: new Date().getTime(), // Salva l'ora attuale in millisecondi
+          loginTimestamp: new Date().getTime(),
         };
         localStorage.setItem("user_session", JSON.stringify(sessionData));
         navigate("/");
@@ -48,41 +44,49 @@ const NavigatorLogin = () => {
   return (
     <div className="login-container">
       <div className="login-card">
+
+        {/* Icon */}
         <div className="logo-icon">
           <FontAwesomeIcon icon={faUniversity} />
         </div>
 
+        {/* Heading */}
         <h1>Bentornato</h1>
         <p className="subtitle">Museum Explorer</p>
 
+        {/* Form */}
         <form onSubmit={handleLogin}>
-          <div className="input-group">
-            <label>Username o Email</label>
+          <div className="login-field">
+            <label htmlFor="identifier">Username</label>
             <input
-              type="text" // Cambiato in text per accettare "autore1"
+              id="identifier"
+              type="text"
               placeholder="Inserisci il tuo username"
+              // className="login-input"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required
-              // Rimosso lo stile inline che rompeva il layout
+              autoComplete="username"
             />
           </div>
 
-          <div className="input-group">
-            <div className="label-row">
-              <label>Password</label>
-            </div>
+          <div className="login-field">
+            <label htmlFor="password">Password</label>
             <div className="password-input-container">
               <input
+                id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Inserisci la password"
+                // className="login-input"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
               />
               <span
                 className="password-toggle-icon"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Nascondi password" : "Mostra password"}
               >
                 <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
               </span>
@@ -95,6 +99,8 @@ const NavigatorLogin = () => {
             Accedi
           </button>
         </form>
+
+        <p className="footer-text">ArtAround &mdash; Museum Explorer</p>
       </div>
     </div>
   );
