@@ -229,7 +229,12 @@ export default function NavigatorItemViewer() {
   const updateContent = async (newLevel, newDuration) => {
     const v = visitRef.current;
     const operaId = v?.tappe?.[safeIndexRef.current]?.operaId;
-    if (!operaId) return;
+    if (!operaId) {
+      // Ti avvisa se manca l'ID dell'opera nella tappa
+      setLogisticsMsg("Errore: operaId non trovato per questa tappa.");
+      setTimeout(() => setLogisticsMsg(""), 4000);
+      return;
+    }
 
     setIsPlaying(false);
     window.speechSynthesis.cancel();
@@ -239,10 +244,15 @@ export default function NavigatorItemViewer() {
         `/api/items?operaId=${operaId}&linguaggio=${newLevel}&lunghezza=${newDuration}`
       );
       const json = await res.json();
+
       if (json.successo && json.data.items.length > 0) {
         setLanguageLevel(newLevel);
         setSelectedDuration(newDuration);
         setCurrentItem(json.data.items[0]);
+      } else {
+        // CORREZIONE: Se la combinazione non esiste, avvisa l'utente senza bloccare l'interfaccia
+        setLogisticsMsg(`Variante (${newLevel} - ${newDuration}) non disponibile per questa opera.`);
+        setTimeout(() => setLogisticsMsg(""), 4000);
       }
     } catch (err) {
       console.error(err);
