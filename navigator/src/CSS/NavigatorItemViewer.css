@@ -619,3 +619,241 @@
     transform: translate(-50%, -50%);
   }
 }
+
+/* ==========================================================================
+   DESKTOP LAYOUT (min-width: 769px)
+   — Split-screen: image column (left, fixed) + content panel (right, scrollable)
+   — Mobile rules above are NOT touched.
+   ========================================================================== */
+@media (min-width: 769px) {
+
+  /* ── Root layout: horizontal split ── */
+  .navigator-viewer-layout {
+    flex-direction: row !important;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── LEFT COLUMN: full-height artwork image, fixed ── */
+  .hero-image-container {
+    position: relative;
+    width: 52vw;
+    height: 100vh !important;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 1px solid red;
+  }
+
+  .hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Subtle Ken-Burns idle effect */
+    animation: desktop-kb 18s ease-in-out infinite alternate;
+  }
+
+  @keyframes desktop-kb {
+    from {
+      transform: scale(1);
+      transform-origin: center center;
+    }
+
+    to {
+      transform: scale(1.04);
+      transform-origin: 55% 48%;
+    }
+  }
+
+  /* Gradient on the image: stronger at the right edge so it bleeds into the panel */
+  .hero-overlay-gradient {
+    background: linear-gradient(to right,
+        transparent 40%,
+        rgba(26, 26, 29, 0.55) 72%,
+        #1a1a1d 100%),
+      linear-gradient(to top,
+        #1a1a1d 0%,
+        transparent 35%);
+  }
+
+  /* Caption is shown on mobile inside the image; on desktop we hide it
+     because the JSX already renders a dedicated .d-none.d-md-block title block */
+  .hero-caption {
+    display: none !important;
+  }
+
+  /* ── RIGHT COLUMN: header + scrollable content + docked nav ── */
+
+  /* Top navigation bar — sits above the right panel only */
+  .top-nav-viewer {
+    position: fixed;
+    top: 0;
+    left: 52vw;
+    width: 48vw;
+    height: 60px;
+    background: rgba(26, 26, 29, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 0 2.5rem;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .top-nav-center {
+    position: static;
+    transform: none;
+    margin-left: 1rem;
+  }
+
+  .top-nav-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    opacity: 0.5;
+  }
+
+  /* Scrollable content panel */
+  .scrollable-viewer-content {
+    position: absolute;
+    top: 0;
+    left: 52vw;
+    width: 48vw;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 80px 2.8rem 13vh 2.8rem !important;
+    background-color: #1a1a1d;
+    box-sizing: border-box;
+  }
+
+  /* Title block already rendered by JSX (.d-none .d-md-block) */
+  .scrollable-viewer-content .d-none.d-md-block {
+    margin-bottom: 1.8rem;
+  }
+
+  .scrollable-viewer-content .d-none.d-md-block h1 {
+    font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+    font-weight: 800;
+    line-height: 1.15;
+    color: #fff;
+    margin: 0;
+  }
+
+  .scrollable-viewer-content .d-none.d-md-block hr {
+    border-color: rgba(255, 255, 255, 0.08);
+    margin-top: 1.2rem;
+    margin-bottom: 0;
+  }
+
+  /* Constrain and tighten every content card/block */
+  .config-box,
+  .description-quote,
+  .integrated-player-static {
+    max-width: 560px;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .config-box {
+    margin-bottom: 1.4rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 1rem;
+  }
+
+  /* Description: remove the inner scroll limit — desktop has space */
+  .description-quote {
+    max-height: none;
+    overflow-y: visible;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    margin-bottom: 0;
+    border-left-width: 3px;
+    padding: 0.6rem 1.4rem;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  /* Player: give it breathing room and a subtle separator above */
+  .integrated-player-static {
+    margin-top: 1.6rem !important;
+    padding: 1.6rem 1.4rem;
+    border-radius: 1.2rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .play-sphere-main {
+    width: 3.8rem;
+    height: 3.8rem;
+    font-size: 2rem;
+  }
+
+  /* ── Bottom navigation bar — docked to the right panel ── */
+  .bottom-nav-viewer {
+    position: fixed;
+    bottom: 0;
+    left: 52vw;
+    width: 48vw;
+    height: auto;
+    padding: 0.9rem 2.5rem;
+    background: rgba(26, 26, 29, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-left: none;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.8rem;
+    padding-bottom: 0.9rem;
+  }
+
+  /* Nav items become compact pill-buttons on desktop */
+  .nav-item {
+    flex: none;
+    width: auto;
+    padding: 0.5rem 1.2rem;
+    border-radius: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.55);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .nav-item:hover,
+  .nav-item:active {
+    background: rgba(225, 143, 55, 0.12);
+    border-color: rgba(225, 143, 55, 0.35);
+    color: #e18f37;
+  }
+
+  .nav-item.central {
+    flex: none;
+    margin-left: auto;
+    margin-right: auto;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .btn-mic-nav {
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.3rem;
+  }
+
+  /* ── Logistics toast: centred within the right panel ── */
+  .logistics-toast {
+    left: calc(52vw + 24vw);
+    /* mid-point of the 48vw right panel */
+    transform: translate(-50%, -50%);
+    width: clamp(260px, 30vw, 380px);
+  }
+
+  /* ── Map modal: sized for desktop ── */
+  .museum-map-modal .modal-dialog {
+    max-width: 680px;
+    margin: auto;
+  }
+}

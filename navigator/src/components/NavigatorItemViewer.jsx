@@ -438,6 +438,12 @@ export default function NavigatorItemViewer() {
           <Row className="justify-content-center g-0">
             <Col xs={12} md={8} lg={6} className="p-0">
               <Card className="card-viewer shadow-none">
+                <div className="d-none d-md-block mb-4">
+                  <h1 style={{ color: "white", fontSize: "2rem", fontWeight: "800", margin: 0 }}>
+                    {currentItem?.titolo || "Titolo assente"}
+                  </h1>
+                  <hr style={{ borderColor: "rgba(255,255,255,0.1)", marginTop: "1rem" }} />
+                </div>
                 <Card.Body className="pt-0">
                   <div className="config-box mx-3 mb-4">
                     <div

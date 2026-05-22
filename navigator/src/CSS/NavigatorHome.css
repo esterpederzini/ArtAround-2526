@@ -16,14 +16,16 @@
   width: 100%;
   font-family: "Nunito", sans-serif;
   overflow-x: hidden;
-  padding-bottom: 5rem; /* Spazio per la bottom nav */
+  padding-bottom: 5rem;
+  /* Spazio per la bottom nav */
 }
 
 /* Header Superiore */
 .home-header {
   display: flex;
   align-items: center;
-  justify-content: center; /* Centra il contenuto (il titolo) */
+  justify-content: center;
+  /* Centra il contenuto (il titolo) */
   width: 100%;
   height: 4rem;
   background: var(--nav-bg);
@@ -32,12 +34,15 @@
   top: 0;
   z-index: 100;
   padding: 0 5vw;
-  position: relative; /* Necessario per posizionare l'icona in modo assoluto */
+  position: relative;
+  /* Necessario per posizionare l'icona in modo assoluto */
 }
 
 .menu-icon {
-  position: absolute; /* Sgancia l'icona dal flusso per non interferire con la centratura del titolo */
-  left: 5vw; /* Allinea l'icona con il padding del contenitore */
+  position: absolute;
+  /* Sgancia l'icona dal flusso per non interferire con la centratura del titolo */
+  left: 5vw;
+  /* Allinea l'icona con il padding del contenitore */
 }
 
 .menu-icon,
@@ -57,7 +62,8 @@
 .hero-modern {
   position: relative;
   width: 100%;
-  height: 45vh; /* Altezza basata sulla vista */
+  height: 45vh;
+  /* Altezza basata sulla vista */
   display: flex;
   align-items: flex-end;
   padding: 2.5rem 5vw;
@@ -138,22 +144,26 @@
   overflow-x: auto;
   gap: 1.2rem;
   padding-right: 5vw;
-  scrollbar-width: none; /* Nasconde scrollbar su Firefox */
+  scrollbar-width: none;
+  /* Nasconde scrollbar su Firefox */
 }
 
 .horizontal-scroll::-webkit-scrollbar {
-  display: none; /* Nasconde scrollbar su Chrome/Safari */
+  display: none;
+  /* Nasconde scrollbar su Chrome/Safari */
 }
 
 .visit-card {
-  min-width: 65vw; /* Occupa il 65% della larghezza schermo per mostrare l'inizio della successiva */
+  min-width: 65vw;
+  /* Occupa il 65% della larghezza schermo per mostrare l'inizio della successiva */
   max-width: 18rem;
 }
 
 .card-img-wrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 3 / 4; /* Mantiene proporzioni verticali fisse */
+  aspect-ratio: 3 / 4;
+  /* Mantiene proporzioni verticali fisse */
   border-radius: 1.2rem;
   overflow: hidden;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
@@ -247,7 +257,8 @@
 .side-bar {
   position: fixed;
   top: 0;
-  left: -280px; /* Nasconde la sidebar a sinistra */
+  left: -280px;
+  /* Nasconde la sidebar a sinistra */
   width: 280px;
   height: 100%;
   background-color: var(--bg-card);
@@ -259,7 +270,8 @@
 }
 
 .side-bar.open {
-  left: 0; /* La fa scivolare dentro lo schermo */
+  left: 0;
+  /* La fa scivolare dentro lo schermo */
 }
 
 /* Header della Sidebar */
@@ -358,7 +370,8 @@
 }
 
 .view-all-btn {
-  background: rgba(59, 130, 246, 0.1); /* Colore accent con trasparenza */
+  background: rgba(59, 130, 246, 0.1);
+  /* Colore accent con trasparenza */
   border: 1px solid var(--accent);
   color: var(--accent);
   padding: 0.4rem 0.8rem;
@@ -387,4 +400,59 @@
   color: var(--text-muted);
   font-style: italic;
   padding: 2rem 0;
+}
+
+/* ==========================================================================
+   ADATTAMENTO DESKTOP: Rimpicciolimento delle card e griglia responsiva
+   ========================================================================== */
+@media (min-width: 769px) {
+
+  /* Trasformiamo lo scorrimento orizzontale in una griglia ordinata su PC */
+  .horizontal-scroll {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+    gap: 2rem !important;
+    padding-right: 5vw !important;
+    overflow-x: visible !important;
+    /* Disattiva lo scroll orizzontale fastidioso da PC */
+  }
+
+  /* Rimpiccioliamo le card forzando una larghezza massima contenuta */
+  .visit-card {
+    min-width: 0 !important;
+    /* Sovrascrive il 65vw del mobile */
+    max-width: 100% !important;
+    width: 100% !important;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  /* Effetto hover elegante per la versione PC */
+  .visit-card:hover {
+    transform: translateY(-5px);
+  }
+
+  /* Rimpiccioliamo la proporzione dell'immagine per non farla allungare troppo */
+  .card-img-wrapper {
+    aspect-ratio: 16 / 10 !important;
+    /* Forma rettangolare più pulita per il PC */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Riduciamo leggermente i testi delle card per adeguarli alle nuove dimensioni */
+  .visit-card h3 {
+    font-size: 0.9rem !important;
+    margin-top: 0.6rem !important;
+    line-height: 1.3;
+  }
+
+  .visit-card p {
+    font-size: 0.75rem !important;
+  }
+
+  /* Allunghiamo la barra di ricerca per sfruttare lo spazio del PC */
+  .search-bar {
+    max-width: 30rem !important;
+    width: 50% !important;
+  }
 }
