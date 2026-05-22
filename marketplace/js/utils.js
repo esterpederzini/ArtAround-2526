@@ -145,6 +145,60 @@ function debounce(fn, delay = 300) {
   };
 }
 
+// ─── CONFIGURAZIONE MUSEO ────────────────────────────
+let configMuseo = null;
+
+async function caricaConfigMuseo() {
+  try {
+    // Try multiple paths for config.json
+    const configPaths = [
+      '/config.json',
+      '/marketplace/config.json',
+      '../config.json'
+    ];
+    
+    let response;
+    for (const path of configPaths) {
+      try {
+        response = await fetch(path);
+        if (response.ok) break;
+      } catch (e) {
+        continue;
+      }
+    }
+    
+    if (!response || !response.ok) {
+      throw new Error('Config non trovata');
+    }
+    
+    configMuseo = await response.json();
+    applicaTemaMuseo();
+    return configMuseo;
+  } catch (err) {
+    console.error('Errore caricamento config:', err);
+    showToast("Errore nel caricamento della configurazione del museo", "error");
+    return null;
+  }
+}
+
+function getConfigMuseo() {
+  return configMuseo;
+}
+
+function applicaTemaMuseo() {
+  if (!configMuseo) return;
+  
+  // Applica colori del museo
+  if (configMuseo.colori) {
+    document.documentElement.style.setProperty('--aa-museum-primary', configMuseo.colori.primario || '#b8962e');
+    document.documentElement.style.setProperty('--aa-museum-secondary', configMuseo.colori.secondario || '#2c2c2c');
+  }
+  
+  // Aggiorna titolo della pagina
+  const museoNome = configMuseo.museo || "Museo";
+  document.title = `ArtAround – ${museoNome}`;
+}
+
 // ─── UI UTENTE NAVBAR ────────────────────────────────
 (function inizializzaNavbar() {
   const utenteInfo = document.getElementById("utenteInfo");

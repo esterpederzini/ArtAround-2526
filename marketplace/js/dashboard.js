@@ -19,6 +19,13 @@ const stato = {
 
 // ─── INIT ────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
+  // Carica configurazione museo
+  const config = await caricaConfigMuseo();
+  if (!config) {
+    showToast("Configurazione museo non trovata", "error");
+    return;
+  }
+
   // Leggi parametri URL
   const params = new URLSearchParams(window.location.search);
   if (params.get("museo")) stato.filtri.museo = params.get("museo");
@@ -98,10 +105,10 @@ function configuraBtnFiltri(selector, callback) {
       btn.classList.add("active");
       callback(
         btn.dataset.museo ??
-          btn.dataset.lang ??
-          btn.dataset.cat ??
-          btn.dataset.prezzo ??
-          "",
+        btn.dataset.lang ??
+        btn.dataset.cat ??
+        btn.dataset.prezzo ??
+        "",
       );
     });
   });
@@ -129,26 +136,51 @@ function switchTab(tab, btnEl) {
 
 // ─── CARICA MUSEI (FILTRO) ───────────────────────────
 async function caricaMuseiFiltro() {
-  const musei = await apiFetch("/api/musei");
-  if (!musei) return;
+  const config = await caricaConfigMuseo();
+  if (!config) return;
+
   const container = document.getElementById("filtroMusei");
-  musei.forEach((m) => {
-    const btn = document.createElement("button");
-    btn.className = "aa-filter-btn";
-    btn.dataset.museo = m;
-    btn.textContent = m.length > 22 ? m.substring(0, 20) + "…" : m;
-    btn.title = m;
-    btn.addEventListener("click", () => {
-      container
-        .querySelectorAll(".aa-filter-btn")
-        .forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      stato.filtri.museo = m;
-      stato.paginaItems = 1;
-      caricaItems();
-    });
-    container.appendChild(btn);
+  if (!container) return;
+
+  // Svuota il contenuto esistente
+  container.innerHTML = "";
+
+  // Aggiungi un bottone per il museo corrente dalla configurazione
+  const btn = document.createElement("button");
+  btn.className = "aa-filter-btn active";
+  btn.dataset.museo = config.museo;
+  btn.textContent = config.museo.length > 22 ? config.museo.substring(0, 20) + "…" : config.museo;
+  btn.title = config.museo;
+  btn.addEventListener("click", () => {
+    container
+      .querySelectorAll(".aa-filter-btn")
+      .forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    stato.filtri.museo = config.museo;
+    stato.paginaItems = 1;
+    caricaItems();
   });
+  container.appendChild(btn);
+}
+
+// ─── CARICA CONFIGURAZIONE MUSEO ─────────────────────
+async function caricaConfigMuseo() {
+  try {
+    // Chiediamo i dati al server tramite la rotta API
+    const response = await fetch('/api/config');
+
+    if (!response.ok) {
+      throw new Error("Configurazione non trovata sul server");
+    }
+
+    // Il server ci risponde inviando il file JSON, lo convertiamo in oggetto JS
+    const config = await response.json();
+    return config;
+
+  } catch (error) {
+    console.error("Errore nel caricamento della configurazione:", error);
+    return null;
+  }
 }
 
 // ─── CARICA ITEMS ────────────────────────────────────
@@ -322,7 +354,7 @@ async function apriVisitaModal(id) {
   if (v.tappe && v.tappe.length > 0) {
     tappeHtml = v.tappe.map(t => {
       // Il backend invia l'item "popolato" con titolo e operaId
-      const infoItem = t.item_default || {}; 
+      const infoItem = t.item_default || {};
       const nomeTappa = infoItem.titolo || "Tappa inesistente";
       const idOpera = infoItem.operaId || "";
       return `<div class="d-flex align-items-center gap-2 mb-2 p-2 rounded" style="background:var(--aa-cream)">
@@ -488,8 +520,8 @@ async function caricaMieiContenuti() {
             </thead>
             <tbody>
               ${miei
-                .map(
-                  (item) => `
+        .map(
+          (item) => `
                 <tr>
                   <td><strong>${item.titolo}</strong><br><small class="text-slate">${item.operaId}</small></td>
                   <td><small>${item.museo}</small></td>
@@ -502,8 +534,8 @@ async function caricaMieiContenuti() {
                   </td>
                 </tr>
               `,
-                )
-                .join("")}
+        )
+        .join("")}
             </tbody>
           </table>
         </div>

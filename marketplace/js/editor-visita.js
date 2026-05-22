@@ -5,40 +5,61 @@
 let itemsNelPercorso = []; // [{itemId, ordine, opzionale, ...datiItem}]
 let tuttiItems = [];
 let dragSrc = null;
+async function caricaConfigMuseo() {
+  try {
+    // Chiediamo i dati al server tramite la rotta API
+    const response = await fetch('/api/config');
+
+    if (!response.ok) {
+      throw new Error("Configurazione non trovata sul server");
+    }
+
+    // Il server ci risponde inviando il file JSON, lo convertiamo in oggetto JS
+    const config = await response.json();
+    return config;
+
+  } catch (error) {
+    console.error("Errore nel caricamento della configurazione:", error);
+    return null;
+  }
+}
 
 // ─── INIT ────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
+  const config = await caricaConfigMuseo();
   const utente = getUtenteCorrente();
 
   // Se l'utente non ha fatto il login (è un ospite anonimo)
   if (!utente) {
-    const container = document.querySelector('.container-fluid');
-    if (container) {
-      container.innerHTML = `
-        <div class="row justify-content-center align-items-center" style="min-height: 60vh;">
-          <div class="col-md-8 col-lg-6 text-center">
-            <div style="font-size: 5rem; margin-bottom: 1rem;">🗺️</div>
-            <h2 style="color: var(--aa-gold); font-family: 'Playfair Display', serif;">
-              Crea il tuo percorso su misura!
-            </h2>
-            <p class="lead mt-3 text-slate">
-              Vuoi diventare un curatore virtuale e progettare la tua visita museale perfetta?
-            </p>
-            <p class="mb-4">
-              Devi effettuare l'accesso per poter mescolare i contenuti del catalogo, creare il tuo itinerario e modificarlo quando vuoi.
-            </p>
-            <button class="btn-aa-primary mt-2" onclick="window.location='/'">
-              <i class="bi bi-person"></i> Torna alla Home per accedere
-            </button>
-          </div>
+    // Disattiva lo scrolling della pagina impostando l'overflow su hidden
+    document.body.classList.add("overflow-hidden");
+
+    // Sovrascriviamo il body centrando il contenuto a schermo intero
+    document.body.innerHTML = `
+      <div class="d-flex flex-column justify-content-center align-items-center vh-100 w-100"
+           style="background: linear-gradient(135deg, var(--aa-ink) 0%, var(--aa-charcoal) 60%, #3d4a5c 100%); color: var(--aa-cream); margin: 0; padding: 2rem;">
+        <div class="text-center col-md-8 col-lg-6" style="transform: translateY(-20px);">
+          <div style="font-size: 5rem; margin-bottom: 1rem;">🗺️</div>
+          <h2 style="color: var(--aa-museum-primary); font-family: 'Garamond', 'Georgia', serif; font-size: 2.5rem; font-weight: 600;">
+            Crea il tuo percorso su misura!
+          </h2>
+          <p class="lead mt-3" style="color: rgba(255, 255, 255, 0.75);">
+            Vuoi diventare un curatore virtuale e progettare la tua visita museale perfetta per ${config.museo}?
+          </p>
+          <p class="mb-4" style="color: rgba(255, 255, 255, 0.65);">
+            Devi effettuare l'accesso per poter mescolare i contenuti del catalogo, creare il tuo itinerario e modificarlo quando vuoi.
+          </p>
+          <button class="btn-aa-gold mt-2" onclick="window.location='/'">
+            <i class="bi bi-person"></i> Torna alla Home per accedere
+          </button>
         </div>
-      `;
-    }
+      </div>
+    `;
     return; // Interrompe il caricamento dell'editor
   }
 
   // Se l'utente è loggato (Visitatore o Autore), procediamo con il caricamento normale!
-  await caricaMusei();
+  await popolaMusei();
   await caricaAutori();
   await caricaTuttiItems();
   await caricaVisiteList();
@@ -56,19 +77,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderCatalogo(e.target.value.trim().toLowerCase());
     }, 250),
   );
+  document.getElementById("editorMainContainer")?.classList.remove("d-none");
 });
 
 // ─── CARICA DATI ────────────────────────────────────
-async function caricaMusei() {
-  const musei = await apiFetch("/api/musei");
+// Trova questa funzione (intorno alla riga 95) e sostituiscila così:
+async function popolaMusei() {
+  // Usiamo la variabile globale che abbiamo caricato all'avvio
+  if (!configMuseo) return;
+
   const sel = document.getElementById("visitaMuseo");
-  if (!musei) return;
-  musei.forEach((m) => {
-    const opt = document.createElement("option");
-    opt.value = m;
-    opt.textContent = m;
-    sel.appendChild(opt);
-  });
+  if (!sel) return;
+
+  // Svuota il selettore prima di aggiungere l'opzione
+  sel.innerHTML = '<option value="">Seleziona museo...</option>';
+
+  // Popola il dropdown con il museo dalla configurazione
+  const opt = document.createElement("option");
+  opt.value = configMuseo.museo;
+  opt.textContent = configMuseo.museo;
+  sel.appendChild(opt);
+
+  // Seleziona automaticamente il museo
+  sel.value = configMuseo.museo;
 }
 
 async function caricaAutori() {
