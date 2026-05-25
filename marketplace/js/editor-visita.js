@@ -431,12 +431,17 @@ async function salvaVisita() {
   });
 
   if (ok) {
-    showToast(id ? "Visita aggiornata!" : "Visita creata!", "success");
-    resetEditor();
-    await caricaVisiteList();
+    showToast(
+      id ? "Visita aggiornata!" : "Visita creata con successo!",
+      "success",
+    );
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 500);
   }
 }
 
+// ─── CARICA VISITA PER MODIFICA ──────────────────────
 // ─── CARICA VISITA PER MODIFICA ──────────────────────
 async function caricaVisitaPerModifica(id) {
   const v = await apiFetch(`/api/visite/${id}`);
@@ -456,7 +461,9 @@ async function caricaVisitaPerModifica(id) {
     v.licenza?.tipo || "gratuito";
   document.getElementById("visitaPrezzo").value = v.prezzo || 0;
   document.getElementById("visitaPubblica").checked = v.pubblica;
-  document.getElementById("visitaAutore").value = v.creatorId?._id || "";
+  document.getElementById("visitaAutore").value =
+    v.creatorId?._id || v.creatorId || "";
+
   const visitLabel = v.titolo || v.title || "Visita";
   document.getElementById("editorTitolo").textContent =
     `Modifica: ${visitLabel}`;
@@ -474,20 +481,26 @@ async function caricaVisitaPerModifica(id) {
     const def = t.item_default;
     const itemId =
       def && typeof def === "object" && def._id != null ? def._id : def;
-    const pop = def && typeof def === "object" ? def : null;
+
+    // CORRETTO: Se l'oggetto è già interamente popolato dal server, usiamo direttamente quello
+    const pop = def && typeof def === "object" && def.titolo ? def : null;
+
+    // Ripiego secondario di sicurezza solo se l'elemento non era popolato
     const meta =
       pop || tuttiItems.find((x) => String(x._id) === String(itemId)) || {};
+
     return {
       itemId: String(itemId),
       ordine: t.ordine,
       opzionale: !!t.opzionale,
-      titolo: meta.titolo || "–",
-      titoloOpera: meta.titoloOpera || meta.titolo || "–",
+      titolo: meta.titolo || t.titolo || "–",
+      titoloOpera: meta.titoloOpera || meta.titolo || t.titoloOpera || "–",
       lunghezza: meta.lunghezza || "1m",
       linguaggio: meta.linguaggio || "intermedio",
       categoria: meta.categoria || "altro",
     };
   });
+
   itemsNelPercorso.sort(
     (a, b) => (Number(a.ordine) || 0) - (Number(b.ordine) || 0),
   );
@@ -496,6 +509,10 @@ async function caricaVisitaPerModifica(id) {
   });
 
   renderPercorso();
+  renderCatalogo(
+    document.getElementById("cercaCatalogo")?.value.toLowerCase() || "",
+  );
+
   showToast(`Visita "${visitLabel}" caricata per modifica`, "info");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
