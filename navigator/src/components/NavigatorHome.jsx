@@ -39,7 +39,7 @@ const NavigatorHome = () => {
   // Filtro ricerca
   const filteredVisits = visits.filter((visita) => {
     const search = searchTerm.toLowerCase();
-    const idVisita = (visita._id || visita.id || "").toLowerCase();
+    const idVisita = (visita._id || "").toLowerCase();
     const titoloVisita = (visita.title || visita.titolo || "").toLowerCase();
     return idVisita.includes(search) || titoloVisita.includes(search);
   });
@@ -120,7 +120,8 @@ const NavigatorHome = () => {
         <div className="hero-content">
           <h1 className="hero-title">{config?.museo || "ArtAround"}</h1>
           <p className="hero-subtitle">
-            {config?.motto || "Curated journeys through the finest collections."}
+            {config?.motto ||
+              "Curated journeys through the finest collections."}
           </p>
 
           <div className="search-bar">
@@ -143,7 +144,7 @@ const NavigatorHome = () => {
         <div className="horizontal-scroll">
           {filteredVisits.length > 0 ? (
             filteredVisits.map((visita) => {
-              const visitId = visita._id || visita.id;
+              const visitId = visita._id;
               return (
                 <div
                   key={visitId}
@@ -152,10 +153,7 @@ const NavigatorHome = () => {
                 >
                   <div className="card-img-wrapper">
                     <img
-                      src={
-                        visita.image ||
-                        "/img/default_item_image.jpg"
-                      }
+                      src={visita.image || "/img/default_item_image.jpg"}
                       alt={visita.title}
                     />
                     <span className="card-badge">
