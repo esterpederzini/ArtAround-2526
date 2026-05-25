@@ -7,7 +7,7 @@ let mappaOpereLocali = {}; // Mappa per l'autocompilazione immediata client-side
 
 // ─── INIT ────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1. Controllo di sicurezza basato sui ruoli
+  // 1. Controllo di sicurezza basato sui ruoli [cite: 427, 519]
   if (!richiedeAutore()) {
     const container =
       document.querySelector(".container") ||
@@ -21,10 +21,10 @@ document.addEventListener("DOMContentLoaded", async () => {
               L'ispirazione ha bussato, ma serve il pass!
             </h2>
             <p class="lead mt-3 text-slate">
-              Attualmente stai esplorando ArtAround come <strong>Visitatore</strong>.
+              Attualmente stai esplorando ArtAround come <strong>Visitatore</strong>. [cite: 427]
             </p>
             <p class="mb-4">
-              Solo gli utenti con il ruolo di <strong>Autore</strong> possono scolpire nuovi contenuti, progettare percorsi museali e condividerli con la community.
+              Solo gli utenti con il ruolo di <strong>Autore</strong> possono scolpire nuovi contenuti, progettare percorsi museali e condividerli con la community. [cite: 427, 519]
             </p>
             <a href="/dashboard" class="btn-aa-primary mt-2">
               <i class="bi bi-arrow-left"></i> Torna alla Dashboard
@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // 2. Carica configurazione statica e sessione utente corrente
+  // 2. Carica configurazione statica e sessione utente corrente [cite: 234, 418]
   await inizializzaMuseoDaConfig();
 
   const utente = getUtenteCorrente();
@@ -45,10 +45,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     inputAutore.value = utente._id;
   }
 
-  // 3. Popola dinamicamente il menu a tendina delle opere disponibili
+  // 3. Popola dinamicamente il menu a tendina delle opere disponibili [cite: 256]
   await popolaSelectOpere();
 
-  // 4. Listener per l'anteprima live dinamica delle card
+  // 4. Listener per l'anteprima live dinamica delle card [cite: 265]
   [
     "titolo",
     "descrizione",
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById(id)?.addEventListener("input", aggiornaPreview);
   });
 
-  // 5. Gestione conteggio caratteri e calcolo automatico profondità
+  // 5. Gestione conteggio caratteri e calcolo automatico profondità [cite: 266]
   document.getElementById("descrizione")?.addEventListener("input", (e) => {
     const len = e.target.value.length;
     document.getElementById("charCount").textContent = len;
@@ -71,13 +71,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("profonditaContenuto").value = prof;
   });
 
-  // 6. REATTIVITÀ DEL MENU A TENDINA: Gestisce il cambio di selezione dell'opera
+  // 6. REATTIVITÀ DEL MENU A TENDINA: Gestisce il cambio di selezione dell'opera [cite: 252, 256]
   document.getElementById("operaSelect")?.addEventListener("change", (e) => {
     const valoreScelto = e.target.value;
     gestisciCambioSelezioneOpera(valoreScelto);
   });
 
-  // 7. Anteprima Live miniatura immagine con debounce
+  // 7. Anteprima Live miniatura immagine con debounce [cite: 265]
   document.getElementById("immagineUrl")?.addEventListener(
     "input",
     debounce((e) => {
@@ -85,12 +85,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 400),
   );
 
-  // 8. Gestione modalità modifica se presente id nell'URL
+  // 8. Gestione modalità modifica se presente id nell'URL [cite: 253]
   const params = new URLSearchParams(window.location.search);
   if (params.get("id")) caricaItemPerModifica(params.get("id"));
 });
 
-// ─── CARICA CONFIGURAZIONE MUSEO DAL SERVER ──────────
+// ─── CARICA CONFIGURAZIONE MUSEO DAL SERVER ────────── [cite: 234, 418]
 async function inizializzaMuseoDaConfig() {
   try {
     const response = await fetch("/api/config");
@@ -111,18 +111,18 @@ async function inizializzaMuseoDaConfig() {
   }
 }
 
-// ─── POPOLA IL MENU A TENDINA DELLE OPERE ────────────
+// ─── POPOLA IL MENU A TENDINA DELLE OPERE ──────────── [cite: 252, 256]
 async function popolaSelectOpere() {
   const select = document.getElementById("operaSelect");
   if (!select) return;
 
-  // Richiediamo gli item esistenti per catalogare le opere attuali del museo
+  // Richiediamo gli item esistenti per catalogare le opere attuali del museo [cite: 256]
   const data = await apiFetch(
     `/api/items?museo=${encodeURIComponent(museoConfigurato)}&limite=300`,
   );
   select.innerHTML = "";
 
-  // Opzioni predefinite di cortesia e inserimento
+  // Opzioni predefinite di cortesia e inserimento [cite: 252]
   const optDefault = document.createElement("option");
   optDefault.value = "";
   optDefault.textContent = "-- Scegli un'opera dall'elenco --";
@@ -138,7 +138,7 @@ async function popolaSelectOpere() {
     return;
   }
 
-  // Estraiamo le opere in modo univoco filtrando per operaId
+  // Estraiamo le opere in modo univoco filtrando per operaId [cite: 259, 264]
   mappaOpereLocali = {};
   data.items.forEach((item) => {
     if (item.operaId && !mappaOpereLocali[item.operaId]) {
@@ -146,30 +146,24 @@ async function popolaSelectOpere() {
     }
   });
 
-  // Generiamo i nodi option grafici
+  // Generiamo i nodi option grafici [cite: 252]
   Object.keys(mappaOpereLocali).forEach((operaId) => {
     const opera = mappaOpereLocali[operaId];
     const opt = document.createElement("option");
     opt.value = operaId;
-    opt.textContent = `${opera.titolo || "Opera senza titolo"} (${operaId})`;
+    opt.textContent = `${opera.titoloOpera || opera.titolo || "Opera senza titolo"} (${operaId})`;
     select.appendChild(opt);
   });
 }
 
-// ─── GESTISCE IL CAMBIO DI SELEZIONE NEL MENU ────────
+// ─── GESTISCE IL CAMBIO DI SELEZIONE NEL MENU ──────── [cite: 252, 256]
 async function gestisciCambioSelezioneOpera(valoreScelto) {
   const badge = document.getElementById("operaStatoBadge");
   const inputOperaIdNascosto = document.getElementById("operaId");
-  const campiSchedaTecnica = [
-    "artista",
-    "stile",
-    "periodo",
-    "titolo",
-    "categoria",
-  ];
+  const campiSchedaTecnica = ["artista", "stile", "periodo", "categoria"];
 
   if (valoreScelto === "__NEW__") {
-    // Caso A: L'autore dichiara una nuova opera via Prompt
+    // Caso A: L'autore dichiara una nuova opera via Prompt [cite: 253, 259]
     const nuovoCodice = prompt(
       "Inserisci il codice ID alfanumerico per la nuova opera (es. ME-005):",
     );
@@ -182,7 +176,7 @@ async function gestisciCambioSelezioneOpera(valoreScelto) {
 
     const codicePulito = nuovoCodice.trim().toUpperCase();
 
-    // Validazione preventiva anti-duplicati localizzati
+    // Validazione preventiva anti-duplicati localizzati [cite: 257]
     if (mappaOpereLocali[codicePulito]) {
       showToast(
         "Questo ID esiste già! Selezionalo direttamente dal menu a tendina.",
@@ -194,39 +188,45 @@ async function gestisciCambioSelezioneOpera(valoreScelto) {
     }
 
     inputOperaIdNascosto.value = codicePulito;
+    document.getElementById("operaTitoloUfficiale").value = "";
+    document.getElementById("operaTitoloUfficiale").readOnly = false;
+    document.getElementById("operaTitoloUfficiale").style.backgroundColor = "";
+    document.getElementById("operaTitoloUfficiale").style.cursor = "";
 
     badge.textContent = `Nuova Opera: ${codicePulito}`;
     badge.className = "badge ms-2 bg-warning text-dark";
     badge.classList.remove("d-none");
 
-    // Sblocchiamo i campi per registrare la prima occorrenza storica
+    // Sblocchiamo i campi per registrare la prima occorrenza storica [cite: 259]
     disabilitaCampiOpere(campiSchedaTecnica, false);
 
     campiSchedaTecnica.forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.value = id === "categoria" ? "pittura" : "";
     });
+    document.getElementById("titolo").value = "";
 
     document.getElementById("variantiList").innerHTML =
       '<em class="text-slate small">Prima occorrenza. Questa opera verrà registrata per la prima volta.</em>';
   } else if (valoreScelto && valoreScelto !== "") {
-    // Caso B: È stata scelta un'opera esistente
+    // Caso B: È stata scelta un'opera esistente [cite: 252, 256]
     inputOperaIdNascosto.value = valoreScelto;
 
     badge.textContent = "Opera Catalogata";
     badge.className = "badge ms-2 bg-success text-white";
     badge.classList.remove("d-none");
 
-    // Recuperiamo i dettagli immutabili condivisi dall'opera
+    // Recuperiamo i dettagli immutabili condivisi dall'opera [cite: 256, 266]
     const operaSelezionata = mappaOpereLocali[valoreScelto];
 
+    document.getElementById("operaTitoloUfficiale").value =
+      operaSelezionata.titoloOpera || operaSelezionata.titolo || "";
     document.getElementById("artista").value =
       operaSelezionata.artista || operaSelezionata.artist || "";
     document.getElementById("stile").value =
       operaSelezionata.stile || operaSelezionata.style || "";
     document.getElementById("periodo").value =
       operaSelezionata.periodo || operaSelezionata.period || "";
-    document.getElementById("titolo").value = operaSelezionata.titolo || "";
     document.getElementById("categoria").value =
       operaSelezionata.categoria || "pittura";
 
@@ -234,10 +234,13 @@ async function gestisciCambioSelezioneOpera(valoreScelto) {
       document.getElementById("immagineUrl").value = operaSelezionata.immagine;
     }
 
-    // Blindiamo la scheda tecnica dell'opera in sola lettura
-    disabilitaCampiOpere(campiSchedaTecnica, true);
+    // Blindiamo la scheda tecnica dell'opera in sola lettura [cite: 259]
+    disabilitaCampiOpere([...campiSchedaTecnica, "operaTitoloUfficiale"], true);
 
-    // Scarichiamo dinamicamente l'elenco delle spiegazioni concorrenti per la barra laterale
+    // Lasciamo il titolo dell'item pulito e pronto per la nuova scrittura [cite: 258]
+    document.getElementById("titolo").value = "";
+
+    // Scarichiamo dinamicamente l'elenco delle spiegazioni concorrenti per la barra laterale [cite: 256, 258]
     const dataVarianti = await apiFetch(
       `/api/items?operaId=${encodeURIComponent(valoreScelto)}&limite=50`,
     );
@@ -247,8 +250,12 @@ async function gestisciCambioSelezioneOpera(valoreScelto) {
   } else {
     // Caso C: Reset o selezione vuota
     inputOperaIdNascosto.value = "";
+    document.getElementById("operaTitoloUfficiale").value = "";
     badge.classList.add("d-none");
-    disabilitaCampiOpere(campiSchedaTecnica, false);
+    disabilitaCampiOpere(
+      [...campiSchedaTecnica, "operaTitoloUfficiale"],
+      false,
+    );
     document.getElementById("variantiList").innerHTML =
       '<em class="text-slate small">Seleziona un\'opera per esaminare le varianti...</em>';
   }
@@ -286,8 +293,8 @@ function renderElencoVarianti(items) {
       (v) => `
     <div class="d-flex align-items-center gap-2 mb-1 p-1 rounded" style="background:var(--aa-cream); font-size: 0.8rem">
       <div class="flex-grow-1 min-w-0">
-        <div class="text-truncate"><strong>Target:</strong> ${v.linguaggio}</div>
-        <div class="text-slate" style="font-size:0.7rem">${v.lunghezza} · Licenza: ${v.licenza?.tipo || "Libera"}</div>
+        <div class="text-truncate"><strong>Target:</strong> ${v.linguaggio}</div> [cite: 267]
+        <div class="text-slate" style="font-size:0.7rem">${v.lunghezza} · Licenza: ${v.licenza?.tipo || "Libera"}</div> [cite: 266, 269]
       </div>
       <a href="/editor-item?id=${v._id}" class="btn-aa-outline" style="font-size:0.68rem;padding:2px 6px">✎ Modifica</a>
     </div>
@@ -296,7 +303,7 @@ function renderElencoVarianti(items) {
     .join("");
 }
 
-// ─── LIVE PREVIEW DELLE CARD ─────────────────────────
+// ─── LIVE PREVIEW DELLE CARD ───────────────────────── [cite: 265]
 function aggiornaPreview() {
   const titolo = document.getElementById("titolo").value || "Titolo item";
   const desc =
@@ -348,7 +355,7 @@ function stimaProfondita(len) {
   return "accademico";
 }
 
-// ─── INVIO E SALVATAGGIO DEI DATI ─────────────────────
+// ─── INVIO E SALVATAGGIO DEI DATI ───────────────────── [cite: 259, 261]
 async function salvaItem() {
   const operaId = document.getElementById("operaId").value.trim();
   const museo = document.getElementById("museo").value.trim();
@@ -374,6 +381,9 @@ async function salvaItem() {
   const artista = document.getElementById("artista").value.trim();
   const stile = document.getElementById("stile").value.trim();
   const periodo = document.getElementById("periodo").value.trim();
+  const titoloOpera = document
+    .getElementById("operaTitoloUfficiale")
+    .value.trim();
 
   if (!operaId)
     return showToast(
@@ -381,7 +391,10 @@ async function salvaItem() {
       "error",
     );
   if (!titolo)
-    return showToast("Il titolo dell'opera o contenuto è necessario.", "error");
+    return showToast(
+      "Il titolo della traccia audio (Item) è necessario.",
+      "error",
+    );
   if (!desc)
     return showToast(
       "Scrivi il testo della spiegazione per la guida.",
@@ -393,7 +406,8 @@ async function salvaItem() {
   const payload = {
     operaId,
     museo,
-    titolo,
+    titolo, // Titolo specifico dell'item
+    titoloOpera: titoloOpera || titolo, // Conserviamo il legame testuale dell'opera nativa [cite: 259]
     descrizione: desc,
     lunghezza,
     linguaggio,
@@ -412,6 +426,10 @@ async function salvaItem() {
 
   const metodo = id ? "PUT" : "POST";
   const url = id ? `/api/items/${id}` : "/api/items";
+
+  if (id) {
+    payload._id = id;
+  }
 
   const ok = await apiFetch(url, {
     method: metodo,
@@ -436,15 +454,18 @@ async function salvaItem() {
   }
 }
 
-// ─── CARICA VARIANTE IN MODIFICA VIA URL QUERY ────────
+// ─── CARICA VARIANTE IN MODIFICA VIA URL QUERY ──────── [cite: 253]
 async function caricaItemPerModifica(id) {
   const item = await apiFetch(`/api/items/${id}`);
   if (!item) return;
 
   document.getElementById("itemId").value = item._id;
   document.getElementById("operaId").value = item.operaId;
-  document.getElementById("museo").value = item.museo;
+  const operaNativa = mappaOpereLocali[item.operaId];
+  document.getElementById("operaTitoloUfficiale").value =
+    item.titoloOpera || (operaNativa ? operaNativa.titolo : item.titolo) || "";
   document.getElementById("titolo").value = item.titolo;
+  document.getElementById("museo").value = item.museo;
   document.getElementById("autoreId").value =
     item.creatorId?._id || item.creatorId || "";
   document.getElementById("descrizione").value = item.descrizione;
@@ -478,7 +499,7 @@ async function caricaItemPerModifica(id) {
     if (select) {
       select.value = item.operaId;
       disabilitaCampiOpere(
-        ["artista", "stile", "periodo", "titolo", "categoria"],
+        ["artista", "stile", "periodo", "operaTitoloUfficiale", "categoria"],
         true,
       );
     }
@@ -503,6 +524,7 @@ async function caricaItemPerModifica(id) {
 function resetForm() {
   const campiDaPulire = [
     "operaId",
+    "operaTitoloUfficiale",
     "titolo",
     "descrizione",
     "tags",
@@ -519,7 +541,7 @@ function resetForm() {
   });
 
   disabilitaCampiOpere(
-    ["artista", "stile", "periodo", "titolo", "categoria"],
+    ["artista", "stile", "periodo", "operaTitoloUfficiale", "categoria"],
     false,
   );
   document.getElementById("operaStatoBadge").classList.add("d-none");

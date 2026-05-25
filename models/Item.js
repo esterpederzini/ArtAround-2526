@@ -9,25 +9,24 @@ const logVenditaSchema = new mongoose.Schema({
 
 const itemSchema = new mongoose.Schema(
   {
-    _id: { type: String },
     operaId: { type: String, required: true, trim: true, index: true },
     museo: { type: String, required: true, trim: true, index: true },
     titolo: { type: String, required: true, trim: true },
     descrizione: { type: String, required: true },
     audioUrl: { type: String, default: "" },
     autore_visita: { type: String, required: true },
-    piano: { 
-      type: String, 
+    piano: {
+      type: String,
       default: "0",
-      enum: ["-1", "0", "1", "2"] // Coerente con il tuo config.json
+      enum: ["-1", "0", "1", "2"], // Coerente con il tuo config.json
     },
-    mappa_x: { 
-      type: Number, 
-      default: 0 
+    mappa_x: {
+      type: Number,
+      default: 0,
     },
-    mappa_y: { 
-      type: Number, 
-      default: 0 
+    mappa_y: {
+      type: Number,
+      default: 0,
     },
 
     stile: {
@@ -72,7 +71,7 @@ const itemSchema = new mongoose.Schema(
     },
     profonditaContenuto: { type: String, default: "standard" },
   },
-  { timestamps: true, strict: false }
+  { timestamps: true, strict: false },
 );
 
 itemSchema.index({ museo: 1, pubblicato: 1 });

@@ -27,7 +27,6 @@
   ],
   "items": [
     {
-      "_id": "it_ramesse_01",
       "operaId": "ME-001",
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
@@ -51,7 +50,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_ramesse_02",
       "operaId": "ME-001",
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
@@ -75,7 +73,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_ramesse_03",
       "operaId": "ME-001",
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
@@ -99,7 +96,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_ramesse_04",
       "operaId": "ME-001",
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
@@ -126,7 +122,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_ramesse_05",
       "operaId": "ME-001",
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
@@ -153,7 +148,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_ramesse_06",
       "operaId": "ME-001",
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
@@ -180,7 +174,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_ramesse_07",
       "operaId": "ME-001",
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
@@ -207,7 +200,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_ramesse_08",
       "operaId": "ME-001",
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
@@ -234,7 +226,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_ramesse_09",
       "operaId": "ME-001",
       "museo": "Museo Egizio di Torino",
       "titolo": "Statua di Ramesse II",
@@ -261,7 +252,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_kha_01",
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
@@ -285,7 +275,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_kha_02",
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
@@ -309,7 +298,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_kha_03",
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
@@ -333,7 +321,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_kha_04",
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
@@ -357,7 +344,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_kha_05",
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
@@ -381,7 +367,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_kha_06",
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
@@ -405,7 +390,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_kha_07",
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
@@ -429,7 +413,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_kha_08",
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
@@ -453,7 +436,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_kha_09",
       "operaId": "ME-002",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sarcofagi di Kha e Merit",
@@ -477,7 +459,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_papiro_01",
       "operaId": "ME-003",
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
@@ -501,7 +482,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_papiro_02",
       "operaId": "ME-003",
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
@@ -525,7 +505,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_papiro_03",
       "operaId": "ME-003",
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
@@ -549,7 +528,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_papiro_04",
       "operaId": "ME-003",
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
@@ -573,7 +551,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_papiro_05",
       "operaId": "ME-003",
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
@@ -597,7 +574,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_papiro_06",
       "operaId": "ME-003",
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
@@ -621,7 +597,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_papiro_07",
       "operaId": "ME-003",
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
@@ -648,7 +623,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_papiro_08",
       "operaId": "ME-003",
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
@@ -675,7 +649,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_papiro_09",
       "operaId": "ME-003",
       "museo": "Museo Egizio di Torino",
       "titolo": "Papiro dei Re",
@@ -702,7 +675,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_sfinge_01",
       "operaId": "ME-004",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
@@ -726,7 +698,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_sfinge_02",
       "operaId": "ME-004",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
@@ -750,7 +721,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_sfinge_03",
       "operaId": "ME-004",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
@@ -774,7 +744,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_sfinge_04",
       "operaId": "ME-004",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
@@ -798,7 +767,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_sfinge_05",
       "operaId": "ME-004",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
@@ -822,7 +790,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_sfinge_06",
       "operaId": "ME-004",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
@@ -846,7 +813,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_sfinge_07",
       "operaId": "ME-004",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
@@ -870,7 +836,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_sfinge_08",
       "operaId": "ME-004",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
@@ -894,7 +859,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_sfinge_09",
       "operaId": "ME-004",
       "museo": "Museo Egizio di Torino",
       "titolo": "Sfinge",
@@ -918,7 +882,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_libro_01",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -942,7 +905,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_libro_02",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -966,7 +928,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_libro_03",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -990,7 +951,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_libro_04",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -1014,7 +974,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_libro_05",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -1038,7 +997,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_libro_06",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -1062,7 +1020,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_libro_07",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -1089,7 +1046,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_libro_08",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",
@@ -1116,7 +1072,6 @@
       "pubblicato": true
     },
     {
-      "_id": "it_libro_09",
       "operaId": "ME-005",
       "museo": "Museo Egizio di Torino",
       "titolo": "Libro dei Morti di Iuefankh",

@@ -84,6 +84,41 @@
                 </div>
               </div>
 
+              <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                  <div class="aa-form-group">
+                    <label class="aa-label">ID Opera Fissa</label>
+                    <input
+                      type="text"
+                      id="operaId"
+                      class="aa-input"
+                      readonly
+                      style="
+                        background-color: var(--aa-cream);
+                        cursor: not-allowed;
+                      "
+                      placeholder="Codice opera..."
+                    />
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="aa-form-group">
+                    <label class="aa-label">Titolo Ufficiale Opera</label>
+                    <input
+                      type="text"
+                      id="operaTitoloUfficiale"
+                      class="aa-input"
+                      readonly
+                      style="
+                        background-color: var(--aa-cream);
+                        cursor: not-allowed;
+                      "
+                      placeholder="Nome reale nel museo..."
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div class="divider"></div>
 
               <div class="aa-sidebar-title" style="font-size: 0.72rem">
@@ -136,14 +171,14 @@
                 <div class="col-md-8">
                   <div class="aa-form-group">
                     <label class="aa-label"
-                      >Titolo dell'Opera / Item
+                      >Titolo della Spiegazione (Item)
                       <span class="required">*</span></label
                     >
                     <input
                       type="text"
                       id="titolo"
                       class="aa-input"
-                      placeholder="Es. Ritratto di frate"
+                      placeholder="Es. Introduzione semplice per bambini"
                     />
                   </div>
                 </div>
@@ -305,7 +340,6 @@
 
               <input type="hidden" id="itemId" />
               <input type="hidden" id="autoreId" />
-              <input type="hidden" id="operaId" />
               <input type="hidden" id="profonditaContenuto" value="standard" />
 
               <button class="btn-aa-primary w-100 mb-2" onclick="salvaItem()">

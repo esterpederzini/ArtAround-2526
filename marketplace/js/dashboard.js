@@ -105,10 +105,10 @@ function configuraBtnFiltri(selector, callback) {
       btn.classList.add("active");
       callback(
         btn.dataset.museo ??
-        btn.dataset.lang ??
-        btn.dataset.cat ??
-        btn.dataset.prezzo ??
-        "",
+          btn.dataset.lang ??
+          btn.dataset.cat ??
+          btn.dataset.prezzo ??
+          "",
       );
     });
   });
@@ -149,7 +149,10 @@ async function caricaMuseiFiltro() {
   const btn = document.createElement("button");
   btn.className = "aa-filter-btn active";
   btn.dataset.museo = config.museo;
-  btn.textContent = config.museo.length > 22 ? config.museo.substring(0, 20) + "…" : config.museo;
+  btn.textContent =
+    config.museo.length > 22
+      ? config.museo.substring(0, 20) + "…"
+      : config.museo;
   btn.title = config.museo;
   btn.addEventListener("click", () => {
     container
@@ -167,7 +170,7 @@ async function caricaMuseiFiltro() {
 async function caricaConfigMuseo() {
   try {
     // Chiediamo i dati al server tramite la rotta API
-    const response = await fetch('/api/config');
+    const response = await fetch("/api/config");
 
     if (!response.ok) {
       throw new Error("Configurazione non trovata sul server");
@@ -176,7 +179,6 @@ async function caricaConfigMuseo() {
     // Il server ci risponde inviando il file JSON, lo convertiamo in oggetto JS
     const config = await response.json();
     return config;
-
   } catch (error) {
     console.error("Errore nel caricamento della configurazione:", error);
     return null;
@@ -337,7 +339,8 @@ async function apriVisitaModal(id) {
   const modal = document.getElementById("visitaModal");
   modal.classList.remove("d-none");
   document.getElementById("modalVisitaTitolo").textContent = "Caricamento…";
-  document.getElementById("modalVisitaBody").innerHTML = '<div class="text-center py-4"><div class="aa-spinner"></div></div>';
+  document.getElementById("modalVisitaBody").innerHTML =
+    '<div class="text-center py-4"><div class="aa-spinner"></div></div>';
   document.getElementById("modalVisitaFooter").innerHTML = "";
 
   // Scarica i dettagli completi della visita dal server
@@ -347,24 +350,28 @@ async function apriVisitaModal(id) {
     return;
   }
 
-  document.getElementById("modalVisitaTitolo").textContent = v.titolo || v.title || "Visita";
+  document.getElementById("modalVisitaTitolo").textContent =
+    v.titolo || v.title || "Visita";
 
   // Costruisce la lista delle tappe del percorso
-  let tappeHtml = '<em class="text-slate small">Nessuna tappa inserita nel percorso.</em>';
+  let tappeHtml =
+    '<em class="text-slate small">Nessuna tappa inserita nel percorso.</em>';
   if (v.tappe && v.tappe.length > 0) {
-    tappeHtml = v.tappe.map(t => {
-      // Il backend invia l'item "popolato" con titolo e operaId
-      const infoItem = t.item_default || {};
-      const nomeTappa = infoItem.titolo || "Tappa inesistente";
-      const idOpera = infoItem.operaId || "";
-      return `<div class="d-flex align-items-center gap-2 mb-2 p-2 rounded" style="background:var(--aa-cream)">
+    tappeHtml = v.tappe
+      .map((t) => {
+        // Il backend invia l'item "popolato" con titolo e operaId
+        const infoItem = t.item_default || {};
+        const nomeTappa = infoItem.titolo || "Tappa inesistente";
+        const idOpera = infoItem.operaId || "";
+        return `<div class="d-flex align-items-center gap-2 mb-2 p-2 rounded" style="background:var(--aa-cream)">
                 <span class="aa-badge aa-badge-len" style="background:white">${t.ordine}</span>
                 <div class="flex-grow-1" style="font-size:0.85rem">
                   <strong>${nomeTappa}</strong> <span class="text-slate mx-1">·</span> <small>${idOpera}</small>
                 </div>
-                ${t.opzionale ? '<span style="font-size:0.7rem; color:var(--aa-slate)">Opzionale</span>' : ''}
+                ${t.opzionale ? '<span style="font-size:0.7rem; color:var(--aa-slate)">Opzionale</span>' : ""}
               </div>`;
-    }).join('');
+      })
+      .join("");
   }
 
   // Costruisce il corpo del Modal
@@ -379,7 +386,7 @@ async function apriVisitaModal(id) {
       <div class="col-6"><span class="aa-label">Autore</span><div>${v.creatorId?.username || "–"}</div></div>
       <div class="col-6"><span class="aa-label">Licenza</span><div>${v.licenza?.tipo || "–"}</div></div>
     </div>
-    ${v.tags?.length ? `<div class="mb-3">${v.tags.map(t => `<span class="aa-badge aa-badge-len me-1">${t}</span>`).join("")}</div>` : ""}
+    ${v.tags?.length ? `<div class="mb-3">${v.tags.map((t) => `<span class="aa-badge aa-badge-len me-1">${t}</span>`).join("")}</div>` : ""}
     
     <div class="aa-sidebar-title mt-4" style="font-size: 0.72rem"><i class="bi bi-geo-alt"></i> Percorso della visita</div>
     <div style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
@@ -392,7 +399,7 @@ async function apriVisitaModal(id) {
   let footerHtml = `<button class="btn-aa-outline" onclick="chiudiVisitaModal()">Chiudi</button>`;
 
   footerHtml += `<button class="btn-aa-primary" onclick="adottaVisita('${v._id}'); chiudiVisitaModal();">
-    <i class="bi bi-bookmark-plus"></i> Adotta ${v.prezzo ? '€' + Number(v.prezzo).toFixed(2) : 'Gratis'}
+    <i class="bi bi-bookmark-plus"></i> Adotta ${v.prezzo ? "€" + Number(v.prezzo).toFixed(2) : "Gratis"}
   </button>`;
 
   if (u && (u._id === v.creatorId?._id || u._id === v.creatorId)) {
@@ -438,8 +445,14 @@ async function caricaVisiteTab(pagina = stato.paginaVisite) {
 }
 
 function renderVisitaCard(v) {
-  const itemsObbligatori = v.tappe?.filter((i) => !i.opzionale).length || v.items?.filter((i) => !i.opzionale).length || 0;
-  const itemsOpzionali = v.tappe?.filter((i) => i.opzionale).length || v.items?.filter((i) => i.opzionale).length || 0;
+  const itemsObbligatori =
+    v.tappe?.filter((i) => !i.opzionale).length ||
+    v.items?.filter((i) => !i.opzionale).length ||
+    0;
+  const itemsOpzionali =
+    v.tappe?.filter((i) => i.opzionale).length ||
+    v.items?.filter((i) => i.opzionale).length ||
+    0;
 
   return `
     <div class="col-md-6 col-xl-4">
@@ -520,8 +533,8 @@ async function caricaMieiContenuti() {
             </thead>
             <tbody>
               ${miei
-        .map(
-          (item) => `
+                .map(
+                  (item) => `
                 <tr>
                   <td><strong>${item.titolo}</strong><br><small class="text-slate">${item.operaId}</small></td>
                   <td><small>${item.museo}</small></td>
@@ -534,8 +547,8 @@ async function caricaMieiContenuti() {
                   </td>
                 </tr>
               `,
-        )
-        .join("")}
+                )
+                .join("")}
             </tbody>
           </table>
         </div>

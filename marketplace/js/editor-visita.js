@@ -1,6 +1,10 @@
-let itemsNelPercorso = [];
-let tuttiItems = [];
-let dragSrc = null;
+/* ═══════════════════════════════════════════════════
+   editor-visita.js – Logica Editor Visita ArtAround
+   ═══════════════════════════════════════════════════ */
+
+var itemsNelPercorso = itemsNelPercorso || [];
+var tuttiItems = tuttiItems || [];
+var dragSrc = dragSrc || null;
 
 // ─── INIT ────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
@@ -9,10 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Se l'utente non ha fatto il login (è un ospite anonimo)
   if (!utente) {
-    // Disattiva lo scrolling della pagina impostando l'overflow su hidden
     document.body.classList.add("overflow-hidden");
-
-    // Sovrascriviamo il body centrando il contenuto a schermo intero
     document.body.innerHTML = `
       <div class="d-flex flex-column justify-content-center align-items-center vh-100 w-100"
            style="background: linear-gradient(135deg, var(--aa-ink) 0%, var(--aa-charcoal) 60%, #3d4a5c 100%); color: var(--aa-cream); margin: 0; padding: 2rem;">
@@ -33,14 +34,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
       </div>
     `;
-    return; // Interrompe il caricamento dell'editor
+    return;
   }
 
-  // Se l'utente è loggato (Visitatore o Autore), procediamo con il caricamento normale!
   if (configMuseo && configMuseo.museo) {
     const inputMuseo = document.getElementById("visitaMuseo");
     if (inputMuseo) {
-      inputMuseo.value = configMuseo.museo; // Es: "Museo Egizio di Torino"
+      inputMuseo.value = configMuseo.museo;
     }
   }
 
@@ -51,11 +51,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   applicaRestrizioniVisitatore();
 
-  // Query param: modifica visita
   const params = new URLSearchParams(window.location.search);
   if (params.get("id")) caricaVisitaPerModifica(params.get("id"));
 
-  // Ricerca catalogo
   document.getElementById("cercaCatalogo")?.addEventListener(
     "input",
     debounce((e) => {
@@ -66,31 +64,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // ─── CARICA DATI ────────────────────────────────────
-// Trova questa funzione (intorno alla riga 95) e sostituiscila così:
 async function popolaMusei() {
-  // Usiamo la variabile globale che abbiamo caricato all'avvio
   if (!configMuseo) return;
-
   const sel = document.getElementById("visitaMuseo");
   if (!sel) return;
-
-  // Svuota il selettore prima di aggiungere l'opzione
   sel.innerHTML = '<option value="">Seleziona museo...</option>';
-
-  // Popola il dropdown con il museo dalla configurazione
   const opt = document.createElement("option");
   opt.value = configMuseo.museo;
   opt.textContent = configMuseo.museo;
   sel.appendChild(opt);
-
-  // Seleziona automaticamente il museo
   sel.value = configMuseo.museo;
 }
 
 async function caricaAutori() {
   const utenti = await apiFetch("/api/utenti");
   const sel = document.getElementById("visitaAutore");
-  if (!utenti) return;
+  if (!utenti || !sel) return;
   utenti
     .filter((u) => ["autore", "admin"].includes(u.ruolo))
     .forEach((u) => {
@@ -99,13 +88,15 @@ async function caricaAutori() {
       opt.textContent = `${u.username} (${u.ruolo})`;
       sel.appendChild(opt);
     });
-  // Pre-seleziona utente loggato
   const u = getUtenteCorrente();
   if (u) sel.value = u._id;
 }
 
 async function caricaTuttiItems() {
-  const data = await apiFetch("/api/items?limite=200&pubblicato=true");
+  if (!configMuseo) return;
+  const data = await apiFetch(
+    `/api/items?museo=${encodeURIComponent(configMuseo.museo)}&limite=200&pubblicato=true`,
+  );
   tuttiItems = data?.items || [];
   renderCatalogo("");
 }
@@ -113,6 +104,7 @@ async function caricaTuttiItems() {
 async function caricaVisiteList() {
   const data = await apiFetch("/api/visite?limite=20&pubblica=tutti");
   const list = document.getElementById("visiteList");
+  if (!list) return;
   if (!data || !data.visite.length) {
     list.innerHTML = '<em class="text-slate small">Nessuna visita ancora.</em>';
     return;
@@ -135,10 +127,13 @@ async function caricaVisiteList() {
 // ─── RENDER CATALOGO ─────────────────────────────────
 function renderCatalogo(filtro = "") {
   const container = document.getElementById("catalogoItems");
+  if (!container) return;
+
   const items = filtro
     ? tuttiItems.filter(
         (i) =>
           i.titolo.toLowerCase().includes(filtro) ||
+          (i.titoloOpera && i.titoloOpera.toLowerCase().includes(filtro)) ||
           i.operaId.toLowerCase().includes(filtro) ||
           (i.tags || []).some((t) => t.toLowerCase().includes(filtro)),
       )
@@ -153,6 +148,7 @@ function renderCatalogo(filtro = "") {
   container.innerHTML = items
     .map((item) => {
       const giàAggiunto = itemsNelPercorso.some((i) => i.itemId === item._id);
+      const subLabel = item.titoloOpera || "Opera";
       return `
       <div class="d-flex align-items-center gap-2 p-2 mb-1 rounded"
            style="border:1px solid var(--aa-stone);background:#fff;transition:background 0.15s"
@@ -162,12 +158,12 @@ function renderCatalogo(filtro = "") {
         </div>
         <div class="flex-grow-1 min-w-0">
           <div style="font-size:0.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.titolo}</div>
-          <div style="font-size:0.72rem;color:var(--aa-slate)">${item.linguaggio} · ${item.lunghezza} · ${item.operaId}</div>
+          <div style="font-size:0.72rem;color:var(--aa-slate)">${subLabel} · ${item.linguaggio} · ${item.lunghezza} · ${item.operaId}</div>
         </div>
         <button class="btn-aa-outline" 
         style="font-size:0.75rem;padding:3px 10px;flex-shrink:0;${giàAggiunto ? "opacity:0.4;cursor:default" : ""}"
         ${giàAggiunto ? 'disabled title="Già aggiunto"' : `onclick="aggiungiItemAlPercorso('${item._id}')"`}>
-        ${giàAggiunto ? "✓" : "+ Add"}
+        ${giàAggiunto ? "✓" : "+ Aggiungi"}
         </button>
       </div>
     `;
@@ -203,20 +199,25 @@ function aggiungiItemAlPercorso(itemId) {
     ordine: itemsNelPercorso.length + 1,
     opzionale: false,
     titolo: item.titolo,
+    titoloOpera: item.titoloOpera || item.titolo,
     lunghezza: item.lunghezza,
     linguaggio: item.linguaggio,
     categoria: item.categoria,
   });
 
   renderPercorso();
-  renderCatalogo(document.getElementById("cercaCatalogo").value.toLowerCase());
+  renderCatalogo(
+    document.getElementById("cercaCatalogo")?.value.toLowerCase() || "",
+  );
 }
 
 function rimuoviItemDalPercorso(itemId) {
   itemsNelPercorso = itemsNelPercorso.filter((i) => i.itemId !== itemId);
   ricalcolaOrdini();
   renderPercorso();
-  renderCatalogo(document.getElementById("cercaCatalogo").value.toLowerCase());
+  renderCatalogo(
+    document.getElementById("cercaCatalogo")?.value.toLowerCase() || "",
+  );
 }
 
 function toggleOpzionale(itemId) {
@@ -231,12 +232,32 @@ function ricalcolaOrdini() {
   itemsNelPercorso.forEach((item, i) => (item.ordine = i + 1));
 }
 
+function lunghezzaInMinuti(lunghezzaStr) {
+  if (lunghezzaStr === "3s") return 0.05;
+  if (lunghezzaStr === "15s") return 0.25;
+  if (lunghezzaStr === "40s") return 0.66;
+  if (lunghezzaStr === "1m") return 1;
+  if (lunghezzaStr === "3m") return 3;
+  if (lunghezzaStr === "5m") return 5;
+  if (lunghezzaStr === "10m") return 10;
+  return 1;
+}
+
+function badgeLinguaggio(lang) {
+  return `<span class="aa-badge aa-badge-lang-${lang}">${lang}</span>`;
+}
+
+function badgeLunghezza(len) {
+  return `<span class="aa-badge aa-badge-len">${len}</span>`;
+}
+
 function renderPercorso() {
   const list = document.getElementById("dndList");
-  document.getElementById("countItems").textContent =
-    `${itemsNelPercorso.length} item`;
+  if (!list) return;
 
-  // Calcola durata totale
+  document.getElementById("countItems").textContent =
+    `${itemsNelPercorso.length} item selezionati`;
+
   const durataMin = itemsNelPercorso.reduce(
     (acc, i) => acc + lunghezzaInMinuti(i.lunghezza),
     0,
@@ -247,7 +268,7 @@ function renderPercorso() {
   }
 
   if (!itemsNelPercorso.length) {
-    list.innerHTML = `<div class="aa-empty" style="padding:1.5rem"><div class="aa-empty-icon" style="font-size:2rem">📭</div><p class="mb-0" style="font-size:0.85rem">Aggiungi item dal catalogo sottostante</p></div>`;
+    list.innerHTML = `<div class="aa-empty" style="padding:1.5rem"><div class="aa-empty-icon" style="font-size:2rem">📭</div><p class="mb-0" style="font-size:0.85rem">Aggiungi item dal catalogo sottostante per creare il percorso.</p></div>`;
     return;
   }
 
@@ -313,7 +334,6 @@ function onDrop(e) {
 
   if (srcIdx === -1 || tgtIdx === -1) return;
 
-  // Sposta elemento
   const [rimosso] = itemsNelPercorso.splice(srcIdx, 1);
   itemsNelPercorso.splice(tgtIdx, 0, rimosso);
   ricalcolaOrdini();
@@ -327,9 +347,6 @@ function onDragEnd(e) {
     .forEach((el) => (el.style.borderTop = ""));
 }
 
-/**
- * Build `tappe` in the same shape as seed / Navigator (item_default, operaId, ordine).
- */
 function buildTappeFromPath(pathItems) {
   return pathItems.map((i) => {
     const meta =
@@ -361,6 +378,8 @@ async function salvaVisita() {
   const prezzo = Number(document.getElementById("visitaPrezzo").value) || 0;
   const pubblica = document.getElementById("visitaPubblica").checked;
   const id = document.getElementById("visitaId").value;
+  const livelloBase =
+    document.getElementById("visitaLivelloBase")?.value || "medio";
 
   if (!titolo || !museo || !autoreId)
     return showToast(
@@ -380,18 +399,17 @@ async function salvaVisita() {
     }
   }
 
-  // `tappe` is what Navigator reads; API also accepts legacy `items` and normalizes.
   const tappe = buildTappeFromPath(itemsNelPercorso);
 
   const payload = {
     titolo,
-    // Navigator home cards use `title` on seed docs; keep both in sync.
     title: titolo,
     museo,
     descrizione: desc,
     immagine: thumbnail,
     tags,
     durataTotaleStimata: durata,
+    livello_base: livelloBase,
     licenza: { tipo: licenza },
     prezzo,
     pubblica,
@@ -403,6 +421,8 @@ async function salvaVisita() {
 
   const metodo = id ? "PUT" : "POST";
   const url = id ? `/api/visite/${id}` : "/api/visite";
+
+  if (id) payload._id = id;
 
   const ok = await apiFetch(url, {
     method: metodo,
@@ -428,6 +448,10 @@ async function caricaVisitaPerModifica(id) {
   document.getElementById("visitaDescrizione").value = v.descrizione || "";
   document.getElementById("visitaTags").value = (v.tags || []).join(", ");
   document.getElementById("visitaDurata").value = v.durataTotaleStimata || 60;
+  if (document.getElementById("visitaLivelloBase")) {
+    document.getElementById("visitaLivelloBase").value =
+      v.livello_base || "medio";
+  }
   document.getElementById("visitaLicenza").value =
     v.licenza?.tipo || "gratuito";
   document.getElementById("visitaPrezzo").value = v.prezzo || 0;
@@ -437,7 +461,6 @@ async function caricaVisitaPerModifica(id) {
   document.getElementById("editorTitolo").textContent =
     `Modifica: ${visitLabel}`;
 
-  // Primary: `tappe` (Navigator + seed). Fallback: legacy `items` until re-saved.
   let rawTappe = Array.isArray(v.tappe) ? v.tappe : [];
   if (rawTappe.length === 0 && Array.isArray(v.items) && v.items.length > 0) {
     rawTappe = v.items.map((row) => ({
@@ -459,6 +482,7 @@ async function caricaVisitaPerModifica(id) {
       ordine: t.ordine,
       opzionale: !!t.opzionale,
       titolo: meta.titolo || "–",
+      titoloOpera: meta.titoloOpera || meta.titolo || "–",
       lunghezza: meta.lunghezza || "1m",
       linguaggio: meta.linguaggio || "intermedio",
       categoria: meta.categoria || "altro",
@@ -497,13 +521,11 @@ function resetEditor() {
   document.getElementById("visitaPubblica").checked = false;
   document.getElementById("editorTitolo").textContent = "Nuova Visita";
 
-  // Ripristina il museo fissato dal config
   const inputMuseo = document.getElementById("visitaMuseo");
-  if (inputMuseo) {
+  if (inputMuseo && configMuseo) {
     inputMuseo.value = configMuseo.museo;
   }
 
-  // Re-impostiamo l'utente corrente anche dopo il reset
   const u = getUtenteCorrente();
   if (u) {
     document.getElementById("visitaAutore").value = u._id;
@@ -517,34 +539,24 @@ function resetEditor() {
 // ─── GESTIONE PERMESSI EDITOR ────────────────────────
 function applicaRestrizioniVisitatore() {
   const u = getUtenteCorrente();
-  // Se non è loggato, non dovrebbe essere qui (gestito nell'init)
   if (!u) return;
-
-  // Se è un autore o admin, ha accesso completo
   if (["autore", "admin"].includes(u.ruolo)) return;
 
-  // Se è un visitatore, blocchiamo i campi "sensibili"
-  console.log("Modalità Visitatore: blocco campi sensibili.");
-
-  // Campi da bloccare (sola lettura/disabilitati)
   const campiDaBloccare = ["visitaPrezzo", "visitaLicenza", "visitaPubblica"];
-
   campiDaBloccare.forEach((id) => {
     const el = document.getElementById(id);
     if (el) {
-      el.disabled = true; // Disabilita l'input
-      // Aggiungiamo un feedback visivo per far capire perché è bloccato
+      el.disabled = true;
       el.title = "Solo gli Autori possono modificare questo campo";
       el.style.opacity = "0.7";
       el.style.cursor = "not-allowed";
     }
   });
 
-  // Mostriamo un avviso nell'interfaccia
   const header = document.querySelector(".aa-card-header");
   if (header) {
     const badge = document.createElement("span");
-    badge.className = "aa-badge aa-badge-lang-infantile ms-2"; // Usa uno stile esistente (es. giallo/arancio)
+    badge.className = "aa-badge aa-badge-lang-infantile ms-2";
     badge.style.fontSize = "0.7rem";
     badge.innerHTML =
       '<i class="bi bi-info-circle"></i> Modalità Personalizzazione';

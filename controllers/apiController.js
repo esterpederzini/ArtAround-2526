@@ -172,8 +172,23 @@ exports.creaItem = async (req, res) => {
         "Solo gli autori possono creare contenuti",
       );
     }
-    const datiNuovoItem = { ...req.body, creatorId, autore: utente.username };
+
+    // 1. Cloniamo il body della richiesta
+    const datiNuovoItem = { ...req.body };
+
+    // 2. PROTEZIONE CRUCIALE: Rimuoviamo eventuali stringhe id inviate dal front-end
+    // Se è una creazione, MongoDB DEVE generare un ObjectId pulito da zero
+    delete datiNuovoItem._id;
+    delete datiNuovoItem.id;
+
+    // 3. Arricchiamo con i dati dell'autore loggato
+    datiNuovoItem.creatorId = creatorId;
+    datiNuovoItem.autore = utente.username; // Per retrocompatibilità con i campi dell'app
+    datiNuovoItem.autore_visita = utente.username; // Allineato al tuo schema Mongoose
+
+    // 4. Salviamo nel database
     const item = await Item.create(datiNuovoItem);
+
     risposta(res, 201, item, "Item creato con successo");
   } catch (err) {
     risposta(res, 500, null, err.message);
