@@ -1,31 +1,10 @@
-/* ═══════════════════════════════════════════════════
-   editor-visita.js – Logica Editor Visita ArtAround
-   ═══════════════════════════════════════════════════ */
-
-let itemsNelPercorso = []; // [{itemId, ordine, opzionale, ...datiItem}]
+let itemsNelPercorso = [];
 let tuttiItems = [];
 let dragSrc = null;
-async function caricaConfigMuseo() {
-  try {
-    // Chiediamo i dati al server tramite la rotta API
-    const response = await fetch("/api/config");
-
-    if (!response.ok) {
-      throw new Error("Configurazione non trovata sul server");
-    }
-
-    // Il server ci risponde inviando il file JSON, lo convertiamo in oggetto JS
-    const config = await response.json();
-    return config;
-  } catch (error) {
-    console.error("Errore nel caricamento della configurazione:", error);
-    return null;
-  }
-}
 
 // ─── INIT ────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
-  const config = await caricaConfigMuseo();
+  configMuseo = await caricaConfigMuseo();
   const utente = getUtenteCorrente();
 
   // Se l'utente non ha fatto il login (è un ospite anonimo)
@@ -43,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             Crea il tuo percorso su misura!
           </h2>
           <p class="lead mt-3" style="color: rgba(255, 255, 255, 0.75);">
-            Vuoi diventare un curatore virtuale e progettare la tua visita museale perfetta per ${config.museo}?
+            Vuoi diventare un curatore virtuale e progettare la tua visita museale perfetta per ${configMuseo ? configMuseo.museo : "il museo"}?
           </p>
           <p class="mb-4" style="color: rgba(255, 255, 255, 0.65);">
             Devi effettuare l'accesso per poter mescolare i contenuti del catalogo, creare il tuo itinerario e modificarlo quando vuoi.
@@ -58,6 +37,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Se l'utente è loggato (Visitatore o Autore), procediamo con il caricamento normale!
+  if (configMuseo && configMuseo.museo) {
+    const inputMuseo = document.getElementById("visitaMuseo");
+    if (inputMuseo) {
+      inputMuseo.value = configMuseo.museo; // Es: "Museo Egizio di Torino"
+    }
+  }
+
   await popolaMusei();
   await caricaAutori();
   await caricaTuttiItems();
@@ -514,7 +500,7 @@ function resetEditor() {
   // Ripristina il museo fissato dal config
   const inputMuseo = document.getElementById("visitaMuseo");
   if (inputMuseo) {
-    inputMuseo.value = museoConfigurato;
+    inputMuseo.value = configMuseo.museo;
   }
 
   // Re-impostiamo l'utente corrente anche dopo il reset

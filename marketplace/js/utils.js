@@ -167,15 +167,16 @@ function debounce(fn, delay = 300) {
 // ─── CONFIGURAZIONE MUSEO ────────────────────────────
 let configMuseo = null;
 
+// utils.js — funzione caricaConfigMuseo aggiornata
 async function caricaConfigMuseo() {
   try {
-    // Try multiple paths for config.json
     const configPaths = [
-      '/config.json',
-      '/marketplace/config.json',
-      '../config.json'
+      "/api/config", // ← aggiungi questo per primo
+      "/config.json",
+      "/marketplace/config.json",
+      "../config.json",
     ];
-    
+
     let response;
     for (const path of configPaths) {
       try {
@@ -185,16 +186,14 @@ async function caricaConfigMuseo() {
         continue;
       }
     }
-    
-    if (!response || !response.ok) {
-      throw new Error('Config non trovata');
-    }
-    
+
+    if (!response || !response.ok) throw new Error("Config non trovata");
+
     configMuseo = await response.json();
     applicaTemaMuseo();
     return configMuseo;
   } catch (err) {
-    console.error('Errore caricamento config:', err);
+    console.error("Errore caricamento config:", err);
     showToast("Errore nel caricamento della configurazione del museo", "error");
     return null;
   }
@@ -206,13 +205,19 @@ function getConfigMuseo() {
 
 function applicaTemaMuseo() {
   if (!configMuseo) return;
-  
+
   // Applica colori del museo
   if (configMuseo.colori) {
-    document.documentElement.style.setProperty('--aa-museum-primary', configMuseo.colori.primario || '#b8962e');
-    document.documentElement.style.setProperty('--aa-museum-secondary', configMuseo.colori.secondario || '#2c2c2c');
+    document.documentElement.style.setProperty(
+      "--aa-museum-primary",
+      configMuseo.colori.primario || "#b8962e",
+    );
+    document.documentElement.style.setProperty(
+      "--aa-museum-secondary",
+      configMuseo.colori.secondario || "#2c2c2c",
+    );
   }
-  
+
   // Aggiorna titolo della pagina
   const museoNome = configMuseo.museo || "Museo";
   document.title = `ArtAround – ${museoNome}`;
