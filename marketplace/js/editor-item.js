@@ -2,12 +2,16 @@
    editor-item.js – Logica Editor Item ArtAround
    ═══════════════════════════════════════════════════ */
 
-// ─── INIT ────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', async () => {
-  // Se non è un autore, fermiamo tutto e mostriamo il messaggio
-  if (!richiedeAutore()) {
-    const container = document.querySelector('.container') || document.querySelector('.container-fluid');
+let museoConfigurato = "";
+let mappaOpereLocali = {}; // Mappa per l'autocompilazione immediata client-side
 
+// ─── INIT ────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", async () => {
+  // 1. Controllo di sicurezza basato sui ruoli
+  if (!richiedeAutore()) {
+    const container =
+      document.querySelector(".container") ||
+      document.querySelector(".container-fluid");
     if (container) {
       container.innerHTML = `
         <div class="row justify-content-center align-items-center" style="min-height: 60vh;">
@@ -22,12 +26,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             <p class="mb-4">
               Solo gli utenti con il ruolo di <strong>Autore</strong> possono scolpire nuovi contenuti, progettare percorsi museali e condividerli con la community.
             </p>
-            <div class="aa-card p-4 mb-4 text-center" style="background: var(--aa-cream); border: 1px dashed var(--aa-gold);">
-              <i class="bi bi-lightbulb text-gold fs-4 mb-2 d-block"></i>
-              <small>
-                Vuoi diventare un creatore? Contatta l'amministratore del museo per richiedere l'upgrade del tuo account e iniziare a plasmare la cultura!
-              </small>
-            </div>
             <a href="/dashboard" class="btn-aa-primary mt-2">
               <i class="bi bi-arrow-left"></i> Torna alla Dashboard
             </a>
@@ -35,255 +33,522 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
       `;
     }
-    return; // Interrompe il caricamento del resto della pagina
+    return;
   }
 
-  // ... (Da qui in giù lascia il resto del codice originale: caricaAutori(), ecc.)
-  await caricaAutori();
-  await caricaMuseiDatalist();
+  // 2. Carica configurazione statica e sessione utente corrente
+  await inizializzaMuseoDaConfig();
 
-  // Live preview
-  ['titolo', 'descrizione', 'lunghezza', 'linguaggio', 'licenzaTipo', 'prezzo', 'immagineUrl'].forEach(id => {
-    document.getElementById(id)?.addEventListener('input', aggiornaPreview);
+  const utente = getUtenteCorrente();
+  const inputAutore = document.getElementById("autoreId");
+  if (inputAutore && utente) {
+    inputAutore.value = utente._id;
+  }
+
+  // 3. Popola dinamicamente il menu a tendina delle opere disponibili
+  await popolaSelectOpere();
+
+  // 4. Listener per l'anteprima live dinamica delle card
+  [
+    "titolo",
+    "descrizione",
+    "lunghezza",
+    "linguaggio",
+    "licenzaTipo",
+    "prezzo",
+    "immagineUrl",
+  ].forEach((id) => {
+    document.getElementById(id)?.addEventListener("input", aggiornaPreview);
   });
 
-  // Char count
-  document.getElementById('descrizione').addEventListener('input', e => {
+  // 5. Gestione conteggio caratteri e calcolo automatico profondità
+  document.getElementById("descrizione")?.addEventListener("input", (e) => {
     const len = e.target.value.length;
-    document.getElementById('charCount').textContent = len;
-    document.getElementById('profonditaPreview').textContent = stimaProfondita(len);
+    document.getElementById("charCount").textContent = len;
+
+    const prof = stimaProfondita(len);
+    document.getElementById("profonditaPreview").textContent = prof;
+    document.getElementById("profonditaContenuto").value = prof;
   });
 
-  // Anteprima immagine
-  document.getElementById('immagineUrl').addEventListener('input', debounce(e => {
-    const url = e.target.value.trim();
-    const prev = document.getElementById('imgPreview');
-    if (url) {
-      prev.innerHTML = `<img src="${url}" style="width:100%;height:80px;object-fit:cover;border-radius:6px" onerror="this.parentElement.innerHTML='🖼️'">`;
-    } else {
-      prev.innerHTML = '🖼️';
-    }
-  }, 400));
+  // 6. REATTIVITÀ DEL MENU A TENDINA: Gestisce il cambio di selezione dell'opera
+  document.getElementById("operaSelect")?.addEventListener("change", (e) => {
+    const valoreScelto = e.target.value;
+    gestisciCambioSelezioneOpera(valoreScelto);
+  });
 
-  // Varianti per operaId
-  document.getElementById('operaId').addEventListener('input', debounce(e => {
-    cercaVarianti(e.target.value.trim());
-  }, 500));
+  // 7. Anteprima Live miniatura immagine con debounce
+  document.getElementById("immagineUrl")?.addEventListener(
+    "input",
+    debounce((e) => {
+      aggiornaPreview();
+    }, 400),
+  );
 
-  // Modifica
+  // 8. Gestione modalità modifica se presente id nell'URL
   const params = new URLSearchParams(window.location.search);
-  if (params.get('id')) caricaItemPerModifica(params.get('id'));
+  if (params.get("id")) caricaItemPerModifica(params.get("id"));
 });
 
-// ─── CARICA DATI ────────────────────────────────────
-async function caricaAutori() {
-  const utenti = await apiFetch('/api/utenti');
-  const sel = document.getElementById('autoreId');
-  if (!utenti) return;
-  utenti.filter(u => ['autore', 'admin'].includes(u.ruolo)).forEach(u => {
-    const opt = document.createElement('option');
-    opt.value = u._id; opt.textContent = `${u.username}`;
-    sel.appendChild(opt);
-  });
-  const u = getUtenteCorrente();
-  if (u) sel.value = u._id;
+// ─── CARICA CONFIGURAZIONE MUSEO DAL SERVER ──────────
+async function inizializzaMuseoDaConfig() {
+  try {
+    const response = await fetch("/api/config");
+    if (!response.ok) {
+      console.warn("File config.json non raggiungibile via API.");
+      return;
+    }
+    const config = await response.json();
+    if (config && config.museo) {
+      museoConfigurato = config.museo;
+      const inputMuseo = document.getElementById("museo");
+      if (inputMuseo) {
+        inputMuseo.value = museoConfigurato;
+      }
+    }
+  } catch (error) {
+    console.error("Errore nel caricamento del modulo config:", error);
+  }
 }
 
-async function caricaMuseiDatalist() {
-  const musei = await apiFetch('/api/musei');
-  const dl = document.getElementById('museiList');
-  if (!musei || !dl) return;
-  musei.forEach(m => {
-    const opt = document.createElement('option');
-    opt.value = m;
-    dl.appendChild(opt);
-  });
-}
+// ─── POPOLA IL MENU A TENDINA DELLE OPERE ────────────
+async function popolaSelectOpere() {
+  const select = document.getElementById("operaSelect");
+  if (!select) return;
 
-// ─── PREVIEW ────────────────────────────────────────
-function aggiornaPreview() {
-  const titolo = document.getElementById('titolo').value || 'Titolo item';
-  const desc = document.getElementById('descrizione').value || 'La descrizione apparirà qui...';
-  const linguaggio = document.getElementById('linguaggio').value;
-  const lunghezza = document.getElementById('lunghezza').value;
-  const prezzo = Number(document.getElementById('prezzo').value);
-  const licenza = document.getElementById('licenzaTipo').value;
-  const imgUrl = document.getElementById('immagineUrl').value.trim();
+  // Richiediamo gli item esistenti per catalogare le opere attuali del museo
+  const data = await apiFetch(
+    `/api/items?museo=${encodeURIComponent(museoConfigurato)}&limite=300`,
+  );
+  select.innerHTML = "";
 
-  document.getElementById('prevTitolo').textContent = titolo;
-  document.getElementById('prevDesc').textContent = desc.substring(0, 120) + (desc.length > 120 ? '…' : '');
-  document.getElementById('prevLen').textContent = lunghezza;
-  document.getElementById('prevLicenza').textContent = licenza;
+  // Opzioni predefinite di cortesia e inserimento
+  const optDefault = document.createElement("option");
+  optDefault.value = "";
+  optDefault.textContent = "-- Scegli un'opera dall'elenco --";
+  select.appendChild(optDefault);
 
-  const prevLang = document.getElementById('prevLang');
-  prevLang.textContent = linguaggio;
-  prevLang.className = `aa-badge aa-badge-lang-${linguaggio}`;
+  const optNuova = document.createElement("option");
+  optNuova.value = "__NEW__";
+  optNuova.textContent = "[+ Censisci Nuova Opera non in elenco]";
+  select.appendChild(optNuova);
 
-  const prevPrice = document.getElementById('prevPrice');
-  if (prezzo === 0) {
-    prevPrice.className = 'aa-badge aa-badge-free';
-    prevPrice.textContent = 'Gratuito';
-  } else {
-    prevPrice.className = 'aa-price';
-    prevPrice.textContent = `€ ${prezzo.toFixed(2)}`;
+  if (!data || !data.items || data.items.length === 0) {
+    mappaOpereLocali = {};
+    return;
   }
 
-  const prevImg = document.getElementById('prevImg');
-  if (imgUrl) {
-    prevImg.innerHTML = `<img src="${imgUrl}" style="width:100%;height:160px;object-fit:cover" onerror="this.parentElement.innerHTML='🖼️'">`;
+  // Estraiamo le opere in modo univoco filtrando per operaId
+  mappaOpereLocali = {};
+  data.items.forEach((item) => {
+    if (item.operaId && !mappaOpereLocali[item.operaId]) {
+      mappaOpereLocali[item.operaId] = item;
+    }
+  });
+
+  // Generiamo i nodi option grafici
+  Object.keys(mappaOpereLocali).forEach((operaId) => {
+    const opera = mappaOpereLocali[operaId];
+    const opt = document.createElement("option");
+    opt.value = operaId;
+    opt.textContent = `${opera.titolo || "Opera senza titolo"} (${operaId})`;
+    select.appendChild(opt);
+  });
+}
+
+// ─── GESTISCE IL CAMBIO DI SELEZIONE NEL MENU ────────
+async function gestisciCambioSelezioneOpera(valoreScelto) {
+  const badge = document.getElementById("operaStatoBadge");
+  const inputOperaIdNascosto = document.getElementById("operaId");
+  const campiSchedaTecnica = [
+    "artista",
+    "stile",
+    "periodo",
+    "titolo",
+    "categoria",
+  ];
+
+  if (valoreScelto === "__NEW__") {
+    // Caso A: L'autore dichiara una nuova opera via Prompt
+    const nuovoCodice = prompt(
+      "Inserisci il codice ID alfanumerico per la nuova opera (es. ME-005):",
+    );
+
+    if (!nuovoCodice || nuovoCodice.trim() === "") {
+      document.getElementById("operaSelect").value = "";
+      gestisciCambioSelezioneOpera("");
+      return;
+    }
+
+    const codicePulito = nuovoCodice.trim().toUpperCase();
+
+    // Validazione preventiva anti-duplicati localizzati
+    if (mappaOpereLocali[codicePulito]) {
+      showToast(
+        "Questo ID esiste già! Selezionalo direttamente dal menu a tendina.",
+        "error",
+      );
+      document.getElementById("operaSelect").value = codicePulito;
+      gestisciCambioSelezioneOpera(codicePulito);
+      return;
+    }
+
+    inputOperaIdNascosto.value = codicePulito;
+
+    badge.textContent = `Nuova Opera: ${codicePulito}`;
+    badge.className = "badge ms-2 bg-warning text-dark";
+    badge.classList.remove("d-none");
+
+    // Sblocchiamo i campi per registrare la prima occorrenza storica
+    disabilitaCampiOpere(campiSchedaTecnica, false);
+
+    campiSchedaTecnica.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.value = id === "categoria" ? "pittura" : "";
+    });
+
+    document.getElementById("variantiList").innerHTML =
+      '<em class="text-slate small">Prima occorrenza. Questa opera verrà registrata per la prima volta.</em>';
+  } else if (valoreScelto && valoreScelto !== "") {
+    // Caso B: È stata scelta un'opera esistente
+    inputOperaIdNascosto.value = valoreScelto;
+
+    badge.textContent = "Opera Catalogata";
+    badge.className = "badge ms-2 bg-success text-white";
+    badge.classList.remove("d-none");
+
+    // Recuperiamo i dettagli immutabili condivisi dall'opera
+    const operaSelezionata = mappaOpereLocali[valoreScelto];
+
+    document.getElementById("artista").value =
+      operaSelezionata.artista || operaSelezionata.artist || "";
+    document.getElementById("stile").value =
+      operaSelezionata.stile || operaSelezionata.style || "";
+    document.getElementById("periodo").value =
+      operaSelezionata.periodo || operaSelezionata.period || "";
+    document.getElementById("titolo").value = operaSelezionata.titolo || "";
+    document.getElementById("categoria").value =
+      operaSelezionata.categoria || "pittura";
+
+    if (operaSelezionata.immagine) {
+      document.getElementById("immagineUrl").value = operaSelezionata.immagine;
+    }
+
+    // Blindiamo la scheda tecnica dell'opera in sola lettura
+    disabilitaCampiOpere(campiSchedaTecnica, true);
+
+    // Scarichiamo dinamicamente l'elenco delle spiegazioni concorrenti per la barra laterale
+    const dataVarianti = await apiFetch(
+      `/api/items?operaId=${encodeURIComponent(valoreScelto)}&limite=50`,
+    );
+    if (dataVarianti && dataVarianti.items) {
+      renderElencoVarianti(dataVarianti.items);
+    }
   } else {
-    prevImg.innerHTML = '🖼️';
+    // Caso C: Reset o selezione vuota
+    inputOperaIdNascosto.value = "";
+    badge.classList.add("d-none");
+    disabilitaCampiOpere(campiSchedaTecnica, false);
+    document.getElementById("variantiList").innerHTML =
+      '<em class="text-slate small">Seleziona un\'opera per esaminare le varianti...</em>';
+  }
+
+  aggiornaPreview();
+}
+
+function disabilitaCampiOpere(listaCampi, bloccati) {
+  listaCampi.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.readOnly = bloccati;
+      if (el.tagName === "SELECT") el.disabled = bloccati;
+
+      // Feedback visivo di sicurezza
+      el.style.backgroundColor = bloccati ? "var(--aa-cream)" : "";
+      el.style.cursor = bloccati ? "not-allowed" : "";
+    }
+  });
+}
+
+function renderElencoVarianti(items) {
+  const container = document.getElementById("variantiList");
+  const currentItemId = document.getElementById("itemId").value;
+
+  const filtrate = items.filter((i) => i._id !== currentItemId);
+  if (!filtrate.length) {
+    container.innerHTML =
+      '<em class="text-slate small">Nessuna spiegazione alternativa registrata oltre a questa.</em>';
+    return;
+  }
+
+  container.innerHTML = filtrate
+    .map(
+      (v) => `
+    <div class="d-flex align-items-center gap-2 mb-1 p-1 rounded" style="background:var(--aa-cream); font-size: 0.8rem">
+      <div class="flex-grow-1 min-w-0">
+        <div class="text-truncate"><strong>Target:</strong> ${v.linguaggio}</div>
+        <div class="text-slate" style="font-size:0.7rem">${v.lunghezza} · Licenza: ${v.licenza?.tipo || "Libera"}</div>
+      </div>
+      <a href="/editor-item?id=${v._id}" class="btn-aa-outline" style="font-size:0.68rem;padding:2px 6px">✎ Modifica</a>
+    </div>
+  `,
+    )
+    .join("");
+}
+
+// ─── LIVE PREVIEW DELLE CARD ─────────────────────────
+function aggiornaPreview() {
+  const titolo = document.getElementById("titolo").value || "Titolo item";
+  const desc =
+    document.getElementById("descrizione").value ||
+    "La descrizione apparirà qui...";
+  const linguaggio = document.getElementById("linguaggio").value;
+  const lunghezza = document.getElementById("lunghezza").value;
+  const prezzo = Number(document.getElementById("prezzo").value) || 0;
+  const licenza = document.getElementById("licenzaTipo").value;
+  const imgUrl = document.getElementById("immagineUrl").value.trim();
+
+  document.getElementById("prevTitolo").textContent = titolo;
+  document.getElementById("prevDesc").textContent =
+    desc.substring(0, 100) + (desc.length > 100 ? "…" : "");
+  document.getElementById("prevLen").textContent = lunghezza;
+  document.getElementById("prevLicenza").textContent = licenza;
+
+  const prevLang = document.getElementById("prevLang");
+  if (prevLang) {
+    prevLang.textContent = linguaggio;
+    prevLang.className = `aa-badge aa-badge-lang-${linguaggio}`;
+  }
+
+  const prevPrice = document.getElementById("prevPrice");
+  if (prevPrice) {
+    if (prezzo === 0) {
+      prevPrice.className = "aa-badge aa-badge-free";
+      prevPrice.textContent = "Gratuito";
+    } else {
+      prevPrice.className = "aa-price";
+      prevPrice.textContent = `€ ${prezzo.toFixed(2)}`;
+    }
+  }
+
+  const prevImg = document.getElementById("prevImg");
+  if (prevImg) {
+    if (imgUrl) {
+      prevImg.innerHTML = `<img src="${imgUrl}" style="width:100%;height:120px;object-fit:cover;border-radius:6px 6px 0 0">`;
+    } else {
+      prevImg.innerHTML = "🖼️";
+    }
   }
 }
 
 function stimaProfondita(len) {
-  if (len < 100) return 'superficiale';
-  if (len < 300) return 'standard';
-  if (len < 700) return 'approfondito';
-  return 'accademico';
+  if (len < 120) return "superficiale";
+  if (len < 350) return "standard";
+  if (len < 750) return "approfondito";
+  return "accademico";
 }
 
-// ─── VARIANTI ────────────────────────────────────────
-async function cercaVarianti(operaId) {
-  const container = document.getElementById('variantiList');
-  if (!operaId) {
-    container.innerHTML = '<em class="text-slate small">Inserisci un operaId</em>';
-    return;
-  }
-  const data = await apiFetch(`/api/items?operaId=${encodeURIComponent(operaId)}&limite=10`);
-  const attId = document.getElementById('itemId').value;
-
-  // Filtra l'item corrente se stiamo modificando
-  const varianti = (data?.items || []).filter(i => i._id !== attId);
-
-  if (!varianti.length) {
-    container.innerHTML = '<em class="text-slate small">Prima occorrenza per questo operaId</em>';
-    return;
-  }
-
-  container.innerHTML = varianti.map(v => `
-    <div class="d-flex align-items-center gap-2 mb-1 p-1 rounded" style="background:var(--aa-cream)">
-      <div class="flex-grow-1">
-        <div style="font-size:0.78rem;font-weight:600">${v.titolo}</div>
-        <div style="font-size:0.7rem;color:var(--aa-slate)">${v.linguaggio} · ${v.lunghezza}</div>
-      </div>
-      <a href="/editor-item?id=${v._id}" class="btn-aa-outline" style="font-size:0.7rem;padding:1px 7px">✎</a>
-    </div>
-  `).join('');
-}
-
-// ─── SALVA ITEM ──────────────────────────────────────
+// ─── INVIO E SALVATAGGIO DEI DATI ─────────────────────
 async function salvaItem() {
-  const operaId = document.getElementById('operaId').value.trim();
-  const museo = document.getElementById('museo').value.trim();
-  const titolo = document.getElementById('titolo').value.trim();
-  const autoreId = document.getElementById('autoreId').value;
-  const desc = document.getElementById('descrizione').value.trim();
-  const lunghezza = document.getElementById('lunghezza').value;
-  const linguaggio = document.getElementById('linguaggio').value;
-  const categoria = document.getElementById('categoria').value;
-  const profondita = document.getElementById('profonditaContenuto').value;
-  const tagsRaw = document.getElementById('tags').value;
-  const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
-  const immagine = document.getElementById('immagineUrl').value.trim() || null;
-  const licenzaTipo = document.getElementById('licenzaTipo').value;
-  const licenzaNote = document.getElementById('licenzaNote').value.trim();
-  const prezzo = Number(document.getElementById('prezzo').value) || 0;
-  const pubblicato = document.getElementById('pubblicato').checked;
-  const id = document.getElementById('itemId').value;
-  const default_image = '/img/default_item_image.jpg';
+  const operaId = document.getElementById("operaId").value.trim();
+  const museo = document.getElementById("museo").value.trim();
+  const titolo = document.getElementById("titolo").value.trim();
+  const autoreId = document.getElementById("autoreId").value;
+  const desc = document.getElementById("descrizione").value.trim();
+  const lunghezza = document.getElementById("lunghezza").value;
+  const linguaggio = document.getElementById("linguaggio").value;
+  const categoria = document.getElementById("categoria").value;
+  const profondita = document.getElementById("profonditaContenuto").value;
+  const tagsRaw = document.getElementById("tags").value;
+  const tags = tagsRaw
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const immagineUrl = document.getElementById("immagineUrl").value.trim();
+  const licenzaTipo = document.getElementById("licenzaTipo").value;
+  const licenzaNote = document.getElementById("licenzaNote").value.trim();
+  const prezzo = Number(document.getElementById("prezzo").value) || 0;
+  const pubblicato = document.getElementById("pubblicato").checked;
+  const id = document.getElementById("itemId").value;
 
-  // Validazione
-  if (!operaId) return showToast('operaId obbligatorio', 'error');
-  if (!museo) return showToast('Museo obbligatorio', 'error');
-  if (!titolo) return showToast('Titolo obbligatorio', 'error');
-  if (!autoreId) return showToast('Seleziona un autore', 'error');
-  if (!desc) return showToast('Descrizione obbligatoria', 'error');
+  const artista = document.getElementById("artista").value.trim();
+  const stile = document.getElementById("stile").value.trim();
+  const periodo = document.getElementById("periodo").value.trim();
 
-  const selectedImage = document.getElementById('immagineUrl').value.trim();
-  const image = selectedImage || default_image;
+  if (!operaId)
+    return showToast(
+      "Seleziona un'opera o inserisci una nuova coordinata ID.",
+      "error",
+    );
+  if (!titolo)
+    return showToast("Il titolo dell'opera o contenuto è necessario.", "error");
+  if (!desc)
+    return showToast(
+      "Scrivi il testo della spiegazione per la guida.",
+      "error",
+    );
+  if (!autoreId)
+    return showToast("Sessione autore non valida. Riesegui il login.", "error");
 
   const payload = {
-    operaId, museo, titolo, autoreId, descrizione: desc,
-    lunghezza, linguaggio, categoria,
+    operaId,
+    museo,
+    titolo,
+    descrizione: desc,
+    lunghezza,
+    linguaggio,
+    categoria,
     profonditaContenuto: profondita,
-    tags, immagine: image,
+    tags,
+    immagine: immagineUrl || "/img/default_item_image.jpg",
     licenza: { tipo: licenzaTipo, note: licenzaNote },
-    prezzo, pubblicato,
-    creatorId: autoreId
+    prezzo,
+    pubblicato,
+    creatorId: autoreId,
+    artista,
+    stile,
+    periodo,
   };
 
-  const metodo = id ? 'PUT' : 'POST';
-  const url = id ? `/api/items/${id}` : '/api/items';
+  const metodo = id ? "PUT" : "POST";
+  const url = id ? `/api/items/${id}` : "/api/items";
 
   const ok = await apiFetch(url, {
     method: metodo,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   });
 
   if (ok) {
-    showToast(id ? 'Item aggiornato!' : 'Item creato con successo!', 'success');
-    if (!id) resetForm();
-    else {
-      document.getElementById('formTitolo').textContent = ` Modifica: ${ok.titolo}`;
+    showToast(
+      id
+        ? "Spiegazione aggiornata nel database!"
+        : "Nuova variante traccia creata con successo!",
+      "success",
+    );
+    if (!id) {
+      await popolaSelectOpere(); // Ripopola l'elenco includendo l'eventuale nuova opera creata
+      resetForm();
+    } else {
+      document.getElementById("formTitolo").textContent =
+        ` Modifica: ${ok.titolo}`;
     }
   }
 }
 
-// ─── CARICA ITEM PER MODIFICA ────────────────────────
+// ─── CARICA VARIANTE IN MODIFICA VIA URL QUERY ────────
 async function caricaItemPerModifica(id) {
   const item = await apiFetch(`/api/items/${id}`);
   if (!item) return;
 
-  document.getElementById('itemId').value = item._id;
-  document.getElementById('operaId').value = item.operaId;
-  document.getElementById('museo').value = item.museo;
-  document.getElementById('titolo').value = item.titolo;
-  document.getElementById('autoreId').value = item.creatorId?._id || item.creatorId || '';
-  document.getElementById('descrizione').value = item.descrizione;
-  document.getElementById('lunghezza').value = item.lunghezza;
-  document.getElementById('linguaggio').value = item.linguaggio;
-  document.getElementById('categoria').value = item.categoria;
-  document.getElementById('profonditaContenuto').value = item.profonditaContenuto;
-  document.getElementById('tags').value = (item.tags || []).join(', ');
-  document.getElementById('immagineUrl').value = item.immagine || '';
-  document.getElementById('licenzaTipo').value = item.licenza?.tipo || 'gratuito';
-  document.getElementById('licenzaNote').value = item.licenza?.note || '';
-  document.getElementById('prezzo').value = item.prezzo || 0;
-  document.getElementById('pubblicato').checked = item.pubblicato;
+  document.getElementById("itemId").value = item._id;
+  document.getElementById("operaId").value = item.operaId;
+  document.getElementById("museo").value = item.museo;
+  document.getElementById("titolo").value = item.titolo;
+  document.getElementById("autoreId").value =
+    item.creatorId?._id || item.creatorId || "";
+  document.getElementById("descrizione").value = item.descrizione;
+  document.getElementById("lunghezza").value = item.lunghezza;
+  document.getElementById("linguaggio").value = item.linguaggio;
+  document.getElementById("categoria").value = item.categoria;
+  document.getElementById("profonditaContenuto").value =
+    item.profonditaContenuto || "standard";
+  document.getElementById("tags").value = (item.tags || []).join(", ");
+  document.getElementById("immagineUrl").value = item.immagine || "";
+  document.getElementById("licenzaTipo").value =
+    item.licenza?.tipo || "gratuito";
+  document.getElementById("licenzaNote").value = item.licenza?.note || "";
+  document.getElementById("prezzo").value = item.prezzo || 0;
+  document.getElementById("pubblicato").checked = item.pubblicato !== false;
 
-  // UI
-  document.getElementById('charCount').textContent = item.descrizione.length;
-  document.getElementById('profonditaPreview').textContent = stimaProfondita(item.descrizione.length);
-  document.getElementById('formTitolo').textContent = ` Modifica: ${item.titolo}`;
+  document.getElementById("artista").value = item.artista || item.artist || "";
+  document.getElementById("stile").value = item.stile || item.style || "";
+  document.getElementById("periodo").value = item.periodo || item.period || "";
 
-  if (item.immagine) {
-    document.getElementById('imgPreview').innerHTML =
-      `<img src="${item.immagine}" style="width:100%;height:80px;object-fit:cover;border-radius:6px">`;
-  }
+  document.getElementById("charCount").textContent = item.descrizione.length;
+  document.getElementById("profonditaPreview").textContent = stimaProfondita(
+    item.descrizione.length,
+  );
+  document.getElementById("formTitolo").textContent =
+    ` Modifica: ${item.titolo}`;
+
+  // Sincronizza l'elemento grafico select con un leggero delay per l'inizializzazione
+  setTimeout(() => {
+    const select = document.getElementById("operaSelect");
+    if (select) {
+      select.value = item.operaId;
+      disabilitaCampiOpere(
+        ["artista", "stile", "periodo", "titolo", "categoria"],
+        true,
+      );
+    }
+  }, 400);
+
+  const badge = document.getElementById("operaStatoBadge");
+  badge.textContent = "Modalità Modifica";
+  badge.className = "badge ms-2 bg-success text-white";
+  badge.classList.remove("d-none");
 
   aggiornaPreview();
-  cercaVarianti(item.operaId);
-  showToast(`"${item.titolo}" caricato per modifica`, 'info');
+
+  const dataVarianti = await apiFetch(
+    `/api/items?operaId=${encodeURIComponent(item.operaId)}&limite=20`,
+  );
+  if (dataVarianti && dataVarianti.items) {
+    renderElencoVarianti(dataVarianti.items);
+  }
 }
 
+// ─── SVUOTA E RIPRISTINA IL MODULO ────────────────────
 function resetForm() {
-  ['operaId', 'museo', 'titolo', 'descrizione', 'tags', 'immagineUrl', 'licenzaNote'].forEach(id => {
-    document.getElementById(id).value = '';
+  const campiDaPulire = [
+    "operaId",
+    "titolo",
+    "descrizione",
+    "tags",
+    "immagineUrl",
+    "licenzaNote",
+    "artista",
+    "stile",
+    "periodo",
+    "operaSelect",
+  ];
+  campiDaPulire.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
   });
-  document.getElementById('lunghezza').value = '3m';
-  document.getElementById('linguaggio').value = 'intermedio';
-  document.getElementById('categoria').value = 'pittura';
-  document.getElementById('profonditaContenuto').value = 'standard';
-  document.getElementById('licenzaTipo').value = 'gratuito';
-  document.getElementById('prezzo').value = 0;
-  document.getElementById('pubblicato').checked = false;
-  document.getElementById('itemId').value = '';
-  document.getElementById('formTitolo').textContent = ' Nuovo Contenuto (Item)';
-  document.getElementById('charCount').textContent = '0';
-  document.getElementById('profonditaPreview').textContent = '–';
-  document.getElementById('imgPreview').innerHTML = '🖼️';
-  document.getElementById('variantiList').innerHTML = '<em class="text-slate small">Inserisci un operaId per vedere le varianti</em>';
+
+  disabilitaCampiOpere(
+    ["artista", "stile", "periodo", "titolo", "categoria"],
+    false,
+  );
+  document.getElementById("operaStatoBadge").classList.add("d-none");
+
+  inizializzaMuseoDaConfig();
+  const utente = getUtenteCorrente();
+  if (utente) document.getElementById("autoreId").value = utente._id;
+
+  document.getElementById("lunghezza").value = "3s";
+  document.getElementById("linguaggio").value = "medio";
+  document.getElementById("categoria").value = "pittura";
+  document.getElementById("profonditaContenuto").value = "standard";
+  document.getElementById("licenzaTipo").value = "gratuito";
+  document.getElementById("prezzo").value = 0;
+  document.getElementById("pubblicato").checked = true;
+  document.getElementById("itemId").value = "";
+  document.getElementById("formTitolo").textContent = " Nuovo Contenuto (Item)";
+  document.getElementById("charCount").textContent = "0";
+  document.getElementById("profonditaPreview").textContent = "–";
+  document.getElementById("variantiList").innerHTML =
+    '<em class="text-slate small">Seleziona un\'opera per esaminare le varianti...</em>';
+
   aggiornaPreview();
+}
+
+function debounce(fn, delay = 300) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
 }

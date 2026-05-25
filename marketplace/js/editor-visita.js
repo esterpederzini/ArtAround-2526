@@ -8,7 +8,7 @@ let dragSrc = null;
 async function caricaConfigMuseo() {
   try {
     // Chiediamo i dati al server tramite la rotta API
-    const response = await fetch('/api/config');
+    const response = await fetch("/api/config");
 
     if (!response.ok) {
       throw new Error("Configurazione non trovata sul server");
@@ -17,7 +17,6 @@ async function caricaConfigMuseo() {
     // Il server ci risponde inviando il file JSON, lo convertiamo in oggetto JS
     const config = await response.json();
     return config;
-
   } catch (error) {
     console.error("Errore nel caricamento della configurazione:", error);
     return null;
@@ -152,11 +151,11 @@ function renderCatalogo(filtro = "") {
   const container = document.getElementById("catalogoItems");
   const items = filtro
     ? tuttiItems.filter(
-      (i) =>
-        i.titolo.toLowerCase().includes(filtro) ||
-        i.operaId.toLowerCase().includes(filtro) ||
-        (i.tags || []).some((t) => t.toLowerCase().includes(filtro)),
-    )
+        (i) =>
+          i.titolo.toLowerCase().includes(filtro) ||
+          i.operaId.toLowerCase().includes(filtro) ||
+          (i.tags || []).some((t) => t.toLowerCase().includes(filtro)),
+      )
     : tuttiItems;
 
   if (!items.length) {
@@ -347,7 +346,8 @@ function onDragEnd(e) {
  */
 function buildTappeFromPath(pathItems) {
   return pathItems.map((i) => {
-    const meta = tuttiItems.find((x) => String(x._id) === String(i.itemId)) || {};
+    const meta =
+      tuttiItems.find((x) => String(x._id) === String(i.itemId)) || {};
     return {
       ordine: i.ordine,
       logistica: "",
@@ -364,7 +364,7 @@ async function salvaVisita() {
   const museo = document.getElementById("visitaMuseo").value;
   const autoreId = document.getElementById("visitaAutore").value;
   const desc = document.getElementById("visitaDescrizione").value.trim();
-  const default_image = '/img/default_item_image.jpg';
+  const default_image = "/img/default_item_image.jpg";
   const tags = document
     .getElementById("visitaTags")
     .value.split(",")
@@ -386,7 +386,9 @@ async function salvaVisita() {
 
   let thumbnail = default_image;
   if (itemsNelPercorso.length > 0) {
-    const primoItem = tuttiItems.find(i => i._id === itemsNelPercorso[0].itemId);
+    const primoItem = tuttiItems.find(
+      (i) => i._id === itemsNelPercorso[0].itemId,
+    );
     if (primoItem && primoItem.immagine) {
       thumbnail = primoItem.immagine;
     }
@@ -446,15 +448,12 @@ async function caricaVisitaPerModifica(id) {
   document.getElementById("visitaPubblica").checked = v.pubblica;
   document.getElementById("visitaAutore").value = v.creatorId?._id || "";
   const visitLabel = v.titolo || v.title || "Visita";
-  document.getElementById("editorTitolo").textContent = `Modifica: ${visitLabel}`;
+  document.getElementById("editorTitolo").textContent =
+    `Modifica: ${visitLabel}`;
 
   // Primary: `tappe` (Navigator + seed). Fallback: legacy `items` until re-saved.
   let rawTappe = Array.isArray(v.tappe) ? v.tappe : [];
-  if (
-    rawTappe.length === 0 &&
-    Array.isArray(v.items) &&
-    v.items.length > 0
-  ) {
+  if (rawTappe.length === 0 && Array.isArray(v.items) && v.items.length > 0) {
     rawTappe = v.items.map((row) => ({
       ordine: row.ordine,
       opzionale: row.opzionale,
@@ -468,9 +467,7 @@ async function caricaVisitaPerModifica(id) {
       def && typeof def === "object" && def._id != null ? def._id : def;
     const pop = def && typeof def === "object" ? def : null;
     const meta =
-      pop ||
-      tuttiItems.find((x) => String(x._id) === String(itemId)) ||
-      {};
+      pop || tuttiItems.find((x) => String(x._id) === String(itemId)) || {};
     return {
       itemId: String(itemId),
       ordine: t.ordine,
@@ -513,6 +510,19 @@ function resetEditor() {
   document.getElementById("visitaPrezzo").value = 0;
   document.getElementById("visitaPubblica").checked = false;
   document.getElementById("editorTitolo").textContent = "Nuova Visita";
+
+  // Ripristina il museo fissato dal config
+  const inputMuseo = document.getElementById("visitaMuseo");
+  if (inputMuseo) {
+    inputMuseo.value = museoConfigurato;
+  }
+
+  // Re-impostiamo l'utente corrente anche dopo il reset
+  const u = getUtenteCorrente();
+  if (u) {
+    document.getElementById("visitaAutore").value = u._id;
+  }
+
   itemsNelPercorso = [];
   renderPercorso();
   renderCatalogo("");
@@ -531,13 +541,9 @@ function applicaRestrizioniVisitatore() {
   console.log("Modalità Visitatore: blocco campi sensibili.");
 
   // Campi da bloccare (sola lettura/disabilitati)
-  const campiDaBloccare = [
-    "visitaPrezzo",
-    "visitaLicenza",
-    "visitaPubblica"
-  ];
+  const campiDaBloccare = ["visitaPrezzo", "visitaLicenza", "visitaPubblica"];
 
-  campiDaBloccare.forEach(id => {
+  campiDaBloccare.forEach((id) => {
     const el = document.getElementById(id);
     if (el) {
       el.disabled = true; // Disabilita l'input
@@ -554,7 +560,8 @@ function applicaRestrizioniVisitatore() {
     const badge = document.createElement("span");
     badge.className = "aa-badge aa-badge-lang-infantile ms-2"; // Usa uno stile esistente (es. giallo/arancio)
     badge.style.fontSize = "0.7rem";
-    badge.innerHTML = '<i class="bi bi-info-circle"></i> Modalità Personalizzazione';
+    badge.innerHTML =
+      '<i class="bi bi-info-circle"></i> Modalità Personalizzazione';
     header.appendChild(badge);
   }
 }

@@ -10,6 +10,25 @@ async function apiFetch(url, opzioni = {}) {
     if (token) headers.Authorization = `Bearer ${token}`;
 
     const risposta = await fetch(url, { ...opzioni, headers });
+
+    // ─── GESTIONE SCADENZA SESSIONE (401) ───────────────
+    if (risposta.status === 401) {
+      showToast("Sessione scaduta. Verrai reindirizzato al login...", "error");
+
+      // Rimuoviamo i dati della sessione obsoleta
+      localStorage.removeItem("aa_token");
+      localStorage.removeItem("aa_utente");
+      localStorage.removeItem("user_session"); // per sicurezza e retrocompatibilità
+
+      // Aspettiamo un secondo per dare il tempo all'utente di leggere il messaggio e poi reindirizziamo
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1500);
+
+      return null;
+    }
+    // ────────────────────────────────────────────────────
+
     const json = await risposta.json();
     if (!risposta.ok || !json.successo) {
       showToast(json.messaggio || "Errore API", "error");
