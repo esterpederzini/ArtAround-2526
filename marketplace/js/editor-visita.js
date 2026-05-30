@@ -47,7 +47,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   await popolaMusei();
   await caricaAutori();
   await caricaTuttiItems();
-  await caricaVisiteList();
 
   applicaRestrizioniVisitatore();
 
@@ -101,47 +100,28 @@ async function caricaTuttiItems() {
   renderCatalogo("");
 }
 
-async function caricaVisiteList() {
-  const data = await apiFetch("/api/visite?limite=20&pubblica=tutti");
-  const list = document.getElementById("visiteList");
-  if (!list) return;
-  if (!data || !data.visite.length) {
-    list.innerHTML = '<em class="text-slate small">Nessuna visita ancora.</em>';
-    return;
-  }
-  list.innerHTML = data.visite
-    .map(
-      (v) => `
-    <div class="d-flex justify-content-between align-items-center py-1 border-bottom" style="border-color:var(--aa-stone)!important">
-      <span class="small text-truncate" style="max-width:140px" title="${v.titolo || v.title}">${v.titolo || v.title}</span>
-      <div class="d-flex gap-1">
-        <button class="btn-aa-outline" style="font-size:0.72rem;padding:1px 7px" onclick="caricaVisitaPerModifica('${v._id}')">✎</button>
-        <button class="btn-aa-danger" style="font-size:0.72rem;padding:1px 6px" onclick="eliminaVisita('${v._id}')">✕</button>
-      </div>
-    </div>
-  `,
-    )
-    .join("");
-}
-
 // ─── RENDER CATALOGO ─────────────────────────────────
 function renderCatalogo(filtro = "") {
   const container = document.getElementById("catalogoItems");
   if (!container) return;
 
-  const items = filtro
-    ? tuttiItems.filter(
-        (i) =>
-          i.titolo.toLowerCase().includes(filtro) ||
-          (i.titoloOpera && i.titoloOpera.toLowerCase().includes(filtro)) ||
-          i.operaId.toLowerCase().includes(filtro) ||
-          (i.tags || []).some((t) => t.toLowerCase().includes(filtro)),
-      )
-    : tuttiItems;
+  let items = tuttiItems.filter(
+    (item) => !itemsNelPercorso.some((p) => p.itemId === item._id),
+  );
+
+  if (filtro) {
+    items = items.filter(
+      (i) =>
+        i.titolo.toLowerCase().includes(filtro) ||
+        (i.titoloOpera && i.titoloOpera.toLowerCase().includes(filtro)) ||
+        i.operaId.toLowerCase().includes(filtro) ||
+        (i.tags || []).some((t) => t.toLowerCase().includes(filtro)),
+    );
+  }
 
   if (!items.length) {
     container.innerHTML =
-      '<div class="aa-empty" style="padding:1rem"><p style="font-size:0.8rem">Nessun item trovato.</p></div>';
+      '<div class="aa-empty" style="padding:1rem"><p style="font-size:0.8rem">Nessun item disponibile.</p></div>';
     return;
   }
 

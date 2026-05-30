@@ -473,10 +473,11 @@ function renderVisitaCard(v) {
           </div>
           ${v.tags?.length ? `<div class="mb-3">${v.tags.map((t) => `<span class="aa-badge aa-badge-len">${t}</span>`).join("")}</div>` : ""}
         </div>
-        <div class="d-flex justify-content-between align-items-center mt-2">
+        
+        <div class="d-flex justify-content-between align-items-center mt-1 mb-2" style="padding-left: 12px;">
               ${badgePrezzo(v.prezzo)}
         </div>
-        </div>
+        
       </div>
     </div>
   `;
