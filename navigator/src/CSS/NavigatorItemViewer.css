@@ -114,6 +114,44 @@
 }
 
 /* --- CONTENT CARDS --- */
+/* --- MUSEUM LOGISTICS CARD --- */
+.museum-logistics-card {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 1.2rem !important;
+  margin: 1rem 15px 0 15px !important;
+  pointer-events: all;
+  position: relative;
+  z-index: 10;
+}
+
+.logistics-card-title {
+  color: #e18f37 !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05rem !important;
+  margin-bottom: 0.6rem !important;
+}
+
+.logistics-card-text {
+  font-size: 0.9rem !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+  line-height: 1.5 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Adattamento specifico per la visualizzazione Split-Screen (Desktop) */
+@media (min-width: 769px) {
+  .museum-logistics-card {
+    width: 100%;
+    max-width: 520px; /* Si allinea perfettamente alla larghezza degli altri box */
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 1.2rem !important; /* Mantiene lo stesso distanziamento regolare */
+  }
+}
 .card-viewer {
   background-color: #1a1a1d !important;
   border: none !important;
@@ -348,74 +386,81 @@
   opacity: 0.6;
 }
 
-/* --- MODAL DI USCITA --- */
-.museum-modal .modal-content {
-  background-color: rgba(26, 26, 29, 0.98) !important;
-  backdrop-filter: blur(0.9rem);
-  border: 0.06rem solid rgba(225, 143, 55, 0.3) !important;
-  border-radius: 1.5rem !important;
-  color: white;
+/* --- MODAL DI CONFERMA USCITA (REPLICATO) --- */
+
+.museum-modal-overview .modal-content {
+  background: rgba(36, 35, 38, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 1.2rem !important;
+  padding: 1.5rem !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
 }
 
-.museum-modal-content {
+.museum-modal-content-overview {
+  background: transparent !important;
   text-align: center;
-  padding: 2.5rem 1.8rem !important;
+  color: #ffffff !important;
+  padding: 0 !important;
 }
 
-.museum-modal-icon {
-  font-size: 3.5rem;
+.museum-modal-icon-overview {
+  font-size: 3rem;
   color: #e18f37;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1rem;
 }
 
-.museum-modal-title {
-  font-weight: 800;
-  font-size: 1.4rem;
+.museum-modal-title-overview {
+  font-family: "Rubik", sans-serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: #ffffff !important;
+}
+
+.museum-modal-text-overview {
+  font-family: "Rubik", sans-serif;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7) !important;
   margin-bottom: 1.5rem;
 }
 
-.museum-modal-actions {
+.museum-modal-actions-overview {
   display: flex;
-  gap: 1rem;
-  justify-content: center;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.museum-modal-actions button {
-  flex: 1;
-  max-width: 9rem;
-  padding: 0.75rem;
-  font-weight: 700;
-  border-radius: 0.75rem;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-}
-
-.btn-museum-primary {
+.btn-overview-confirm {
   background-color: #e18f37 !important;
-  color: #1a1a1d !important;
+  color: #ffffff !important;
   border: none !important;
-}
-
-.btn-museum-outline {
-  background: transparent !important;
-  color: #fff !important;
-  border: 0.06rem solid rgba(255, 255, 255, 0.2) !important;
-}
-
-.btn-museum-outline {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 10px;
+  border-radius: 25px !important;
+  font-weight: 600;
+  transition: background 0.2s;
   width: 100%;
-  padding: 0.8rem !important;
-  font-size: 0.9rem;
-  background: transparent !important;
-  color: #fff !important;
-  border: 0.06rem solid rgba(225, 143, 55, 0.3) !important;
 }
 
-.btn-museum-outline i {
-  color: #e18f37;
+.btn-overview-confirm:hover {
+  background-color: #c9792c !important;
+}
+
+.btn-overview-cancel {
+  background-color: transparent !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  padding: 10px;
+  border-radius: 25px !important;
+  font-weight: 500;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.btn-overview-cancel:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
 }
 
 /* --- BOTTOM NAVIGATION BAR --- */
@@ -875,4 +920,67 @@
     max-width: 600px;
     margin: auto;
   }
+}
+
+/* --- MODAL INDICAZIONI LOGISTICHE --- */
+.custom-viewer-modal .modal-content {
+  background: rgba(26, 26, 29, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+.custom-viewer-modal .modal-header {
+  padding: 1.5rem 1.5rem 0.5rem 1.5rem !important;
+}
+
+.custom-viewer-modal .modal-body {
+  padding: 0 1.5rem 1.5rem 1.5rem !important;
+}
+
+/* Scatola interna del testo delle indicazioni */
+.logistics-text-container {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 1rem !important;
+  padding: 1.2rem !important;
+}
+
+.logistics-text-container p {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Stile uniforme per i pulsanti minimali dell'intestazione dell'opera */
+.btn-hero-minimal {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 20px;
+  padding: 4px 15px;
+  font-size: 0.8rem;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px); /* Supporto per Safari */
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.btn-hero-minimal:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+}
+
+.modal-logistic .btn-close {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23e18f37'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") !important;
+  opacity: 1;
+}
+
+.modal-logistic .btn-close:hover {
+  opacity: 0.8;
 }

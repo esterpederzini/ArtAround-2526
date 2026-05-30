@@ -33,6 +33,7 @@ export default function NavigatorItemViewer() {
   const recognitionRef = useRef(null);
   const [logisticsMsg, setLogisticsMsg] = useState("");
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showLogisticsModal, setShowLogisticsModal] = useState(false);
 
   const [uiLabels] = useState({
     "3s": "3s",
@@ -569,44 +570,31 @@ export default function NavigatorItemViewer() {
             <h1 className="hero-title">
               {currentItem?.titolo || "Titolo assente"}
             </h1>
-            <button
-              className="btn-details-minimal mt-2"
-              onClick={() => setShowDetailsModal(true)}
-              style={{
-                background: "rgba(255,255,255,0.1)",
-                border: "1px solid rgba(255,255,255,0.3)",
-                color: "white",
-                borderRadius: "20px",
-                padding: "4px 15px",
-                fontSize: "0.8rem",
-                backdropFilter: "blur(5px)",
-              }}
-            >
-              <i
-                className="bi bi-info-circle me-2"
-                style={{ color: "#e18f37" }}
-              ></i>
-              Dettagli
-            </button>
+            <div className="d-flex flex-wrap gap-2 mt-2">
+              <button
+                className="btn-hero-minimal"
+                onClick={() => setShowDetailsModal(true)}
+              >
+                <i
+                  className="bi bi-info-circle me-2"
+                  style={{ color: "#e18f37" }}
+                ></i>
+                Dettagli
+              </button>
+
+              <button
+                className="btn-hero-minimal"
+                onClick={() => setShowLogisticsModal(true)}
+              >
+                <i
+                  className="bi bi-compass me-2"
+                  style={{ color: "#e18f37" }}
+                ></i>
+                Indicazioni prossima tappa
+              </button>
+            </div>
           </div>
         </section>
-        <Card
-          className="mt-3 museum-logistics-card"
-          style={{
-            background: "rgba(255, 193, 7, 0.1)",
-            border: "1px solid #ffc107",
-          }}
-        >
-          <Card.Body>
-            <h6 className="text-warning mb-2">
-              <i className="bi bi-geo-alt-fill me-2"></i>
-              Directions to the next stop
-            </h6>
-            <p className="mb-0" style={{ fontSize: "0.9rem", color: "#fff" }}>
-              {getLogisticsDirections()}
-            </p>
-          </Card.Body>
-        </Card>
 
         <Container fluid className="p-0">
           <Row className="justify-content-center g-0">
@@ -1045,29 +1033,34 @@ export default function NavigatorItemViewer() {
       </Modal>
 
       {/* USCITA */}
+      {/* MODAL DI CONFERMA USCITA */}
       <Modal
         show={showExitModal}
         onHide={() => setShowExitModal(false)}
         centered
-        className="museum-modal"
+        className="museum-modal-overview"
+        dialogClassName="museum-modal-overview"
       >
-        <Modal.Body className="museum-modal-content text-center">
-          <div className="museum-modal-icon">
-            <i className="bi bi-door-open"></i>
+        <Modal.Body className="museum-modal-content-overview">
+          <div className="museum-modal-icon-overview">
+            <i className="bi bi-exclamation-circle"></i>
           </div>
-          <h5 className="museum-modal-title">Vuoi tornare alla preview?</h5>
-          <div className="museum-modal-actions">
+          <h5 className="museum-modal-title-overview">Conferma uscita</h5>
+          <p className="museum-modal-text-overview">
+            Vuoi tornare alla preview?
+          </p>
+          <div className="museum-modal-actions-overview">
             <button
-              className="btn-museum-outline"
+              className="btn-overview-confirm"
+              onClick={() => navigate(`/visita/${id}/overview`)} // Sostituisci con la tua funzione di uscita se diversa
+            >
+              Esci dalla guida
+            </button>
+            <button
+              className="btn-overview-cancel"
               onClick={() => setShowExitModal(false)}
             >
               Annulla
-            </button>
-            <button
-              className="btn-museum-primary"
-              onClick={() => navigate(`/visit/${id}`)}
-            >
-              Esci
             </button>
           </div>
         </Modal.Body>
@@ -1258,6 +1251,35 @@ export default function NavigatorItemViewer() {
           >
             Ho capito
           </button>
+        </Modal.Body>
+      </Modal>
+
+      {/* MODAL DELLE INDICAZIONI LOGISTICHE */}
+      <Modal
+        show={showLogisticsModal}
+        onHide={() => setShowLogisticsModal(false)}
+        centered
+        dialogClassName="custom-viewer-modal modal-logistic"
+      >
+        <Modal.Header
+          closeButton
+          className="border-0 bg-transparent text-white"
+        >
+          <Modal.Title
+            className="fs-6 d-flex align-items-center"
+            style={{
+              color: "#e18f37",
+              fontWeight: "700",
+              letterSpacing: "0.05em",
+            }}
+          >
+            <i className="bi bi-compass-fill me-2"></i> INDICAZIONI PERCORSO
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="pt-0">
+          <div className="logistics-text-container">
+            <p>{getLogisticsDirections()}</p>
+          </div>
         </Modal.Body>
       </Modal>
     </div>

@@ -209,7 +209,8 @@ function NavigatorVisitOverview() {
         show={showExitModal}
         onHide={handleClose}
         centered
-        className="museum-modal-overlay"
+        className="museum-modal-overview"
+        dialogClassName="museum-modal-overview"
       >
         <Modal.Body className="museum-modal-content-overview">
           <div className="museum-modal-icon-overview">
