@@ -15,7 +15,7 @@ const NavigatorHome = () => {
   const userName = sessionData?.user?.username || "ArtAround User";
 
   useEffect(() => {
-    // Fetch configurazione
+    // Usa il percorso assoluto partendo dalla radice /api
     fetch("/api/config")
       .then((res) => res.json())
       .then((data) => setConfig(data))
@@ -24,10 +24,11 @@ const NavigatorHome = () => {
         setConfig({ museumName: "ArtAround", appName: "Discover the Art" });
       });
 
-    // Fetch visite
     fetch("/api/visite")
       .then((res) => res.json())
       .then((json) => {
+        // Importante: il controller restituisce { successo: true, data: { visite: [...] } }
+        // Quindi dobbiamo mappare correttamente la risposta in base alla struttura di apiController.js
         if (json.successo && json.data) {
           const dataVisite = json.data.visite || json.data;
           setVisits(Array.isArray(dataVisite) ? dataVisite : []);
@@ -154,6 +155,7 @@ const NavigatorHome = () => {
                   <div className="card-img-wrapper">
                     <img
                       src={
+                        visita.immagine ||
                         visita.image ||
                         config?.defaultCardImage ||
                         "/navigator/img/default_item_image.jpg"

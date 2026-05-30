@@ -1,6 +1,15 @@
+/* Definiamo delle variabili per gestire le larghezze in un unico punto */
+:root {
+  --sidebar-collapsed-width: 3.75rem; /* Circa 60px */
+  --sidebar-expanded-width-mobile: 14rem; /* Larghezza ottimale per smartphone */
+  --sidebar-expanded-width-desktop: 17.5rem; /* Più larga su schermi grandi */
+}
+
 .sidebar {
   background-color: transparent;
-  transition: all 0.3s ease;
+  transition:
+    width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.3s ease;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -9,48 +18,54 @@
   left: 0;
   top: 0;
   height: 100vh;
+  background-color: red !important;
 }
 
+/* Stato Espanso (Mobile di base) */
 .sidebar.expanded {
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  width: 30vh;
-  border-right: 1px solid rgba(255, 255, 255, 0.3);
+  width: var(--sidebar-expanded-width-mobile);
+  border-right: 1px solid rgba(255, 255, 255, 0.25);
   background-image: linear-gradient(to right, #ffecd2 0%, #dbb280 100%);
 }
 
+/* Stato Contratto (Identico su tutti i dispositivi) */
 .sidebar.collapsed {
-  width: 60px;
-  height: 100%;
+  width: var(--sidebar-collapsed-width);
 }
 
-.sidebar.collapsed i {
-  color: #cc9966;
+/* HEADER E BOTTONE HAMBURGER */
+.sidebar-header {
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.sidebar.expanded i,
-.link-text {
-  color: white;
-}
-
-/* DESKTOP: Da tablet in su */
-@media (min-width: 768px) {
-  .sidebar.collapsed {
-    width: 60px;
-  }
-
-  .sidebar.expanded {
-    width: 280px;
-  }
+.sidebar.expanded .sidebar-header {
+  justify-content: flex-start;
+  padding-left: 1rem;
 }
 
 .nav-btn {
   background-color: transparent;
   border: none;
-  color: #cc9966;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
   cursor: pointer;
   font-size: 1.5rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ICONE E TESTO SEMPRE BIANCHI */
+.sidebar i,
+.link-text {
+  color: #ffffff !important;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .nav-list {
@@ -59,18 +74,57 @@
   margin: 0;
 }
 
+/* VOCI DEL MENU RESPONSIVE */
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 12px;
+  padding: 0.85rem 1.1rem;
   cursor: pointer;
   white-space: nowrap;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  transition: background-color 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.nav-item:hover i {
+  transform: scale(1.08);
 }
 
 .nav-item i {
-  font-size: 1.5rem;
-  min-width: 30px;
+  font-size: 1.3rem;
+  min-width: 1.85rem;
   text-align: center;
+}
+
+.link-text {
+  font-size: 0.95rem;
+  margin-left: 0.6rem;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+/* ─── MEDIA QUERIES (ADATTAMENTO DISPOSITIVI) ─── */
+
+/* Tablet e schermi intermedi (MD) */
+@media (min-width: 768px) {
+  .sidebar.expanded {
+    width: var(--sidebar-expanded-width-desktop);
+  }
+  .nav-item {
+    padding: 1rem 1.25rem; /* Più respiro sui tablet */
+  }
+  .link-text {
+    font-size: 1rem;
+  }
+}
+
+/* Schermi Desktop molto grandi (XL) */
+@media (min-width: 1200px) {
+  .nav-item {
+    padding: 1.1rem 1.4rem; /* Ottimizzazione per monitor grandi */
+  }
 }

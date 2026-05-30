@@ -67,25 +67,18 @@ app.get("/db/create", async function (req, res) {
 // 2. MOBILE APP (navigator/dist)
 const navigatorDistPath = path.join(__dirname, "navigator", "dist");
 const navigatorSourcePath = path.join(__dirname, "navigator");
-const navigatorPublicAudioPath = path.join(
-  __dirname,
-  "navigator",
-  "public",
-  "audio",
-);
 
-// Audio sempre disponibile anche se "dist" non esiste (ambiente dev)
-app.use("/navigator/audio", express.static(navigatorPublicAudioPath));
-
-// Build frontend (produzione)
 app.use(
-  "/navigator",
-  express.static(path.join(__dirname, "navigator", "dist")),
+  "/navigator/audio",
+  express.static(path.join(navigatorSourcePath, "public", "audio")),
+);
+app.use(
+  "/navigator/img",
+  express.static(path.join(navigatorSourcePath, "public", "img")),
 );
 
-// Gestione del refresh per la Single Page Application (Mobile)
-// Con Express/router recenti, usiamo una regex invece di "/navigator*"
-app.use("/navigator", express.static(navigatorSourcePath));
+app.use("/navigator", express.static(navigatorDistPath));
+
 app.get(/^\/navigator(?:\/.*)?$/, (req, res) => {
   const distIndexPath = path.join(navigatorDistPath, "index.html");
   const sourceIndexPath = path.join(navigatorSourcePath, "index.html");
@@ -93,11 +86,9 @@ app.get(/^\/navigator(?:\/.*)?$/, (req, res) => {
   if (fs.existsSync(distIndexPath)) {
     return res.sendFile(distIndexPath);
   }
-
   if (fs.existsSync(sourceIndexPath)) {
     return res.sendFile(sourceIndexPath);
   }
-
   return res.status(404).send("Mobile app non trovata: build mancante.");
 });
 

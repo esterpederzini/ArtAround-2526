@@ -506,6 +506,42 @@ export default function NavigatorItemViewer() {
     );
   }
 
+  const getLogisticsDirections = () => {
+    // 1. If the author wrote custom directions in the editor, use them
+    const manualLogistics = visit?.tappe?.[safeIndex]?.logistica;
+    if (manualLogistics && manualLogistics.trim() !== "") {
+      return manualLogistics;
+    }
+
+    // 2. If it's the last stop, the tour is finished
+    const totalStops = visit?.tappe?.length || 1;
+    if (safeIndex === totalStops - 1) {
+      return "You have reached the last stop of the tour! Follow the museum signs to reach the main exit or the bookshop.";
+    }
+
+    // 3. AUTOMATIC FALLBACK: Compare current item location with the next item location
+    const currentRoom = currentItem?.sala || `Room ${safeIndex + 1}`;
+    const currentFloor = currentItem?.piano;
+
+    // Retrieve the next stop's item data (handling both populated objects or raw fallback)
+    const nextStopData = visit?.tappe?.[safeIndex + 1]?.item_default;
+    const nextRoom = nextStopData?.sala || `Room ${safeIndex + 2}`;
+    const nextFloor = nextStopData?.piano;
+
+    // Case A: Different floors
+    if (currentFloor && nextFloor && currentFloor !== nextFloor) {
+      return `Exit ${currentRoom} and take the stairs or elevator to ${nextFloor}. The next artwork is located in ${nextRoom}.`;
+    }
+
+    // Case B: Different rooms on the same floor
+    if (currentRoom !== nextRoom) {
+      return `Leave ${currentRoom} behind and enter ${nextRoom} to find the next artwork.`;
+    }
+
+    // Case C: Same room
+    return `The next artwork is also located here in ${currentRoom}. Look for the adjacent display panel.`;
+  };
+
   return (
     <div className="navigator-viewer-layout">
       {/* HEADER — FIX 1: removed marketplace shop icon, back arrow only */}
@@ -554,6 +590,23 @@ export default function NavigatorItemViewer() {
             </button>
           </div>
         </section>
+        <Card
+          className="mt-3 museum-logistics-card"
+          style={{
+            background: "rgba(255, 193, 7, 0.1)",
+            border: "1px solid #ffc107",
+          }}
+        >
+          <Card.Body>
+            <h6 className="text-warning mb-2">
+              <i className="bi bi-geo-alt-fill me-2"></i>
+              Directions to the next stop
+            </h6>
+            <p className="mb-0" style={{ fontSize: "0.9rem", color: "#fff" }}>
+              {getLogisticsDirections()}
+            </p>
+          </Card.Body>
+        </Card>
 
         <Container fluid className="p-0">
           <Row className="justify-content-center g-0">

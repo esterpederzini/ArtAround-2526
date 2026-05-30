@@ -83,10 +83,12 @@
 .hero-overlay-gradient {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top,
-      #1a1a1d 5%,
-      rgba(26, 26, 29, 0.3) 50%,
-      transparent 90%);
+  background: linear-gradient(
+    to top,
+    #1a1a1d 5%,
+    rgba(26, 26, 29, 0.3) 50%,
+    transparent 90%
+  );
   z-index: 2;
 }
 
@@ -170,7 +172,7 @@
   pointer-events: all;
 }
 
-.config-content>div {
+.config-content > div {
   min-height: 0;
 }
 
@@ -495,7 +497,6 @@
   color: #e18f37;
 }
 
-
 /* --- MAP MODAL RESPONSIVE --- */
 .museum-map-modal .modal-dialog {
   margin: 0.5rem;
@@ -625,8 +626,10 @@
    — Split-screen: image column (left, fixed) + content panel (right, scrollable)
    — Mobile rules above are NOT touched.
    ========================================================================== */
+/* ──────────────────────────────────────────────────────────────────────────
+   ADATTAMENTO TABLET E PC (iPad, Tablet Android e Monitor Desktop)
+   ────────────────────────────────────────────────────────────────────────── */
 @media (min-width: 769px) {
-
   /* ── Root layout: horizontal split ── */
   .navigator-viewer-layout {
     flex-direction: row !important;
@@ -634,21 +637,36 @@
     overflow: hidden;
   }
 
+  /* ── VARIABILI DI LAYOUT DINAMICHE PER REA REATTIVO ── */
+  /* Su iPad e schermi intermedi diamo più spazio al testo (50/50 o 45/55)
+     Su schermi grandi (PC) possiamo mantenere l'immagine più imponente */
+  :root {
+    --left-column-width: 45vw;
+    --right-column-width: 55vw;
+  }
+
+  /* Se lo schermo è un PC generoso (soprattutto monitor larghi) */
+  @media (min-width: 1200px) {
+    :root {
+      --left-column-width: 52vw;
+      --right-column-width: 48vw;
+    }
+  }
+
   /* ── LEFT COLUMN: full-height artwork image, fixed ── */
   .hero-image-container {
     position: relative;
-    width: 52vw;
+    width: var(--left-column-width); /* Dinamico basato sul dispositivo */
     height: 100vh !important;
     flex-shrink: 0;
     overflow: hidden;
-    border: 1px solid red;
+    border: none; /* Rimosso il bordo rosso di test */
   }
 
   .hero-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Subtle Ken-Burns idle effect */
     animation: desktop-kb 18s ease-in-out infinite alternate;
   }
 
@@ -657,44 +675,42 @@
       transform: scale(1);
       transform-origin: center center;
     }
-
     to {
       transform: scale(1.04);
       transform-origin: 55% 48%;
     }
   }
 
-  /* Gradient on the image: stronger at the right edge so it bleeds into the panel */
+  /* Gradient on the image: fluid integration */
   .hero-overlay-gradient {
-    background: linear-gradient(to right,
+    background:
+      linear-gradient(
+        to right,
         transparent 40%,
         rgba(26, 26, 29, 0.55) 72%,
-        #1a1a1d 100%),
-      linear-gradient(to top,
-        #1a1a1d 0%,
-        transparent 35%);
+        #1a1a1d 100%
+      ),
+      linear-gradient(to top, #1a1a1d 0%, transparent 35%);
   }
 
-  /* Caption is shown on mobile inside the image; on desktop we hide it
-     because the JSX already renders a dedicated .d-none.d-md-block title block */
   .hero-caption {
     display: none !important;
   }
 
   /* ── RIGHT COLUMN: header + scrollable content + docked nav ── */
 
-  /* Top navigation bar — sits above the right panel only */
+  /* Top navigation bar */
   .top-nav-viewer {
     position: fixed;
     top: 0;
-    left: 52vw;
-    width: 48vw;
+    left: var(--left-column-width);
+    width: var(--right-column-width);
     height: 60px;
     background: rgba(26, 26, 29, 0.92);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    padding: 0 2.5rem;
+    padding: 0 1.5rem; /* Un po' più di respiro sui tablet */
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -717,22 +733,22 @@
   .scrollable-viewer-content {
     position: absolute;
     top: 0;
-    left: 52vw;
-    width: 48vw;
+    left: var(--left-column-width);
+    width: var(--right-column-width);
     height: 100vh;
     overflow-y: auto;
-    padding: 80px 2.8rem 13vh 2.8rem !important;
+    /* Utilizzo delle funzioni clamp e dei padding fluidi per non schiacciare i testi su iPad */
+    padding: 80px max(1.5rem, 3vw) 13vh max(1.5rem, 3vw) !important;
     background-color: #1a1a1d;
     box-sizing: border-box;
   }
 
-  /* Title block already rendered by JSX (.d-none .d-md-block) */
   .scrollable-viewer-content .d-none.d-md-block {
-    margin-bottom: 1.8rem;
+    margin-bottom: 1.5rem;
   }
 
   .scrollable-viewer-content .d-none.d-md-block h1 {
-    font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+    font-size: clamp(1.5rem, 2.4vw, 2.2rem);
     font-weight: 800;
     line-height: 1.15;
     color: #fff;
@@ -741,61 +757,60 @@
 
   .scrollable-viewer-content .d-none.d-md-block hr {
     border-color: rgba(255, 255, 255, 0.08);
-    margin-top: 1.2rem;
+    margin-top: 1rem;
     margin-bottom: 0;
   }
 
-  /* Constrain and tighten every content card/block */
+  /* I box interni non superano una larghezza ottimale di lettura */
   .config-box,
   .description-quote,
   .integrated-player-static {
-    max-width: 560px;
+    width: 100%;
+    max-width: 520px; /* Perfetto sia per la larghezza iPad che per PC */
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
 
   .config-box {
-    margin-bottom: 1.4rem;
+    margin-bottom: 1.2rem;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 1rem;
   }
 
-  /* Description: remove the inner scroll limit — desktop has space */
   .description-quote {
     max-height: none;
     overflow-y: visible;
-    font-size: 1.05rem;
-    line-height: 1.75;
+    font-size: clamp(0.95rem, 1.2vw, 1.05rem); /* Testo scalabile */
+    line-height: 1.7;
     margin-bottom: 0;
     border-left-width: 3px;
-    padding: 0.6rem 1.4rem;
+    padding: 0.5rem 1.2rem;
     color: rgba(255, 255, 255, 0.75);
   }
 
-  /* Player: give it breathing room and a subtle separator above */
   .integrated-player-static {
-    margin-top: 1.6rem !important;
-    padding: 1.6rem 1.4rem;
+    margin-top: 1.4rem !important;
+    padding: 1.4rem 1.2rem;
     border-radius: 1.2rem;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .play-sphere-main {
-    width: 3.8rem;
-    height: 3.8rem;
-    font-size: 2rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: 1.8rem;
   }
 
   /* ── Bottom navigation bar — docked to the right panel ── */
   .bottom-nav-viewer {
     position: fixed;
     bottom: 0;
-    left: 52vw;
-    width: 48vw;
+    left: var(--left-column-width);
+    width: var(--right-column-width);
     height: auto;
-    padding: 0.9rem 2.5rem;
+    padding: 0.8rem max(1.5rem, 2.5rem);
     background: rgba(26, 26, 29, 0.94);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -804,21 +819,26 @@
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 0.8rem;
-    padding-bottom: 0.9rem;
+    gap: 0.6rem;
+    padding-bottom: max(
+      0.8rem,
+      env(safe-area-inset-bottom)
+    ); /* Gestione zone sicure iPad */
   }
 
-  /* Nav items become compact pill-buttons on desktop */
   .nav-item {
     flex: none;
     width: auto;
-    padding: 0.5rem 1.2rem;
+    padding: 0.4rem 1rem;
     border-radius: 2rem;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     color: rgba(255, 255, 255, 0.55);
-    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    transition:
+      background 0.2s,
+      color 0.2s,
+      border-color 0.2s;
   }
 
   .nav-item:hover,
@@ -838,22 +858,21 @@
   }
 
   .btn-mic-nav {
-    width: 3rem;
-    height: 3rem;
-    font-size: 1.3rem;
+    width: 2.8rem;
+    height: 2.8rem;
+    font-size: 1.2rem;
   }
 
   /* ── Logistics toast: centred within the right panel ── */
   .logistics-toast {
-    left: calc(52vw + 24vw);
-    /* mid-point of the 48vw right panel */
+    left: calc(var(--left-column-width) + (var(--right-column-width) / 2));
     transform: translate(-50%, -50%);
-    width: clamp(260px, 30vw, 380px);
+    width: clamp(260px, 35vw, 380px);
   }
 
   /* ── Map modal: sized for desktop ── */
   .museum-map-modal .modal-dialog {
-    max-width: 680px;
+    max-width: 600px;
     margin: auto;
   }
 }

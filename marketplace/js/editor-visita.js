@@ -183,6 +183,7 @@ function aggiungiItemAlPercorso(itemId) {
     lunghezza: item.lunghezza,
     linguaggio: item.linguaggio,
     categoria: item.categoria,
+    immagine: item.immagine,
   });
 
   renderPercorso();
@@ -252,37 +253,54 @@ function renderPercorso() {
     return;
   }
 
+  // Sostituisci il map dentro renderPercorso con questa versione aggiornata:
   list.innerHTML = itemsNelPercorso
-    .map(
-      (item) => `
-    <div class="aa-dnd-item ${item.opzionale ? "optional-item" : ""}"
-         draggable="true"
-         data-id="${item.itemId}"
-         ondragstart="onDragStart(event)"
-         ondragover="onDragOver(event)"
-         ondrop="onDrop(event)"
-         ondragend="onDragEnd(event)">
-      <span class="drag-handle">⠿</span>
-      <span class="item-num">${item.ordine}</span>
-      <div class="item-info">
-        <div class="item-title">${item.titolo}</div>
-        <div class="item-meta">
-          ${badgeLinguaggio(item.linguaggio)}
-          ${badgeLunghezza(item.lunghezza)}
-          ${item.opzionale ? '<span class="aa-badge aa-badge-len" style="border-style:dashed">opzionale</span>' : ""}
+    .map((item, index) => {
+      // Aggiunto "index" come secondo parametro per tracciare la posizione
+      const valoreLogistica = item.logistica || ""; // Recupera il testo se già salvato
+
+      return `
+        <div class="aa-dnd-item ${item.opzionale ? "optional-item" : ""}"
+             draggable="true"
+             data-id="${item.itemId}"
+             ondragstart="onDragStart(event)"
+             ondragover="onDragOver(event)"
+             ondrop="onDrop(event)"
+             ondragend="onDragEnd(event)">
+          <span class="drag-handle">⠿</span>
+          <span class="item-num">${item.ordine}</span>
+          <div class="item-info w-100">
+            <div class="item-title">${item.titolo}</div>
+            <div class="item-meta">
+              ${badgeLinguaggio(item.linguaggio)}
+              ${badgeLunghezza(item.lunghezza)}
+              ${item.opzionale ? '<span class="aa-badge aa-badge-len" style="border-style:dashed">opzionale</span>' : ""}
+            </div>
+            
+            <div class="mt-2 text-start pr-2" style="width: 95%;">
+              <label class="text-slate d-block mb-1" style="font-size:0.68rem; font-weight:700; letter-spacing:0.5px;">
+                <i class="bi bi-geo-alt-fill text-warning me-1"></i> INDICAZIONI VERSO LA PROSSIMA OPERA
+              </label>
+              <textarea 
+                class="aa-input input-logistica-tappa w-100 p-1" 
+                rows="1" 
+                placeholder="Es: Svolta a sinistra ed entra nella sala successiva..."
+                data-index="${index}"
+                style="font-size:0.75rem; border-radius:4px; line-height:1.3; resize:vertical; background:var(--aa-cream); border: 1px solid var(--aa-stone);"
+              >${valoreLogistica}</textarea>
+            </div>
+            </div>
+          <div class="d-flex gap-1 ms-auto align-self-start mt-1">
+            <button class="btn-aa-outline" style="font-size:0.72rem;padding:2px 8px" 
+                    onclick="toggleOpzionale('${item.itemId}')"
+                    title="${item.opzionale ? "Rendi obbligatorio" : "Rendi opzionale"}">
+              ${item.opzionale ? "⟳" : "○"}
+            </button>
+            <button class="btn-aa-danger" onclick="rimuoviItemDalPercorso('${item.itemId}')">✕</button>
+          </div>
         </div>
-      </div>
-      <div class="d-flex gap-1 ms-auto">
-        <button class="btn-aa-outline" style="font-size:0.72rem;padding:2px 8px" 
-                onclick="toggleOpzionale('${item.itemId}')"
-                title="${item.opzionale ? "Rendi obbligatorio" : "Rendi opzionale"}">
-          ${item.opzionale ? "⟳" : "○"}
-        </button>
-        <button class="btn-aa-danger" onclick="rimuoviItemDalPercorso('${item.itemId}')">✕</button>
-      </div>
-    </div>
-  `,
-    )
+      `;
+    })
     .join("");
 }
 
@@ -333,7 +351,9 @@ function buildTappeFromPath(pathItems) {
       tuttiItems.find((x) => String(x._id) === String(i.itemId)) || {};
     return {
       ordine: i.ordine,
-      logistica: "",
+      // ─── MODIFICA: Prendi il valore dinamico salvato nell'oggetto o usa una stringa vuota di fallback ───
+      logistica: i.logistica || "",
+      // ────────────────────────────────────────────────────────────────────────────────────────────────
       item_default: String(i.itemId),
       operaId: meta.operaId || "",
       opzionale: !!i.opzionale,
@@ -369,14 +389,22 @@ async function salvaVisita() {
   if (!itemsNelPercorso.length)
     return showToast("Aggiungi almeno un item al percorso", "error");
 
-  let thumbnail = default_image;
-  if (itemsNelPercorso.length > 0) {
+  // Sostituisci la vecchia logica di calcolo di thumbnail con questa:
+  let thumbnail = document.getElementById("visitaImmagine").value.trim();
+
+  // Se l'input è vuoto, cerca di recuperare l'immagine dal primo item del percorso
+  if (!thumbnail && itemsNelPercorso.length > 0) {
     const primoItem = tuttiItems.find(
       (i) => i._id === itemsNelPercorso[0].itemId,
     );
     if (primoItem && primoItem.immagine) {
       thumbnail = primoItem.immagine;
     }
+  }
+
+  // Se non c'è input e non c'è immagine nel primo item, usa il fallback finale
+  if (!thumbnail) {
+    thumbnail = default_image;
   }
 
   const tappe = buildTappeFromPath(itemsNelPercorso);
@@ -433,6 +461,7 @@ async function caricaVisitaPerModifica(id) {
   document.getElementById("visitaDescrizione").value = v.descrizione || "";
   document.getElementById("visitaTags").value = (v.tags || []).join(", ");
   document.getElementById("visitaDurata").value = v.durataTotaleStimata || 60;
+  document.getElementById("visitaImmagine").value = v.immagine || "";
   if (document.getElementById("visitaLivelloBase")) {
     document.getElementById("visitaLivelloBase").value =
       v.livello_base || "medio";
@@ -478,6 +507,7 @@ async function caricaVisitaPerModifica(id) {
       lunghezza: meta.lunghezza || "1m",
       linguaggio: meta.linguaggio || "intermedio",
       categoria: meta.categoria || "altro",
+      immagine: meta.immagine || null,
     };
   });
 
@@ -517,6 +547,7 @@ function resetEditor() {
   document.getElementById("visitaPrezzo").value = 0;
   document.getElementById("visitaPubblica").checked = false;
   document.getElementById("editorTitolo").textContent = "Nuova Visita";
+  document.getElementById("visitaImmagine").value = "";
 
   const inputMuseo = document.getElementById("visitaMuseo");
   if (inputMuseo && configMuseo) {
@@ -560,3 +591,15 @@ function applicaRestrizioniVisitatore() {
     header.appendChild(badge);
   }
 }
+
+// Incolla questo in fondo al file editor-visita.js se non lo hai già fatto
+document.addEventListener("input", (e) => {
+  if (e.target.classList.contains("input-logistica-tappa")) {
+    const index = parseInt(e.target.getAttribute("data-index"), 10);
+    const testoInserito = e.target.value;
+
+    if (itemsNelPercorso[index]) {
+      itemsNelPercorso[index].logistica = testoInserito;
+    }
+  }
+});
