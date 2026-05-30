@@ -236,7 +236,9 @@
 }
 
 .list-num-circle.furthest {
-  box-shadow: 0 0 0 3px rgba(225, 143, 55, 0.4), 0 0 0 6px rgba(225, 143, 55, 0.15);
+  box-shadow:
+    0 0 0 3px rgba(225, 143, 55, 0.4),
+    0 0 0 6px rgba(225, 143, 55, 0.15);
 }
 
 /* Timeline line segment turns orange for completed segments */
@@ -244,78 +246,66 @@
   background-color: #e18f37;
 }
 
-/* ==========================================================================
-   ADATTAMENTO DESKTOP: Rimpicciolimento e ottimizzazione delle card delle opere
-   ========================================================================== */
+/* --- TRASFORMAZIONI E ADATTAMENTO PC / TABLET --- */
+
+/* Wrapper per centrare e snellire il layout su PC */
+.content-wrapper {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* DESKTOP MEDIA QUERY (Da tablet orizzontale / PC in su) */
 @media (min-width: 769px) {
-
-  /* Contenitore principale: limitiamo la larghezza massima per non disperdere i testi */
-  .full-container .container {
-    max-width: 900px !important;
-    margin: 0 auto;
-    padding-top: 2rem !important;
+  .content-wrapper {
+    max-width: 720px; /* Impedisce l'effetto ciccione limitando la larghezza del blocco */
+    padding-top: 1.5rem;
   }
 
-  /* Rimpiccioliamo la riga della timeline (ogni tappa della visita) */
-  .itinerary-row {
-    margin-bottom: 1rem !important;
-  }
-
-  /* Forziamo il cerchio del numero a dimensioni fisse e più piccole su PC */
+  /* Rimpiccioliamo proporzionalmente i cerchi numerici senza romperli */
   .list-num-circle {
-    width: 40px !important;
-    height: 40px !important;
-    font-size: 1rem !important;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    font-size: 0.95rem !important;
   }
 
-  /* La linea tratteggiata verticale della timeline si adegua al cerchio più piccolo */
-  .itinerary-row:not(:last-child) .col-2::after {
-    left: calc(50% + 4px) !important;
-    /* Centratura millimetrica basata sul cerchio da 40px */
-    top: 40px !important;
+  /* Correzione millimetrica della linea verticale sotto il cerchio più piccolo */
+  .timeline-line {
+    top: 2.5rem;
   }
 
-  /* RIMPICCIOLIMENTO DELLE CARD DELLE OPERE */
-  .overview-card {
-    max-width: 700px !important;
-    /* Evita che la card si allarghi a tutto monitor */
-    margin-left: 0 !important;
-    border: 1px solid rgba(225, 143, 55, 0.15) !important;
-    /* Un micro bordo arancione elegante */
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  /* Rimpiccioliamo l'impatto visivo del bottone "Inizia visita" per non farlo sembrare un blocco gigante */
+  .btn-container-desktop {
+    max-width: 320px;
+    margin: 0 auto 2rem auto; /* Centrato con margine inferiore */
   }
 
-  .overview-card:hover {
-    transform: translateX(5px);
-    /* Micro-animazione quando ci passi sopra col mouse */
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important;
+  .start-visit-btn {
+    padding: 12px 20px !important;
   }
 
-  /* Rimpiccioliamo sensibilmente l'immagine dell'opera dentro la card */
-  .overview-card-img {
-    width: 110px !important;
-    /* Dimensione fissa e compatta su PC */
-    height: 110px !important;
-    object-fit: cover;
-    border-radius: 12px !important;
-    margin: 0.5rem;
-    /* Un po' di respiro dal bordo della card */
+  /* Animazione elegante di rollover sulla card solo su PC */
+  .itinerary-card {
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
   }
 
-  /* Sistemiamo il corpo del testo per renderlo più snello e proporzionato */
-  .overview-card .card-title {
-    font-size: 1.1rem !important;
-    margin-top: 0.4rem;
+  .itinerary-card:hover {
+    transform: translateX(6px);
+    border-color: rgba(
+      225,
+      143,
+      55,
+      0.4
+    ) !important; /* Illumina leggermente il bordo d'arancione */
+    background-color: #323235 !important; /* Schiarisce leggermente lo sfondo */
   }
 
-  .overview-card .audio-info span {
-    font-size: 0.8rem !important;
-  }
-
-  /* Ridimensioniamo anche i bottoni d'azione in cima (Indietro e Inizia Visita) */
-  .full-container .btn-outline-light,
-  .full-container .btn-warning {
-    padding: 0.5rem 1.5rem !important;
-    font-size: 0.9rem !important;
+  /* Compattiamo la colonna dell'immagine dentro la card su schermi larghi */
+  .img-list-new {
+    max-width: 90px; /* Evita che l'immagine occupi troppo spazio orizzontale */
+    border-radius: 8px;
   }
 }
