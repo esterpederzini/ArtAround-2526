@@ -56,96 +56,91 @@
     <div class="container-fluid py-4 px-4 flex-grow-1">
       <div class="row g-4">
         <div class="col-lg-2 col-md-3">
-          <div class="aa-sidebar">
-            <div class="aa-sidebar-title">
-              <i class="bi bi-funnel"></i> Filtri
-            </div>
-
-            <div class="mb-3">
-              <div class="aa-sidebar-title" style="font-size: 0.7rem">
-                Museo
+          <div class="aa-sidebar-wrapper">
+            <div class="aa-sidebar-section">
+              <div class="aa-sidebar-title">
+                <i class="bi bi-funnel"></i> Filtri
               </div>
-              <div id="filtroMusei">
-                <button class="aa-filter-btn active" data-museo="">
-                  Tutti
+
+              <div class="mb-3">
+                <div class="aa-sidebar-title" style="font-size: 0.7rem">
+                  Museo
+                </div>
+                <div id="filtroMusei">
+                  <button class="aa-filter-btn active" data-museo="">
+                    Tutti
+                  </button>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="mb-3">
+                <div class="aa-sidebar-title" style="font-size: 0.7rem">
+                  Linguaggio
+                </div>
+                <button class="aa-filter-btn active" data-lang="">Tutti</button>
+                <button class="aa-filter-btn" data-lang="infantile">
+                  Infantile
+                </button>
+                <button class="aa-filter-btn" data-lang="medio">Medio</button>
+                <button class="aa-filter-btn" data-lang="avanzato">
+                  Avanzato
+                </button>
+                <button class="aa-filter-btn" data-lang="specialistico">
+                  Specialistico
                 </button>
               </div>
-            </div>
 
-            <div class="divider"></div>
+              <div class="divider"></div>
 
-            <div class="mb-3">
-              <div class="aa-sidebar-title" style="font-size: 0.7rem">
-                Linguaggio
+              <div class="mb-3">
+                <div class="aa-sidebar-title" style="font-size: 0.7rem">
+                  Prezzo
+                </div>
+                <button class="aa-filter-btn active" data-prezzo="">
+                  Tutti
+                </button>
+                <button class="aa-filter-btn" data-prezzo="free">
+                  Gratuiti
+                </button>
+                <button class="aa-filter-btn" data-prezzo="paid">
+                  A pagamento
+                </button>
               </div>
-              <button class="aa-filter-btn active" data-lang="">Tutti</button>
-              <button class="aa-filter-btn" data-lang="infantile">
-                Infantile
-              </button>
-              <button class="aa-filter-btn" data-lang="medio">Medio</button>
-              <button class="aa-filter-btn" data-lang="avanzato">
-                Avanzato
-              </button>
-              <button class="aa-filter-btn" data-lang="specialistico">
-                Specialistico
-              </button>
-            </div>
 
-            <div class="divider"></div>
+              <div class="divider"></div>
 
-            <div class="mb-3">
-              <div class="aa-sidebar-title" style="font-size: 0.7rem">
-                Prezzo
+              <div class="mb-3">
+                <div class="aa-sidebar-title" style="font-size: 0.7rem">
+                  Categoria
+                </div>
+                <button class="aa-filter-btn active" data-cat="">Tutte</button>
+                <button class="aa-filter-btn" data-cat="pittura">
+                  Pittura
+                </button>
+                <button class="aa-filter-btn" data-cat="scultura">
+                  Scultura
+                </button>
+                <button class="aa-filter-btn" data-cat="decorativa">
+                  Decorativa
+                </button>
+                <button class="aa-filter-btn" data-cat="arte_antica">
+                  Arte Antica
+                </button>
+                <button class="aa-filter-btn" data-cat="altro">Altro</button>
               </div>
-              <button class="aa-filter-btn active" data-prezzo="">Tutti</button>
-              <button class="aa-filter-btn" data-prezzo="free">Gratuiti</button>
-              <button class="aa-filter-btn" data-prezzo="paid">
-                A pagamento
+
+              <div class="divider"></div>
+
+              <button
+                class="btn-aa-outline w-100 mb-3"
+                onclick="resetFiltri()"
+                style="font-size: 0.8rem"
+              >
+                <i class="bi bi-x-circle"></i> Reset
               </button>
             </div>
-
-            <div class="divider"></div>
-
-            <div class="mb-3">
-              <div class="aa-sidebar-title" style="font-size: 0.7rem">
-                Categoria
-              </div>
-              <button class="aa-filter-btn active" data-cat="">Tutte</button>
-              <button class="aa-filter-btn" data-cat="pittura">Pittura</button>
-              <button class="aa-filter-btn" data-cat="scultura">
-                Scultura
-              </button>
-              <button class="aa-filter-btn" data-cat="decorativa">
-                Decorativa
-              </button>
-              <button class="aa-filter-btn" data-cat="arte_antica">
-                Arte Antica
-              </button>
-              <button class="aa-filter-btn" data-cat="altro">Altro</button>
-            </div>
-
-            <div class="divider"></div>
-
-            <button
-              class="btn-aa-outline w-100"
-              onclick="resetFiltri()"
-              style="font-size: 0.8rem"
-            >
-              <i class="bi bi-x-circle"></i> Reset
-            </button>
-          </div>
-
-          <div class="aa-sidebar mt-3 d-none" id="sidebarLog">
-            <div class="aa-sidebar-title">
-              <i class="bi bi-receipt"></i> Log Vendite
-            </div>
-            <button
-              class="btn-aa-outline w-100"
-              style="font-size: 0.8rem"
-              onclick="apriLogModal()"
-            >
-              <i class="bi bi-table"></i> Visualizza Log
-            </button>
           </div>
         </div>
 
@@ -264,25 +259,6 @@
         </div>
         <div class="aa-modal-body" id="modalVisitaBody"></div>
         <div class="aa-modal-footer" id="modalVisitaFooter"></div>
-      </div>
-    </div>
-
-    <div id="logModal" class="aa-modal-overlay d-none">
-      <div class="aa-modal" style="max-width: 780px">
-        <div class="aa-modal-header">
-          <h4><i class="bi bi-receipt"></i> Log Vendite & Adozioni</h4>
-          <button
-            class="aa-modal-close"
-            onclick="
-              document.getElementById('logModal').classList.add('d-none')
-            "
-          >
-            ✕
-          </button>
-        </div>
-        <div class="aa-modal-body">
-          <div id="logBody"><div class="aa-spinner"></div></div>
-        </div>
       </div>
     </div>
 

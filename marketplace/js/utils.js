@@ -20,6 +20,10 @@ async function apiFetch(url, opzioni = {}) {
       localStorage.removeItem("aa_utente");
       localStorage.removeItem("user_session"); // per sicurezza e retrocompatibilità
 
+      if (typeof aggiornaUiNavbar === "function") {
+        aggiornaUiNavbar();
+      }
+
       // Aspettiamo un secondo per dare il tempo all'utente di leggere il messaggio e poi reindirizziamo
       setTimeout(() => {
         window.location.href = "/";
@@ -62,22 +66,42 @@ function showToast(messaggio, tipo = "info", durata = 3500) {
 }
 
 // ─── AUTH ────────────────────────────────────────────
-function getUtenteCorrente() {
+function getAuthToken() {
   try {
-    return JSON.parse(localStorage.getItem("aa_utente"));
+    return localStorage.getItem("aa_token");
   } catch {
     return null;
   }
 }
 
-function getAuthToken() {
-  const token = localStorage.getItem("aa_token");
-  if (token) return token;
-
-  // Backward-compatible fallback for navigator-style session object.
+function isTokenScaduto(token) {
+  if (!token) return true;
   try {
-    const session = JSON.parse(localStorage.getItem("user_session"));
-    return session?.token || null;
+    // Il JWT è composto da tre parti separate da un punto. La seconda è il payload.
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(window.atob(base64));
+
+    // Il timestamp di scadenza del JWT (exp) è in secondi, Date.now() in millisecondi
+    const adesso = Math.floor(Date.now() / 1000);
+    return payload.exp < adesso;
+  } catch (e) {
+    return true; // Se il token è corrotto o non valido, consideralo scaduto
+  }
+}
+
+function getUtenteCorrente() {
+  try {
+    const token = getAuthToken();
+    // Se c'è un token ma è scaduto, pulisci tutto SUBITO prima che il resto della pagina si carichi
+    if (token && isTokenScaduto(token)) {
+      console.warn("Rilevato token scaduto all'avvio. Svuoto la sessione.");
+      localStorage.removeItem("aa_token");
+      localStorage.removeItem("aa_utente");
+      localStorage.removeItem("user_session");
+      return null;
+    }
+    return JSON.parse(localStorage.getItem("aa_utente"));
   } catch {
     return null;
   }
@@ -224,10 +248,13 @@ function applicaTemaMuseo() {
 }
 
 // ─── UI UTENTE NAVBAR ────────────────────────────────
-(function inizializzaNavbar() {
+function aggiornaUiNavbar() {
   const utenteInfo = document.getElementById("utenteInfo");
   if (utenteInfo) {
     const u = getUtenteCorrente();
     utenteInfo.textContent = u ? `${u.username} (${u.ruolo})` : "";
   }
-})();
+}
+
+// La eseguiamo comunque all'avvio
+aggiornaUiNavbar();

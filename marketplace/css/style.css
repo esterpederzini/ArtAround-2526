@@ -688,15 +688,24 @@ a:hover {
   border-color: var(--aa-danger);
 }
 
-/* ─── FILTRI SIDEBAR ───────────────────────────────────────── */
-.aa-sidebar {
+/* ─── FILTRI SIDEBAR (STATICA E NATURALE) ───────────────────── */
+.aa-sidebar-wrapper {
   background: #fff;
   border: 1px solid var(--aa-stone);
   border-radius: var(--aa-radius-lg);
   padding: 1.25rem;
   box-shadow: var(--aa-shadow-sm);
-  position: sticky;
-  top: 80px;
+
+  /* Nessun posizionamento fisso: la barra si muove naturalmente con la pagina */
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+
+/* Sotto-sezioni interne per dare respiro ai blocchi di filtri e log */
+.aa-sidebar-section {
+  display: flex;
+  flex-direction: column;
 }
 
 .aa-sidebar-title {

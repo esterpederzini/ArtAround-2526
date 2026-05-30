@@ -153,7 +153,11 @@ const NavigatorHome = () => {
                 >
                   <div className="card-img-wrapper">
                     <img
-                      src={visita.image || "/img/default_item_image.jpg"}
+                      src={
+                        visita.image ||
+                        config?.defaultCardImage ||
+                        "/navigator/img/default_item_image.jpg"
+                      }
                       alt={visita.title}
                     />
                     <span className="card-badge">

@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: "/mobile/",
+  base: "/navigator/",
   server: {
     proxy: {
       // Reindirizza le chiamate API al tuo server Node (Porta 8000)

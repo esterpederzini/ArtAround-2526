@@ -1047,7 +1047,7 @@ export default function NavigatorItemViewer() {
 
           <div className="map-container" style={{ position: "relative" }}>
             <img
-              src={`/mobile/maps/mappa-museo-piano_${selectedMapFloor}.png`}
+              src={`/navigator/maps/mappa-museo-piano_${selectedMapFloor}.png`}
               alt={`Piano ${selectedMapFloor}`}
               style={{ width: "100%", display: "block" }}
             />

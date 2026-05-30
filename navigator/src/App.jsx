@@ -33,7 +33,7 @@ function App() {
 
   return (
     <NavigatorProvider>
-      <BrowserRouter basename="/mobile">
+      <BrowserRouter basename="/navigator">
         {showIntro ? (
           <div className="intro-wrapper">
             <h1 className="bounce-text">
