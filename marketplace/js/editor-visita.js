@@ -276,10 +276,12 @@ function renderPercorso() {
           <span class="drag-handle">⠿</span>
           <span class="item-num">${item.ordine}</span>
           <div class="item-info w-100">
-            <div class="item-title">${item.titolo}</div>
-            <div class="item-meta">
+            <div class="item-title" style="font-weight:600; color:var(--aa-ink);">${item.titolo}</div>
+            <div class="item-meta mt-1 d-flex align-items-center gap-2 flex-wrap">
               ${badgeLinguaggio(item.linguaggio)}
-              ${badgeLunghezza(item.lunghezza)}
+              <span class="badge bg-dark-subtle text-dark-emphasis" style="font-size:0.68rem; font-weight: 600; padding:2px 6px; border-radius:4px;">
+                <i class="bi bi-clock me-1"></i>${item.lunghezza}
+              </span>
               ${item.opzionale ? '<span class="aa-badge aa-badge-len" style="border-style:dashed">opzionale</span>' : ""}
             </div>
             
@@ -502,7 +504,7 @@ async function caricaVisitaPerModifica(id) {
       titolo: meta.titolo || t.titolo || "–",
       titoloOpera: meta.titoloOpera || meta.titolo || t.titoloOpera || "–",
       lunghezza: meta.lunghezza || "1m",
-      linguaggio: meta.linguaggio || "intermedio",
+      linguaggio: meta.linguaggio || "medio",
       categoria: meta.categoria || "altro",
       immagine: meta.immagine || null,
       logistica: t.logistica || "",

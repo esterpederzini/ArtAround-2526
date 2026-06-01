@@ -197,26 +197,23 @@ function richiedeAutore() {
 function badgeLinguaggio(linguaggio) {
   if (!linguaggio) return "";
 
-  let bgClass = "bg-secondary text-white"; // Grigio di default se non trova corrispondenze
+  let bgClass = "bg-secondary text-white"; // Fallback di sicurezza
   const tagLabel = linguaggio.charAt(0).toUpperCase() + linguaggio.slice(1);
 
   switch (linguaggio.toLowerCase()) {
     case "infantile":
-      // Verde pastello con testo scuro
       bgClass =
         "bg-success-subtle text-success-emphasis border border-success-subtle";
       break;
+    case "elementare":
+      // Allineato al bando: Azzurro pastello per il livello Junior
+      bgClass = "bg-info-subtle text-info-emphasis border border-info-subtle";
+      break;
     case "medio":
-      // Giallo/Arancio pastello con testo scuro
       bgClass =
         "bg-warning-subtle text-warning-emphasis border border-warning-subtle";
       break;
-    case "avanzato":
-      // Blu classico di Bootstrap con testo bianco
-      bgClass = "bg-primary text-white";
-      break;
     case "specialistico":
-      // Rosso pastello con testo scuro
       bgClass =
         "bg-danger-subtle text-danger-emphasis border border-danger-subtle";
       break;
@@ -273,12 +270,8 @@ function lunghezzaInMinuti(lunghezza) {
   const mappa = {
     "3s": 0.05,
     "15s": 0.25,
-    "30s": 0.5,
-    "40s": 0.67,
     "1m": 1,
-    "3m": 3,
-    "5m": 5,
-    "10m": 10,
+    "4m": 4, // Allineato al bando: 4 minuti per le tracce accademiche
   };
   return mappa[lunghezza] || 1;
 }

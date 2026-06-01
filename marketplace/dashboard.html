@@ -83,7 +83,6 @@
               </div>
 
               <div class="divider"></div>
-
               <div class="mb-3">
                 <div class="aa-sidebar-title" style="font-size: 0.7rem">
                   Linguaggio
@@ -92,10 +91,10 @@
                 <button class="aa-filter-btn" data-lang="infantile">
                   Infantile
                 </button>
-                <button class="aa-filter-btn" data-lang="medio">Medio</button>
-                <button class="aa-filter-btn" data-lang="avanzato">
-                  Avanzato
+                <button class="aa-filter-btn" data-lang="elementare">
+                  Elementare
                 </button>
+                <button class="aa-filter-btn" data-lang="medio">Medio</button>
                 <button class="aa-filter-btn" data-lang="specialistico">
                   Specialistico
                 </button>
@@ -200,7 +199,13 @@
               <option value="24">24 / pag</option>
               <option value="48">48 / pag</option>
             </select>
-
+            <button
+              id="btnLogVendite"
+              class="btn-aa-outline d-none"
+              onclick="apriLogModal()"
+            >
+              <i class="bi bi-graph-up-arrow"></i> Log Vendite
+            </button>
             <a
               href="/editor-item"
               id="btnNuovoItem"
@@ -313,5 +318,24 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/dashboard.js"></script>
+
+    <div id="logModal" class="aa-modal-overlay d-none">
+      <div class="aa-modal" style="max-width: 750px">
+        <div class="aa-modal-header">
+          <h4>
+            <i class="bi bi-journal-text"></i> Registro Storico delle Vendite
+          </h4>
+          <button
+            class="aa-modal-close"
+            onclick="
+              document.getElementById('logModal').classList.add('d-none')
+            "
+          >
+            ✕
+          </button>
+        </div>
+        <div class="aa-modal-body" id="logBody"></div>
+      </div>
+    </div>
   </body>
 </html>

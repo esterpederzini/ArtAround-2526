@@ -489,8 +489,13 @@ function resetForm() {
   document.getElementById("formTitolo").textContent = " Nuovo Contenuto (Item)";
   document.getElementById("charCount").textContent = "0";
   document.getElementById("profonditaPreview").textContent = "–";
-  document.getElementById("variantiList").innerHTML =
-    '<em class="text-slate small">Seleziona un\'opera per esaminare le varianti...</em>';
+
+  // Ripristina l'elemento preventivo per evitare che si spacchi al prossimo input
+  const prevLang = document.getElementById("prevLang");
+  if (prevLang) {
+    prevLang.textContent = "medio";
+    prevLang.className = "aa-badge";
+  }
 
   aggiornaPreview();
 }

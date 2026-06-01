@@ -37,13 +37,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   aggiornaUtenteUI();
   // Attiva sidebar log e permessi di creazione
   const u = getUtenteCorrente();
+
   if (u) {
     document.getElementById("tabMieiBtn")?.classList.remove("d-none");
 
     if (["autore", "admin"].includes(u.ruolo)) {
       document.getElementById("sidebarLog")?.classList.remove("d-none");
+
+      // Sincronizza i bottoni di creazione basandoti sulla tab iniziale ("items")
       document.getElementById("btnNuovoItem")?.classList.remove("d-none");
-      // ATTIVAZIONE SICURA: Mostra il pulsante del Log Vendite appena aggiunto nell'HTML
+      document.getElementById("btnNuovaVisita")?.classList.add("d-none");
+
+      // MOSTRA IL PULSANTE DEL LOG VENDITE
       document.getElementById("btnLogVendite")?.classList.remove("d-none");
     }
   }
@@ -400,10 +405,13 @@ async function apriVisitaModal(id) {
   }
 
   // Costruisce il corpo del Modal
+  // Costruisce il corpo del Modal con tutti i dettagli strutturali
   document.getElementById("modalVisitaBody").innerHTML = `
-    <div class="d-flex flex-wrap gap-2 mb-3">
+    <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
       <span class="aa-badge aa-badge-len">🏛️ ${v.museo || "Nessun museo"}</span>
       <span class="aa-badge aa-badge-len"><i class="bi bi-clock"></i> ~${v.durataTotaleStimata || 60} min</span>
+      ${badgeLinguaggio(v.livello_base)}
+      ${badgePrezzo(v.prezzo)}
     </div>
     <p style="line-height:1.7">${v.descrizione || "Nessuna descrizione disponibile."}</p>
     <div class="divider"></div>
