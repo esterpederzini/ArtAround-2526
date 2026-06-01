@@ -46,14 +46,7 @@ const itemSchema = new mongoose.Schema(
     },
     linguaggio: {
       type: String,
-      enum: [
-        "infantile",
-        "medio",
-        "avanzato",
-        "elementare",
-        "intermedio",
-        "specialistico",
-      ],
+      enum: ["infantile", "medio", "avanzato", "elementare", "intermedio"],
       required: true,
     },
     categoria: { type: String, default: "altro" },

@@ -34,10 +34,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   await caricaItems();
   caricaVisiteTab();
 
-  // Attiva sidebar log per autori
+  aggiornaUtenteUI();
+  // Attiva sidebar log e permessi di creazione
   const u = getUtenteCorrente();
-  if (u && ["autore", "admin"].includes(u.ruolo)) {
-    document.getElementById("sidebarLog")?.classList.remove("d-none");
+  if (u) {
+    document.getElementById("tabMieiBtn")?.classList.remove("d-none");
+
+    if (["autore", "admin"].includes(u.ruolo)) {
+      document.getElementById("sidebarLog")?.classList.remove("d-none");
+      document.getElementById("btnNuovoItem")?.classList.remove("d-none");
+      // ATTIVAZIONE SICURA: Mostra il pulsante del Log Vendite appena aggiunto nell'HTML
+      document.getElementById("btnLogVendite")?.classList.remove("d-none");
+    }
   }
 
   // Filtri sidebar – click handler
@@ -121,8 +129,6 @@ function switchTab(tab, btnEl) {
     .querySelectorAll(".aa-tab")
     .forEach((b) => b.classList.remove("active"));
   btnEl.classList.add("active");
-
-  // Mostra/Nasconde i contenitori dei dati
   document
     .getElementById("tabItems")
     .classList.toggle("d-none", tab !== "items");
@@ -131,17 +137,23 @@ function switchTab(tab, btnEl) {
     .classList.toggle("d-none", tab !== "visite");
   document.getElementById("tabMiei").classList.toggle("d-none", tab !== "miei");
 
-  // Gestione pulita dei bottoni
+  // Gestione pulita dei bottoni d'azione (Solo per Autori e Admin)
   const btnNuovoItem = document.getElementById("btnNuovoItem");
   const btnNuovaVisita = document.getElementById("btnNuovaVisita");
+  const u = getUtenteCorrente();
 
   if (btnNuovoItem && btnNuovaVisita) {
-    if (tab === "items") {
-      btnNuovoItem.classList.remove("d-none");
-      btnNuovaVisita.classList.add("d-none");
-    } else if (tab === "visite") {
-      btnNuovoItem.classList.add("d-none");
-      btnNuovaVisita.classList.remove("d-none");
+    if (u && ["autore", "admin"].includes(u.ruolo)) {
+      if (tab === "items") {
+        btnNuovoItem.classList.remove("d-none");
+        btnNuovaVisita.classList.add("d-none");
+      } else if (tab === "visite") {
+        btnNuovoItem.classList.add("d-none");
+        btnNuovaVisita.classList.remove("d-none");
+      } else {
+        btnNuovoItem.classList.add("d-none");
+        btnNuovaVisita.classList.add("d-none");
+      }
     } else {
       btnNuovoItem.classList.add("d-none");
       btnNuovaVisita.classList.add("d-none");
@@ -495,7 +507,6 @@ async function adottaVisita(visitaId) {
 }
 
 // ─── MIEI CONTENUTI ──────────────────────────────────
-// ─── MIEI CONTENUTI (AGGIORNATO CON TABELLA VISITE) ───
 async function caricaMieiContenuti() {
   const u = getUtenteCorrente();
   const container = document.getElementById("mieiContenuti");

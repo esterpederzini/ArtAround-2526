@@ -8,6 +8,9 @@ var dragSrc = dragSrc || null;
 
 // ─── INIT ────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
+  // Sincronizza lo stato visivo della navbar globale usando utils.js
+  aggiornaUtenteUI();
+
   configMuseo = await caricaConfigMuseo();
   const utente = getUtenteCorrente();
 
@@ -28,8 +31,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           <p class="mb-4" style="color: rgba(255, 255, 255, 0.65);">
             Devi effettuare l'accesso per poter mescolare i contenuti del catalogo, creare il tuo itinerario e modificarlo quando vuoi.
           </p>
-          <button class="btn-aa-gold mt-2" onclick="window.location='/'">
-            <i class="bi bi-person"></i> Torna alla Home per accedere
+          <button class="btn-aa-gold mt-2" onclick="apriLogin()">
+            <i class="bi bi-person"></i> Accedi ora
           </button>
         </div>
       </div>
@@ -137,8 +140,17 @@ function renderCatalogo(filtro = "") {
           ${iconaCategoriaPiccola(item.categoria)}
         </div>
         <div class="flex-grow-1 min-w-0">
-          <div style="font-size:0.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.titolo}</div>
-          <div style="font-size:0.72rem;color:var(--aa-slate)">${subLabel} · ${item.linguaggio} · ${item.lunghezza} · ${item.operaId}</div>
+          <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--aa-ink);">${item.titolo}</div>
+          
+          <div style="font-size:0.75rem; color:var(--aa-slate); display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:2px;">
+            <span style="font-weight:600; color:var(--aa-charcoal); font-size:0.78rem;">${subLabel}</span>
+            <span style="opacity:0.5;">·</span>
+            ${badgeLinguaggio(item.linguaggio)}
+            <span style="opacity:0.5;">·</span>
+            <span class="badge bg-dark-subtle text-dark-emphasis" style="font-size:0.68rem; font-weight:600; padding:2px 6px; border-radius:4px;">
+              <i class="bi bi-clock me-1"></i>${item.lunghezza}
+            </span>
+          </div>
         </div>
         <button class="btn-aa-outline" 
         style="font-size:0.75rem;padding:3px 10px;flex-shrink:0;${giàAggiunto ? "opacity:0.4;cursor:default" : ""}"
@@ -167,6 +179,8 @@ function iconaCategoriaPiccola(cat) {
 
 // ─── GESTIONE PERCORSO ───────────────────────────────
 function aggiungiItemAlPercorso(itemId) {
+  salvaTestoLogisticaCorrente(); // Mantiene il testo digitato prima di ridisegnare
+
   if (itemsNelPercorso.some((i) => i.itemId === itemId)) {
     showToast("Item già presente nel percorso", "info");
     return;
@@ -184,6 +198,7 @@ function aggiungiItemAlPercorso(itemId) {
     linguaggio: item.linguaggio,
     categoria: item.categoria,
     immagine: item.immagine,
+    logistica: "",
   });
 
   renderPercorso();
@@ -193,6 +208,7 @@ function aggiungiItemAlPercorso(itemId) {
 }
 
 function rimuoviItemDalPercorso(itemId) {
+  salvaTestoLogisticaCorrente();
   itemsNelPercorso = itemsNelPercorso.filter((i) => i.itemId !== itemId);
   ricalcolaOrdini();
   renderPercorso();
@@ -202,6 +218,7 @@ function rimuoviItemDalPercorso(itemId) {
 }
 
 function toggleOpzionale(itemId) {
+  salvaTestoLogisticaCorrente();
   const item = itemsNelPercorso.find((i) => i.itemId === itemId);
   if (item) {
     item.opzionale = !item.opzionale;
@@ -213,23 +230,14 @@ function ricalcolaOrdini() {
   itemsNelPercorso.forEach((item, i) => (item.ordine = i + 1));
 }
 
-function lunghezzaInMinuti(lunghezzaStr) {
-  if (lunghezzaStr === "3s") return 0.05;
-  if (lunghezzaStr === "15s") return 0.25;
-  if (lunghezzaStr === "40s") return 0.66;
-  if (lunghezzaStr === "1m") return 1;
-  if (lunghezzaStr === "3m") return 3;
-  if (lunghezzaStr === "5m") return 5;
-  if (lunghezzaStr === "10m") return 10;
-  return 1;
-}
-
-function badgeLinguaggio(lang) {
-  return `<span class="aa-badge aa-badge-lang-${lang}">${lang}</span>`;
-}
-
-function badgeLunghezza(len) {
-  return `<span class="aa-badge aa-badge-len">${len}</span>`;
+// Sincronizza i testi digitati dentro le textarea con lo stato JavaScript prima dei cambi del DOM
+function salvaTestoLogisticaCorrente() {
+  document.querySelectorAll(".input-logistica-tappa").forEach((el) => {
+    const index = parseInt(el.getAttribute("data-index"), 10);
+    if (itemsNelPercorso[index]) {
+      itemsNelPercorso[index].logistica = el.value;
+    }
+  });
 }
 
 function renderPercorso() {
@@ -253,11 +261,9 @@ function renderPercorso() {
     return;
   }
 
-  // Sostituisci il map dentro renderPercorso con questa versione aggiornata:
   list.innerHTML = itemsNelPercorso
     .map((item, index) => {
-      // Aggiunto "index" come secondo parametro per tracciare la posizione
-      const valoreLogistica = item.logistica || ""; // Recupera il testo se già salvato
+      const valoreLogistica = item.logistica || "";
 
       return `
         <div class="aa-dnd-item ${item.opzionale ? "optional-item" : ""}"
@@ -306,6 +312,7 @@ function renderPercorso() {
 
 // ─── DRAG & DROP ─────────────────────────────────────
 function onDragStart(e) {
+  salvaTestoLogisticaCorrente(); // Mette in cassaforte i testi scritti prima dello spostamento
   dragSrc = e.currentTarget;
   e.dataTransfer.effectAllowed = "move";
   e.dataTransfer.setData("text/plain", dragSrc.dataset.id);
@@ -346,14 +353,13 @@ function onDragEnd(e) {
 }
 
 function buildTappeFromPath(pathItems) {
+  salvaTestoLogisticaCorrente();
   return pathItems.map((i) => {
     const meta =
       tuttiItems.find((x) => String(x._id) === String(i.itemId)) || {};
     return {
       ordine: i.ordine,
-      // ─── MODIFICA: Prendi il valore dinamico salvato nell'oggetto o usa una stringa vuota di fallback ───
       logistica: i.logistica || "",
-      // ────────────────────────────────────────────────────────────────────────────────────────────────
       item_default: String(i.itemId),
       operaId: meta.operaId || "",
       opzionale: !!i.opzionale,
@@ -389,10 +395,8 @@ async function salvaVisita() {
   if (!itemsNelPercorso.length)
     return showToast("Aggiungi almeno un item al percorso", "error");
 
-  // Sostituisci la vecchia logica di calcolo di thumbnail con questa:
   let thumbnail = document.getElementById("visitaImmagine").value.trim();
 
-  // Se l'input è vuoto, cerca di recuperare l'immagine dal primo item del percorso
   if (!thumbnail && itemsNelPercorso.length > 0) {
     const primoItem = tuttiItems.find(
       (i) => i._id === itemsNelPercorso[0].itemId,
@@ -402,10 +406,7 @@ async function salvaVisita() {
     }
   }
 
-  // Se non c'è input e non c'è immagine nel primo item, usa il fallback finale
-  if (!thumbnail) {
-    thumbnail = default_image;
-  }
+  if (!thumbnail) thumbnail = default_image;
 
   const tappe = buildTappeFromPath(itemsNelPercorso);
 
@@ -444,12 +445,11 @@ async function salvaVisita() {
       "success",
     );
     setTimeout(() => {
-      window.location.href = "/";
+      window.location.href = "/dashboard";
     }, 500);
   }
 }
 
-// ─── CARICA VISITA PER MODIFICA ──────────────────────
 // ─── CARICA VISITA PER MODIFICA ──────────────────────
 async function caricaVisitaPerModifica(id) {
   const v = await apiFetch(`/api/visite/${id}`);
@@ -483,6 +483,7 @@ async function caricaVisitaPerModifica(id) {
       ordine: row.ordine,
       opzionale: row.opzionale,
       item_default: row.itemId?._id || row.itemId,
+      logistica: row.logistica || "",
     }));
   }
 
@@ -490,11 +491,7 @@ async function caricaVisitaPerModifica(id) {
     const def = t.item_default;
     const itemId =
       def && typeof def === "object" && def._id != null ? def._id : def;
-
-    // CORRETTO: Se l'oggetto è già interamente popolato dal server, usiamo direttamente quello
     const pop = def && typeof def === "object" && def.titolo ? def : null;
-
-    // Ripiego secondario di sicurezza solo se l'elemento non era popolato
     const meta =
       pop || tuttiItems.find((x) => String(x._id) === String(itemId)) || {};
 
@@ -508,6 +505,7 @@ async function caricaVisitaPerModifica(id) {
       linguaggio: meta.linguaggio || "intermedio",
       categoria: meta.categoria || "altro",
       immagine: meta.immagine || null,
+      logistica: t.logistica || "",
     };
   });
 
@@ -533,7 +531,6 @@ async function eliminaVisita(id) {
   if (ok !== null) {
     showToast("Visita eliminata", "success");
     resetEditor();
-    caricaVisiteList();
   }
 }
 
@@ -592,7 +589,7 @@ function applicaRestrizioniVisitatore() {
   }
 }
 
-// Incolla questo in fondo al file editor-visita.js se non lo hai già fatto
+// Listener in tempo reale per catturare i cambiamenti di testo dentro le logiche logistiche
 document.addEventListener("input", (e) => {
   if (e.target.classList.contains("input-logistica-tappa")) {
     const index = parseInt(e.target.getAttribute("data-index"), 10);

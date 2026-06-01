@@ -46,6 +46,83 @@ async function apiFetch(url, opzioni = {}) {
   }
 }
 
+// LOGIN
+// ─── COMPONENTE AUTH UNIVERSALE (utils.js) ───────────────────────────
+
+function apriLogin() {
+  document.getElementById("loginModal")?.classList.remove("d-none");
+}
+
+function chiudiLogin() {
+  document.getElementById("loginModal")?.classList.add("d-none");
+}
+
+async function eseguiLogin() {
+  const usernameInput = document.getElementById("loginUsername");
+  const passwordInput = document.getElementById("loginPassword");
+  if (!usernameInput || !passwordInput) return;
+
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value;
+
+  const data = await apiFetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+
+  if (data) {
+    localStorage.setItem("aa_utente", JSON.stringify(data.user || data));
+    localStorage.setItem("aa_token", data.token);
+    chiudiLogin();
+    aggiornaUtenteUI();
+    showToast(`Benvenuto, ${username}!`, "success");
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  }
+}
+
+function logout() {
+  localStorage.removeItem("aa_utente");
+  localStorage.removeItem("aa_token");
+  showToast("Logout effettuato", "info");
+  setTimeout(() => {
+    window.location.reload();
+  }, 500);
+}
+
+function aggiornaUtenteUI() {
+  const u = getUtenteCorrente();
+  const info = document.getElementById("utenteInfo");
+  const btnLogin = document.getElementById("btnLogin");
+  const btnLogout = document.getElementById("btnLogout");
+
+  if (u) {
+    if (info) info.textContent = `${u.username}`;
+    btnLogin?.classList.add("d-none"); // Nasconde Accedi se loggato
+    btnLogout?.classList.remove("d-none"); // Mostra Esci se loggato
+
+    if (["autore", "admin"].includes(u.ruolo)) {
+      document
+        .querySelectorAll(".id-autore-nav")
+        .forEach((el) => el.classList.remove("d-none"));
+    } else {
+      document
+        .querySelectorAll(".id-autore-nav")
+        .forEach((el) => el.classList.add("d-none"));
+    }
+  } else {
+    if (info) info.textContent = "";
+    btnLogin?.classList.remove("d-none"); // MOSTRA Accedi se NON loggato
+    btnLogout?.classList.add("d-none"); // Nasconde Esci se NON loggato
+    document
+      .querySelectorAll(".id-autore-nav")
+      .forEach((el) => el.classList.add("d-none"));
+  }
+}
+
 // ─── TOAST ──────────────────────────────────────────
 function showToast(messaggio, tipo = "info", durata = 3500) {
   const container = document.getElementById("toastContainer");
@@ -118,7 +195,34 @@ function richiedeAutore() {
 
 // ─── BADGE ──────────────────────────────────────────
 function badgeLinguaggio(linguaggio) {
-  return `<span class="aa-badge aa-badge-lang-${linguaggio}">${linguaggio}</span>`;
+  if (!linguaggio) return "";
+
+  let bgClass = "bg-secondary text-white"; // Grigio di default se non trova corrispondenze
+  const tagLabel = linguaggio.charAt(0).toUpperCase() + linguaggio.slice(1);
+
+  switch (linguaggio.toLowerCase()) {
+    case "infantile":
+      // Verde pastello con testo scuro
+      bgClass =
+        "bg-success-subtle text-success-emphasis border border-success-subtle";
+      break;
+    case "medio":
+      // Giallo/Arancio pastello con testo scuro
+      bgClass =
+        "bg-warning-subtle text-warning-emphasis border border-warning-subtle";
+      break;
+    case "avanzato":
+      // Blu classico di Bootstrap con testo bianco
+      bgClass = "bg-primary text-white";
+      break;
+    case "specialistico":
+      // Rosso pastello con testo scuro
+      bgClass =
+        "bg-danger-subtle text-danger-emphasis border border-danger-subtle";
+      break;
+  }
+
+  return `<span class="aa-badge ${bgClass}">${tagLabel}</span>`;
 }
 
 function badgeLunghezza(lunghezza) {
@@ -257,4 +361,5 @@ function aggiornaUiNavbar() {
 }
 
 // La eseguiamo comunque all'avvio
+aggiornaUtenteUI();
 aggiornaUiNavbar();

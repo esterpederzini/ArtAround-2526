@@ -7,7 +7,9 @@ let mappaOpereLocali = {}; // Mappa per l'autocompilazione immediata client-side
 
 // ─── INIT ────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1. Controllo di sicurezza basato sui ruoli [cite: 427, 519]
+  // Sincronizza lo stato visivo della navbar globale
+  aggiornaUtenteUI();
+
   if (!richiedeAutore()) {
     const container =
       document.querySelector(".container") ||
@@ -21,10 +23,10 @@ document.addEventListener("DOMContentLoaded", async () => {
               L'ispirazione ha bussato, ma serve il pass!
             </h2>
             <p class="lead mt-3 text-slate">
-              Attualmente stai esplorando ArtAround come <strong>Visitatore</strong>. [cite: 427]
+              Attualmente stai esplorando ArtAround come <strong>Visitatore</strong>. 
             </p>
             <p class="mb-4">
-              Solo gli utenti con il ruolo di <strong>Autore</strong> possono scolpire nuovi contenuti, progettare percorsi museali e condividerli con la community. [cite: 427, 519]
+              Solo gli utenti con il ruolo di <strong>Autore</strong> possono scolpire nuovi contenuti, progettare percorsi museali e condividerli con la community. 
             </p>
             <a href="/dashboard" class="btn-aa-primary mt-2">
               <i class="bi bi-arrow-left"></i> Torna alla Dashboard
@@ -35,8 +37,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     return;
   }
-
-  // 2. Carica configurazione statica e sessione utente corrente [cite: 234, 418]
   await inizializzaMuseoDaConfig();
 
   const utente = getUtenteCorrente();
@@ -45,10 +45,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     inputAutore.value = utente._id;
   }
 
-  // 3. Popola dinamicamente il menu a tendina delle opere disponibili [cite: 256]
   await popolaSelectOpere();
 
-  // 4. Listener per l'anteprima live dinamica delle card [cite: 265]
   [
     "titolo",
     "descrizione",
@@ -61,7 +59,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById(id)?.addEventListener("input", aggiornaPreview);
   });
 
-  // 5. Gestione conteggio caratteri e calcolo automatico profondità [cite: 266]
   document.getElementById("descrizione")?.addEventListener("input", (e) => {
     const len = e.target.value.length;
     document.getElementById("charCount").textContent = len;
@@ -71,13 +68,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("profonditaContenuto").value = prof;
   });
 
-  // 6. REATTIVITÀ DEL MENU A TENDINA: Gestisce il cambio di selezione dell'opera [cite: 252, 256]
   document.getElementById("operaSelect")?.addEventListener("change", (e) => {
     const valoreScelto = e.target.value;
     gestisciCambioSelezioneOpera(valoreScelto);
   });
 
-  // 7. Anteprima Live miniatura immagine con debounce [cite: 265]
   document.getElementById("immagineUrl")?.addEventListener(
     "input",
     debounce((e) => {
@@ -85,12 +80,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 400),
   );
 
-  // 8. Gestione modalità modifica se presente id nell'URL [cite: 253]
   const params = new URLSearchParams(window.location.search);
   if (params.get("id")) caricaItemPerModifica(params.get("id"));
 });
 
-// ─── CARICA CONFIGURAZIONE MUSEO DAL SERVER ────────── [cite: 234, 418]
+// ─── CARICA CONFIGURAZIONE MUSEO DAL SERVER ──────────
 async function inizializzaMuseoDaConfig() {
   try {
     const response = await fetch("/api/config");
@@ -111,18 +105,16 @@ async function inizializzaMuseoDaConfig() {
   }
 }
 
-// ─── POPOLA IL MENU A TENDINA DELLE OPERE ──────────── [cite: 252, 256]
+// ─── POPOLA IL MENU A TENDINA DELLE OPERE ────────────
 async function popolaSelectOpere() {
   const select = document.getElementById("operaSelect");
   if (!select) return;
 
-  // Richiediamo gli item esistenti per catalogare le opere attuali del museo
   const data = await apiFetch(
     `/api/items?museo=${encodeURIComponent(museoConfigurato)}&limite=300`,
   );
   select.innerHTML = "";
 
-  // Opzione predefinita di cortesia
   const optDefault = document.createElement("option");
   optDefault.value = "";
   optDefault.textContent = "-- Scegli un'opera ufficiale --";
@@ -133,7 +125,6 @@ async function popolaSelectOpere() {
     return;
   }
 
-  // Estraiamo le opere in modo univoco filtrando per operaId
   mappaOpereLocali = {};
   data.items.forEach((item) => {
     if (item.operaId && !mappaOpereLocali[item.operaId]) {
@@ -149,6 +140,7 @@ async function popolaSelectOpere() {
     select.appendChild(opt);
   });
 }
+
 // ─── GESTISCE IL CAMBIO DI SELEZIONE NEL MENU ────────
 async function gestisciCambioSelezioneOpera(valoreScelto) {
   const badge = document.getElementById("operaStatoBadge");
@@ -156,14 +148,12 @@ async function gestisciCambioSelezioneOpera(valoreScelto) {
   const campiSchedaTecnica = ["artista", "stile", "periodo", "categoria"];
 
   if (valoreScelto && valoreScelto !== "") {
-    // Caso B: È stata scelta un'opera esistente
     inputOperaIdNascosto.value = valoreScelto;
 
     badge.textContent = "Opera Catalogata";
     badge.className = "badge ms-2 bg-success text-white";
     badge.classList.remove("d-none");
 
-    // Recuperiamo i dettagli immutabili condivisi dall'opera
     const operaSelezionata = mappaOpereLocali[valoreScelto];
 
     document.getElementById("operaTitoloUfficiale").value =
@@ -181,21 +171,9 @@ async function gestisciCambioSelezioneOpera(valoreScelto) {
       document.getElementById("immagineUrl").value = operaSelezionata.immagine;
     }
 
-    // Blindiamo la scheda tecnica dell'opera in sola lettura
     disabilitaCampiOpere([...campiSchedaTecnica, "operaTitoloUfficiale"], true);
-
-    // Lasciamo il titolo dell'item pulito e pronto per la nuova scrittura
     document.getElementById("titolo").value = "";
-
-    // Scarichiamo dinamicamente l'elenco delle spiegazioni concorrenti per la barra laterale
-    const dataVarianti = await apiFetch(
-      `/api/items?operaId=${encodeURIComponent(valoreScelto)}&limite=50`,
-    );
-    if (dataVarianti && dataVarianti.items) {
-      renderElencoVarianti(dataVarianti.items);
-    }
   } else {
-    // Caso C: Reset o selezione vuota
     inputOperaIdNascosto.value = "";
     document.getElementById("operaTitoloUfficiale").value = "";
     badge.classList.add("d-none");
@@ -217,7 +195,6 @@ function disabilitaCampiOpere(listaCampi, bloccati) {
       el.readOnly = bloccati;
       if (el.tagName === "SELECT") el.disabled = bloccati;
 
-      // Feedback visivo di sicurezza
       el.style.backgroundColor = bloccati ? "var(--aa-cream)" : "";
       el.style.cursor = bloccati ? "not-allowed" : "";
     }
@@ -250,7 +227,8 @@ function renderElencoVarianti(items) {
     .join("");
 }
 
-// ─── LIVE PREVIEW DELLE CARD ───────────────────────── [cite: 265]
+// ─── LIVE PREVIEW DELLE CARD ─────────────────────────
+// ─── LIVE PREVIEW DELLE CARD ─────────────────────────
 function aggiornaPreview() {
   const titolo = document.getElementById("titolo").value || "Titolo item";
   const desc =
@@ -268,11 +246,25 @@ function aggiornaPreview() {
   document.getElementById("prevLen").textContent = lunghezza;
   document.getElementById("prevLicenza").textContent = licenza;
 
-  const prevLang = document.getElementById("prevLang");
-  if (prevLang) {
-    prevLang.textContent = linguaggio;
-    prevLang.className = `aa-badge aa-badge-lang-${linguaggio}`;
+  // ─── CORREZIONE: Usa la funzione globale di utils.js per il badge colorato ───
+  const prevLangContainer = document.getElementById("prevLang")?.parentElement;
+  if (prevLangContainer) {
+    // Rimuoviamo il vecchio elemento statico e rigeneriamo il badge dinamicamente
+    const vecchioBadge = document.getElementById("prevLang");
+    if (vecchioBadge) {
+      vecchioBadge.remove();
+    }
+
+    // Creiamo il nuovo badge e gli assegniamo l'ID per i cicli di aggiornamento successivi
+    const htmlNuovoBadge = badgeLinguaggio(linguaggio);
+    prevLangContainer.insertAdjacentHTML("afterbegin", htmlNuovoBadge);
+
+    const badgeAppenaInserito = prevLangContainer.querySelector(".aa-badge");
+    if (badgeAppenaInserito) {
+      badgeAppenaInserito.id = "prevLang";
+    }
   }
+  // ─────────────────────────────────────────────────────────────────────────────
 
   const prevPrice = document.getElementById("prevPrice");
   if (prevPrice) {
@@ -302,7 +294,7 @@ function stimaProfondita(len) {
   return "accademico";
 }
 
-// ─── INVIO E SALVATAGGIO DEI DATI ───────────────────── [cite: 259, 261]
+// ─── INVIO E SALVATAGGIO DEI DATI ─────────────────────
 async function salvaItem() {
   const operaId = document.getElementById("operaId").value.trim();
   const museo = document.getElementById("museo").value.trim();
@@ -353,8 +345,8 @@ async function salvaItem() {
   const payload = {
     operaId,
     museo,
-    titolo, // Titolo specifico dell'item
-    titoloOpera: titoloOpera || titolo, // Conserviamo il legame testuale dell'opera nativa [cite: 259]
+    titolo,
+    titoloOpera: titoloOpera || titolo,
     descrizione: desc,
     lunghezza,
     linguaggio,
@@ -384,7 +376,6 @@ async function salvaItem() {
     body: JSON.stringify(payload),
   });
 
-  //  IL CODICE MODIFICATO DA METTERE AL SUO POSTO
   if (ok) {
     showToast(
       id
@@ -393,7 +384,6 @@ async function salvaItem() {
       "success",
     );
 
-    // Lasciamo 500 millisecondi all'utente per leggere il messaggio di successo
     setTimeout(() => {
       window.location.href = "/dashboard";
     }, 500);
@@ -439,7 +429,6 @@ async function caricaItemPerModifica(id) {
   document.getElementById("formTitolo").textContent =
     ` Modifica: ${item.titolo}`;
 
-  // Sincronizza l'elemento grafico select con un leggero delay per l'inizializzazione
   setTimeout(() => {
     const select = document.getElementById("operaSelect");
     if (select) {
@@ -457,13 +446,6 @@ async function caricaItemPerModifica(id) {
   badge.classList.remove("d-none");
 
   aggiornaPreview();
-
-  const dataVarianti = await apiFetch(
-    `/api/items?operaId=${encodeURIComponent(item.operaId)}&limite=20`,
-  );
-  if (dataVarianti && dataVarianti.items) {
-    renderElencoVarianti(dataVarianti.items);
-  }
 }
 
 // ─── SVUOTA E RIPRISTINA IL MODULO ────────────────────
@@ -511,12 +493,4 @@ function resetForm() {
     '<em class="text-slate small">Seleziona un\'opera per esaminare le varianti...</em>';
 
   aggiornaPreview();
-}
-
-function debounce(fn, delay = 300) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), delay);
-  };
 }
