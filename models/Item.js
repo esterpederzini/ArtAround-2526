@@ -41,12 +41,12 @@ const itemSchema = new mongoose.Schema(
     immagine: { type: String, default: null },
     lunghezza: {
       type: String,
-      enum: ["3s", "15s", "30s", "40s", "1m", "3m", "5m", "10m"],
+      enum: ["3s", "15s", "1m", "4m", "3m", "5m", "10m"],
       required: true,
     },
     linguaggio: {
       type: String,
-      enum: ["infantile", "medio", "avanzato", "elementare", "intermedio"],
+      enum: ["infantile", "elementare", "medio", "specialistico"],
       required: true,
     },
     categoria: { type: String, default: "altro" },

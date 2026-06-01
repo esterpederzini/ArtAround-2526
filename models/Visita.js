@@ -10,8 +10,9 @@ const tappaSchema = new mongoose.Schema(
     },
     varianti_difficolta: {
       infantile: String,
+      elementare: String,
       medio: String,
-      avanzato: String,
+      specialistico: String,
     },
   },
   { _id: false },
