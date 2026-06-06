@@ -67,9 +67,6 @@
   display: flex;
   align-items: flex-end;
   padding: 2.5rem 5vw;
-  background-image:
-    linear-gradient(to top, var(--bg-dark) 5%, transparent 60%),
-    url("https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=2070");
   background-size: cover;
   background-position: center;
 }
@@ -406,7 +403,6 @@
    ADATTAMENTO DESKTOP: Rimpicciolimento delle card e griglia responsiva
    ========================================================================== */
 @media (min-width: 769px) {
-
   /* Trasformiamo lo scorrimento orizzontale in una griglia ordinata su PC */
   .horizontal-scroll {
     display: grid !important;
@@ -424,7 +420,9 @@
     max-width: 100% !important;
     width: 100% !important;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
   }
 
   /* Effetto hover elegante per la versione PC */

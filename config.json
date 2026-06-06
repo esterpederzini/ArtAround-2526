@@ -1,12 +1,12 @@
 {
   "museo": "Museo Egizio di Torino",
   "logoUrl": "/navigator/img/logo-egizio.png",
-  "defaultCardImage": "/navigator/img/museum_image.jpg",
+  "heroImage": "/navigator/img/museum_hero.jpg",
   "mappe": {
-    "-1": "/navigator/img/mappa-museo-piano_-1.png",
-    "0": "/navigator/img/mappa-museo-piano_0.png",
-    "1": "/navigator/img/mappa-museo-piano_1.png",
-    "2": "/navigator/img/mappa-museo-piano_2.png"
+    "-1": "/navigator/maps/mappa-museo-piano_-1.png",
+    "0": "/navigator/maps/mappa-museo-piano_0.png",
+    "1": "/navigator/maps/mappa-museo-piano_1.png",
+    "2": "/navigator/maps/mappa-museo-piano_2.png"
   },
   "colori": {
     "primario": "#b38b4d",

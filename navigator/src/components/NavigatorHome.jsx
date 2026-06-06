@@ -65,8 +65,16 @@ const NavigatorHome = () => {
     navigate("/login");
   };
 
+  const stringUrlImmagine =
+    config?.heroImage ||
+    config?.defaultCardImage ||
+    "/img/default_item_image.jpg";
+
   return (
-    <div className="home-dark-container">
+    <div
+      className="home-dark-container"
+      style={{ "--hero-bg-image": `url(${stringUrlImmagine})` }}
+    >
       <div
         className={`sidebar-overlay ${sidebarOpen ? "visible" : ""}`}
         onClick={closeSidebar}
@@ -117,7 +125,12 @@ const NavigatorHome = () => {
         <span className="brand-name">{"ArtAround"}</span>
       </header>
 
-      <section className="hero-modern">
+      <section
+        className="hero-modern"
+        style={{
+          backgroundImage: `linear-gradient(to top, var(--bg-dark) 5%, transparent 60%), url(${stringUrlImmagine})`,
+        }}
+      >
         <div className="hero-content">
           <h1 className="hero-title">{config?.museo || "ArtAround"}</h1>
           <p className="hero-subtitle">
@@ -158,7 +171,7 @@ const NavigatorHome = () => {
                         visita.immagine ||
                         visita.image ||
                         config?.defaultCardImage ||
-                        "/navigator/img/default_item_image.jpg"
+                        "/img/default_item_image.jpg"
                       }
                       alt={visita.title}
                     />

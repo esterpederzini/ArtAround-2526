@@ -101,16 +101,15 @@ export default function NavigatorItemViewer() {
   const changeItemRef = useRef(null);
   const handleLogisticsRef = useRef(null);
 
-  // All four helpers MUST be after updateContentRef is declared
   const handleSimplify = () => {
-    const levels = ["infantile", "medio", "avanzato"];
+    const levels = ["infantile", "elementare", "medio", "specialistico"];
     const idx = levels.indexOf(languageLevelRef.current);
     if (idx > 0)
       updateContentRef.current(levels[idx - 1], selectedDurationRef.current);
   };
 
   const handleAdvance = () => {
-    const levels = ["infantile", "medio", "avanzato"];
+    const levels = ["infantile", "elementare", "medio", "specialistico"];
     const idx = levels.indexOf(languageLevelRef.current);
     if (idx < levels.length - 1)
       updateContentRef.current(levels[idx + 1], selectedDurationRef.current);
@@ -642,17 +641,28 @@ export default function NavigatorItemViewer() {
                         <p className="small mb-3 text-uppercase ls-1 text-white">
                           Livello di analisi
                         </p>
-                        <div className="d-flex gap-2 mb-4">
-                          {["infantile", "medio", "avanzato"].map((l) => (
-                            <button
-                              key={l}
-                              className={`btn-difficolta-custom ${languageLevel === l ? "active" : ""}`}
-                              onClick={() => updateContent(l, selectedDuration)}
-                            >
-                              {l}
-                            </button>
+
+                        {/* MODIFICATO: Struttura a griglia 2x2 per i 4 livelli di linguaggio delle specifiche */}
+                        <Row className="g-2 mb-4">
+                          {[
+                            "infantile",
+                            "elementare",
+                            "medio",
+                            "specialistico",
+                          ].map((l) => (
+                            <Col xs={6} key={l}>
+                              <button
+                                className={`btn-difficolta-custom w-100 ${languageLevel === l ? "active" : ""}`}
+                                onClick={() =>
+                                  updateContent(l, selectedDuration)
+                                }
+                              >
+                                {l}
+                              </button>
+                            </Col>
                           ))}
-                        </div>
+                        </Row>
+
                         <p className="small mb-3 text-uppercase ls-1 text-white">
                           Durata Audio
                         </p>
@@ -774,47 +784,40 @@ export default function NavigatorItemViewer() {
         show={showDetailsModal}
         onHide={() => setShowDetailsModal(false)}
         centered
-        size="sm"
-        className="museum-modal"
+        dialogClassName="museum-modal" /* Forziamo l'aggancio del CSS personalizzato */
       >
-        <Modal.Body className="museum-modal-content py-4">
-          <div className="text-center mb-3">
-            <i
-              className="bi bi-palette"
-              style={{ fontSize: "2rem", color: "#e18f37" }}
-            ></i>
+        <Modal.Header closeButton className="bg-transparent">
+          <Modal.Title className="text-uppercase d-flex align-items-center">
+            <i className="bi bi-info-circle-fill me-2"></i> Scheda Tecnica
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="bg-transparent">
+          <div className="details-text-container">
+            <p>
+              <strong>Titolo:</strong> {currentItem?.titolo || "N/A"}
+            </p>
+            <p>
+              <strong>Artista:</strong> {currentItem?.artista || "Ignoto"}
+            </p>
+            {currentItem?.stile && (
+              <p>
+                <strong>Stile / Periodo:</strong> {currentItem.stile}
+              </p>
+            )}
+            <p>
+              <strong>Posizione:</strong> Piano {currentItem?.piano || "0"}
+            </p>
+            <p>
+              <strong>Creato da:</strong>{" "}
+              {currentItem?.artista || "Sconosciuto"}
+            </p>
+            {currentItem?.categoria && (
+              <p>
+                <strong>Categoria:</strong>{" "}
+                <span className="text-capitalize">{currentItem.categoria}</span>
+              </p>
+            )}
           </div>
-          <h6 className="text-uppercase fw-bold mb-3 text-white text-center">
-            Scheda Tecnica
-          </h6>
-          <div className="small text-white opacity-90 px-2">
-            <p className="mb-2">
-              <strong>Autore:</strong> {currentItem?.artista || "Autore Ignoto"}
-            </p>
-            <p className="mb-2">
-              <strong>Periodo:</strong>{" "}
-              {currentItem?.periodo || "Non specificato"}
-            </p>
-            <p className="mb-2">
-              <strong>Stile:</strong> {currentItem?.stile || "Non specificato"}
-            </p>
-            <p className="mb-2">
-              <strong>Licenza:</strong>{" "}
-              {typeof currentItem?.licenza === "object"
-                ? currentItem?.licenza?.tipo
-                : currentItem?.licenza || "Creative Commons"}
-            </p>
-            <hr style={{ borderColor: "rgba(255,255,255,0.1)" }} />
-            <p className="mb-0 text-muted" style={{ fontSize: "0.75rem" }}>
-              Testi di: {currentItem?.autore_visita || "Sistema"}
-            </p>
-          </div>
-          <button
-            className="btn-museum-primary w-100 mt-4"
-            onClick={() => setShowDetailsModal(false)}
-          >
-            Chiudi
-          </button>
         </Modal.Body>
       </Modal>
 
@@ -1032,7 +1035,6 @@ export default function NavigatorItemViewer() {
         </Modal.Body>
       </Modal>
 
-      {/* USCITA */}
       {/* MODAL DI CONFERMA USCITA */}
       <Modal
         show={showExitModal}
