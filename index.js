@@ -60,6 +60,31 @@ app.get("/api/config", (req, res) => {
   }
 });
 
+const say = require("say");
+
+// Rotta TTS con la libreria "say"
+app.get("/api/tts", (req, res) => {
+  const text = req.query.text;
+  if (!text) return res.status(400).send("Missing text parameter");
+
+  // Esporta temporaneamente l'audio in un file wav e lo spedisce al client
+  const tempFilePath = path.join(__dirname, "temp_audio.wav");
+
+  // Su Windows puoi usare voci come "Cosimo" o "Elsa" se installate,
+  // oppure lasciarlo nullo per usare la voce italiana di default del sistema.
+  say.export(text, null, 1.0, tempFilePath, (err) => {
+    if (err) {
+      console.error("Errore Say TTS:", err);
+      return res.status(500).send("Errore generazione audio");
+    }
+
+    // Inviamo il file generato al frontend e lo cancelliamo subito dopo l'invio
+    res.sendFile(tempFilePath, () => {
+      fs.unlinkSync(tempFilePath);
+    });
+  });
+});
+
 app.get("/db/create", async function (req, res) {
   res.send(await mymongo.create(mongoCredentials));
 });

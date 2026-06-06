@@ -15,6 +15,7 @@
     "@fortawesome/react-fontawesome": "^3.2.0",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
+    "google-tts-api": "^2.0.2",
     "react": "^19.2.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.0",

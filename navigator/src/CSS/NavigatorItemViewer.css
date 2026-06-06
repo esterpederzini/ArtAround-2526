@@ -666,36 +666,23 @@
   }
 }
 
-/* ==========================================================================
-   DESKTOP LAYOUT (min-width: 769px)
-   — Split-screen: image column (left, fixed) + content panel (right, scrollable)
-   — Mobile rules above are NOT touched.
-   ========================================================================== */
-/* ──────────────────────────────────────────────────────────────────────────
-   ADATTAMENTO TABLET E PC (iPad, Tablet Android e Monitor Desktop)
-   ────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 1200px) {
+  :root {
+    --left-column-width: 52vw;
+    --right-column-width: 48vw;
+  }
+}
+
 @media (min-width: 769px) {
-  /* ── Root layout: horizontal split ── */
   .navigator-viewer-layout {
     flex-direction: row !important;
     height: 100vh;
     overflow: hidden;
   }
 
-  /* ── VARIABILI DI LAYOUT DINAMICHE PER REA REATTIVO ── */
-  /* Su iPad e schermi intermedi diamo più spazio al testo (50/50 o 45/55)
-     Su schermi grandi (PC) possiamo mantenere l'immagine più imponente */
   :root {
     --left-column-width: 45vw;
     --right-column-width: 55vw;
-  }
-
-  /* Se lo schermo è un PC generoso (soprattutto monitor larghi) */
-  @media (min-width: 1200px) {
-    :root {
-      --left-column-width: 52vw;
-      --right-column-width: 48vw;
-    }
   }
 
   /* ── LEFT COLUMN: full-height artwork image, fixed ── */
@@ -737,12 +724,6 @@
       ),
       linear-gradient(to top, #1a1a1d 0%, transparent 35%);
   }
-
-  .hero-caption {
-    display: none !important;
-  }
-
-  /* ── RIGHT COLUMN: header + scrollable content + docked nav ── */
 
   /* Top navigation bar */
   .top-nav-viewer {

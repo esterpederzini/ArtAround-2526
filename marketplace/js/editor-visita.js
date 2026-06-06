@@ -15,28 +15,46 @@ document.addEventListener("DOMContentLoaded", async () => {
   const utente = getUtenteCorrente();
 
   // Se l'utente non ha fatto il login (è un ospite anonimo)
+  // Se l'utente non ha fatto il login (è un ospite anonimo)
   if (!utente) {
-    document.body.classList.add("overflow-hidden");
-    document.body.innerHTML = `
-      <div class="d-flex flex-column justify-content-center align-items-center vh-100 w-100"
-           style="background: linear-gradient(135deg, var(--aa-ink) 0%, var(--aa-charcoal) 60%, #3d4a5c 100%); color: var(--aa-cream); margin: 0; padding: 2rem;">
-        <div class="text-center col-md-8 col-lg-6" style="transform: translateY(-20px);">
-          <div style="font-size: 5rem; margin-bottom: 1rem;">🗺️</div>
-          <h2 style="color: var(--aa-museum-primary); font-family: 'Garamond', 'Georgia', serif; font-size: 2.5rem; font-weight: 600;">
-            Crea il tuo percorso su misura!
-          </h2>
-          <p class="lead mt-3" style="color: rgba(255, 255, 255, 0.75);">
-            Vuoi diventare un curatore virtuale e progettare la tua visita museale perfetta per ${configMuseo ? configMuseo.museo : "il museo"}?
-          </p>
-          <p class="mb-4" style="color: rgba(255, 255, 255, 0.65);">
-            Devi effettuare l'accesso per poter mescolare i contenuti del catalogo, creare il tuo itinerario e modificarlo quando vuoi.
-          </p>
-          <button class="btn-aa-gold mt-2" onclick="apriLogin()">
-            <i class="bi bi-person"></i> Accedi ora
-          </button>
+    // 1. Nascondiamo la navbar globale per liberare la parte superiore dello schermo
+    const navbar = document.querySelector(".aa-navbar");
+    if (navbar) {
+      navbar.classList.add("d-none");
+    }
+
+    const mainContainer = document.getElementById("editorMainContainer");
+    if (mainContainer) {
+      // 2. Rendiamo visibile il contenitore principale
+      mainContainer.classList.remove("d-none");
+
+      // 3. Sostituiamo l'intero layout interno (la row g-4 originale sparisce)
+      mainContainer.innerHTML = `
+        <div class="row justify-content-center align-items-center flex-grow-1" style="min-height: 85vh;">
+          <div class="col-md-8 col-lg-6 text-center">
+            <div style="font-size: 5rem; margin-bottom: 1rem;">🗺️</div>
+            <h2 style="color: var(--aa-gold); font-family: var(--aa-font-serif); font-size: 2.5rem; font-weight: 600;">
+              Crea il tuo percorso su misura!
+            </h2>
+            <p class="lead mt-3" style="color: var(--aa-slate);">
+              Vuoi diventare un curatore virtuale e progettare la tua visita museale perfetta per ${configMuseo ? configMuseo.museo : "il museo"}?
+            </p>
+            <p class="mb-4 text-muted">
+              Devi effettuare l'accesso per poter mescolare i contenuti del catalogo, creare il tuo itinerario e modificarlo quando vuoi.
+            </p>
+            
+            <div class="d-flex justify-content-center gap-3 mt-2">
+              <a href="/dashboard" class="btn-aa-outline">
+                <i class="bi bi-arrow-left"></i> Torna alla Dashboard
+              </a>
+              <button class="btn-aa-primary" onclick="apriLogin()">
+                <i class="bi bi-person"></i> Accedi ora
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
     return;
   }
 

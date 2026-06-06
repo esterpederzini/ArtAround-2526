@@ -35,7 +35,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
       `;
     }
-    return;
   }
   await inizializzaMuseoDaConfig();
 

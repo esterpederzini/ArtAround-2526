@@ -180,9 +180,12 @@ export default function NavigatorItemViewer() {
     };
   }, []);
 
-  // ---------- GESTIONE AUDIO / TTS ----------
+  // ---------- GESTIONE AUDIO / INTEGRAZIONE GENERAZIONE MP3 DAL BACKEND ----------
+  // ---------- GESTIONE AUDIO / FALLBACK TRA FILE STATICO E BACKEND TTS ----------
   useEffect(() => {
     const audio = audioRef.current;
+
+    // Fermiamo e puliamo i vecchi flussi ad ogni cambio opera o stato
     window.speechSynthesis.cancel();
     clearInterval(ttsIntervalRef.current);
 
@@ -191,10 +194,30 @@ export default function NavigatorItemViewer() {
       return;
     }
 
-    if (currentItem?.audioUrl) {
-      audio.src = currentItem.audioUrl;
-      audio.play().catch((e) => console.log("Autoplay blocked", e));
+    // CONTROLLO DI SICUREZZA:
+    // Se l'item ha già un suo file audio pre-registrato (es. memorizzato in currentItem.audio o currentItem.audioUrl) lo usiamo direttamente.
+    const item_audio = currentItem?.audio || currentItem?.audioUrl;
 
+    if (item_audio) {
+      console.log(
+        "[AUDIO LOG] Uso il file audio statico pre-esistente:",
+        item_audio,
+      );
+      audio.src = item_audio;
+    } else if (currentItem?.descrizione) {
+      // Altrimenti, facciamo il fallback dinamico sulla rotta Express che genera l'MP3 al volo
+      console.log(
+        "[AUDIO LOG] Nessun file audio statico trovato. Genero via EdgeTTS dal testo.",
+      );
+      audio.src = `/api/tts?text=${encodeURIComponent(currentItem.descrizione)}`;
+    }
+
+    if (audio.src) {
+      audio
+        .play()
+        .catch((e) => console.log("Autoplay blocked or stream interrupted", e));
+
+      // Sincronizzazione perfetta dei metadati e del tempo di riproduzione reale dell'MP3
       const upMeta = () => setDuration(audio.duration);
       const upTime = () => setCurrentTime(audio.currentTime);
       const onEnd = () => {
@@ -211,30 +234,6 @@ export default function NavigatorItemViewer() {
         audio.removeEventListener("timeupdate", upTime);
         audio.removeEventListener("ended", onEnd);
       };
-    } else if (currentItem?.descrizione) {
-      const utterance = new SpeechSynthesisUtterance(currentItem.descrizione);
-      utterance.lang = "it-IT";
-      const estimatedDuration = currentItem.descrizione.length / 15;
-      setDuration(estimatedDuration);
-      setCurrentTime(0);
-
-      utterance.onend = () => {
-        setIsPlaying(false);
-        setCurrentTime(0);
-        clearInterval(ttsIntervalRef.current);
-      };
-
-      window.speechSynthesis.speak(utterance);
-
-      ttsIntervalRef.current = setInterval(() => {
-        setCurrentTime((prev) => {
-          if (prev >= estimatedDuration) {
-            clearInterval(ttsIntervalRef.current);
-            return estimatedDuration;
-          }
-          return prev + 0.5;
-        });
-      }, 500);
     }
   }, [currentItem, isPlaying]);
 
@@ -1054,7 +1053,7 @@ export default function NavigatorItemViewer() {
           <div className="museum-modal-actions-overview">
             <button
               className="btn-overview-confirm"
-              onClick={() => navigate(`/visita/${id}/overview`)} // Sostituisci con la tua funzione di uscita se diversa
+              onClick={() => navigate(`/visit/${id}`)} // Sostituisci con la tua funzione di uscita se diversa
             >
               Esci dalla guida
             </button>

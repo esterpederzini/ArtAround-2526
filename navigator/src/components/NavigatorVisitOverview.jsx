@@ -50,9 +50,14 @@ function NavigatorVisitOverview() {
   const handleShow = () => setShowExitModal(true);
   const handleClose = () => setShowExitModal(false);
   const handleConfirmExit = () => {
-    if (id) localStorage.removeItem(`artaround_furthest_${id}`);
+    if (id) {
+      const key = `artaround_furthest_${id}`;
+      localStorage.removeItem(key);
+    }
     setFurthestIndex(-1);
-    navigate("/");
+    setTimeout(() => {
+      navigate("/");
+    }, 50);
   };
 
   const handleStartOrResume = () => {
