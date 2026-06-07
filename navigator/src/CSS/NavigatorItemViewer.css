@@ -1160,3 +1160,50 @@
 .details-text-container p:last-child {
   margin-bottom: 0 !important;
 }
+
+/* --- PULSANTI ASSISTENTE --- */
+.btn-museum-outline {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+  border-radius: 0.6rem;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+  width: 100%;
+  text-align: center;
+}
+
+.btn-museum-outline:hover,
+.btn-museum-outline:active {
+  background: rgba(225, 143, 55, 0.12);
+  border-color: rgba(225, 143, 55, 0.4);
+  color: #e18f37;
+}
+
+.btn-museum-outline:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-museum-primary {
+  background: #e18f37;
+  border: none;
+  color: #1a1a1d;
+  border-radius: 0.6rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s;
+}
+
+.btn-museum-primary:hover {
+  background: #c9792c;
+}

@@ -34,6 +34,7 @@ export default function NavigatorItemViewer() {
   const [logisticsMsg, setLogisticsMsg] = useState("");
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showLogisticsModal, setShowLogisticsModal] = useState(false);
+  const [showEndModal, setShowEndModal] = useState(false);
 
   const [uiLabels] = useState({
     "3s": "3s",
@@ -64,9 +65,13 @@ export default function NavigatorItemViewer() {
   const handleLogistics = (msg) => {
     if (!msg) return;
     setLogisticsMsg(msg);
-    const utterance = new SpeechSynthesisUtterance(msg);
-    utterance.lang = "it-IT";
-    window.speechSynthesis.speak(utterance);
+    const audio = new Audio(`/api/tts?text=${encodeURIComponent(msg)}`);
+    audio.play().catch(() => {
+      // Fallback al browser TTS se l'API non risponde
+      const utterance = new SpeechSynthesisUtterance(msg);
+      utterance.lang = "it-IT";
+      window.speechSynthesis.speak(utterance);
+    });
     setTimeout(() => setLogisticsMsg(""), 5000);
   };
 
@@ -738,8 +743,13 @@ export default function NavigatorItemViewer() {
                   </div>
                   <button
                     className="btn-item-skip"
-                    onClick={() => changeItem(safeIndex + 1)}
-                    disabled={safeIndex === (visit?.tappe?.length ?? 0) - 1}
+                    onClick={() => {
+                      if (safeIndex === (visit?.tappe?.length ?? 0) - 1) {
+                        setShowEndModal(true);
+                      } else {
+                        changeItem(safeIndex + 1);
+                      }
+                    }}
                   >
                     <i className="bi bi-skip-end"></i>
                   </button>
@@ -827,8 +837,10 @@ export default function NavigatorItemViewer() {
         centered
         dialogClassName="museum-modal"
       >
-        <Modal.Body className="text-center">
-          <h6 className="text-white mb-4 text-uppercase">Assistente</h6>
+        <Modal.Header closeButton>
+          <Modal.Title>Assistente</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
           <div className="d-grid gap-2">
             <p
               className="text-muted small text-uppercase mb-1"
@@ -1252,6 +1264,43 @@ export default function NavigatorItemViewer() {
           >
             Ho capito
           </button>
+        </Modal.Body>
+      </Modal>
+
+      {/* FINE VISITA */}
+      <Modal
+        show={showEndModal}
+        onHide={() => setShowEndModal(false)}
+        centered
+        className="museum-modal-overview"
+        dialogClassName="museum-modal-overview"
+      >
+        <Modal.Body className="museum-modal-content-overview">
+          <div className="museum-modal-icon-overview">
+            <i className="bi bi-stars"></i>
+          </div>
+          <h5 className="museum-modal-title-overview">Visita completata</h5>
+          <p className="museum-modal-text-overview">
+            Hai concluso{" "}
+            <strong style={{ color: "#e18f37" }}>
+              {visit?.titolo || "questa visita"}
+            </strong>
+            . Grazie per aver esplorato con noi.
+          </p>
+          <div className="museum-modal-actions-overview">
+            <button
+              className="btn-overview-confirm"
+              onClick={() => navigate("/")}
+            >
+              <i className="bi bi-house me-2"></i>Torna alla home
+            </button>
+            <button
+              className="btn-overview-cancel"
+              onClick={() => setShowEndModal(false)}
+            >
+              Rimani sull'ultima opera
+            </button>
+          </div>
         </Modal.Body>
       </Modal>
 
