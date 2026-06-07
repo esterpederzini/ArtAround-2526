@@ -770,34 +770,120 @@ a:hover {
   letter-spacing: 0.06em;
   margin-top: 4px;
 }
+  
+  /* 🛡️ BLOCCO DI SICUREZZA PER TUTTA LA VIEWPORT MOBILE */
+  html, body {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
 
-/* ─── TABS ─────────────────────────────────────────────────── */
-.aa-tabs {
-  border-bottom: 2px solid var(--aa-stone);
-  margin-bottom: 1.5rem;
-  display: flex;
-  gap: 0;
+  .aa-tabs {
+    background: var(--aa-cream-dark);
+    border: 1px solid var(--aa-stone);
+    border-radius: var(--aa-radius-md);
+    padding: 4px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 4px;
+    width: auto; /* <-- SISTEMATO: Impedisce alla barra di sbordare a destra */
+  }
+
+  .aa-tab {
+    flex: 1; /* Divide lo schermo in 3 parti perfettamente uguali */
+    text-align: center;
+    justify-content: center;
+    padding: 0.6rem 0.4rem;
+    font-size: 0.82rem; 
+    font-weight: 600;
+    color: var(--aa-slate-dark);
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: none;
+    margin-bottom: 0;
+    border-radius: var(--aa-radius-sm);
+    transition: all 0.15s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .aa-tab:hover {
+    color: var(--aa-ink);
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  .aa-tab.active {
+    color: var(--aa-ink);
+    background-color: #ffffff; 
+    box-shadow: var(--aa-shadow-sm);
+    border-bottom: none;
+  }
+
+  /* Impedisce che testi eccessivamente lunghi deformino il layout del tavolo */
+  .aa-card-body {
+    overflow-x: auto !important;
+  }
 }
 
-.aa-tab {
-  padding: 0.65rem 1.25rem;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--aa-slate);
-  cursor: pointer;
-  border: none;
-  background: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  transition: all 0.2s;
+/* COMPORTAMENTO SU PC DESKTOP (Da 768px in su) - RIMANE TUTTO ORIGINALE E NORMALE */
+@media (min-width: 768px) {
+  .aa-tabs {
+    border-bottom: 2px solid var(--aa-stone);
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0;
+    width: auto;
+    background: none;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .aa-tab {
+    flex: none;
+    padding: 0.65rem 1.25rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--aa-slate);
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .aa-tab:hover {
+    color: var(--aa-charcoal);
+  }
+
+  .aa-tab.active {
+    color: var(--aa-charcoal);
+    border-bottom-color: var(--aa-gold);
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .d-none-pc {
+    display: none !important;
+  }
 }
 
-.aa-tab:hover {
-  color: var(--aa-charcoal);
+/* Animazione per l'effetto cliccato della riga solo su mobile */
+@media (max-width: 767.98px) {
+  .aa-row-clickable-mobile:active td {
+    background-color: var(--aa-cream-dark) !important;
+  }
 }
-.aa-tab.active {
-  color: var(--aa-charcoal);
-  border-bottom-color: var(--aa-gold);
+
+/* Effetto di transizione per la freccia dei filtri mobile */
+.transition-transform {
+  transition: transform 0.25s ease-in-out;
 }
 
 /* ─── SEARCH BAR ───────────────────────────────────────────── */
@@ -1138,6 +1224,45 @@ a:hover {
 
 /* ─── RESPONSIVE ───────────────────────────────────────────── */
 @media (max-width: 768px) {
+  /* 1. Icona del menu (Hamburger) color Gold e senza bordi al click */
+  .aa-navbar .navbar-toggler {
+    border: none !important;          /* Rimuove il bordo nativo di Bootstrap */
+    outline: none !important;         /* Rimuove la linea di focus */
+    box-shadow: none !important;      /* Rimuove l'alone azzurro/grigio di Bootstrap al click */
+    padding: 0.25rem;
+  }
+
+  /* Cambia il colore delle tre lineette dell'hamburger in Gold */
+  .aa-navbar .navbar-toggler-icon {
+    filter: invert(74%) sepia(43%) saturate(541%) hue-rotate(11deg) brightness(96%) contrast(89%);
+    /* Nota: questo filtro ricrea esattamente la tonalità del tuo --aa-gold-light su SVG */
+  }
+
+  /* 2. Nasconde il testo "visitatore 3 (visitatore)" per salvare spazio sulla barra */
+  #utenteInfo {
+    display: none !important;
+  }
+
+  /* 3. Posiziona il tasto Logout in modo pulito sotto le voci del menu */
+  #btnLogout {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.6rem 1rem;
+    color: var(--aa-gold-light) !important; /* Testo color oro per evidenziare l'azione */
+    background: transparent;
+    border: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  
+  /* Se nel tuo HTML il logout è un bottone arrotondato stile desktop, azzeriamo l'estetica su mobile */
+  .aa-navbar .btn-login[onclick*="logout"] {
+    border: none !important;
+    background: transparent !important;
+    padding: 0.6rem 1rem !important;
+    border-radius: 0 !important;
+  }
   .aa-sidebar {
     position: static;
     margin-bottom: 1rem;
@@ -1150,10 +1275,6 @@ a:hover {
   }
   .aa-stat-num {
     font-size: 1.4rem;
-  }
-  .aa-tabs {
-    overflow-x: auto;
-    flex-wrap: nowrap;
   }
   .aa-modal {
     max-width: 100%;
@@ -1192,4 +1313,9 @@ a:hover {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--aa-taupe);
+}
+
+.transition-transform {
+  transition: transform 0.2s ease-in-out;
+  display: inline-block;
 }

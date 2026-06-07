@@ -66,85 +66,118 @@
       <div class="row g-4">
         <div class="col-lg-2 col-md-3">
           <div class="aa-sidebar-wrapper">
-            <div class="aa-sidebar-section">
-              <div class="aa-sidebar-title">
-                <i class="bi bi-funnel"></i> Filtri
-              </div>
+            <div
+              class="d-flex justify-content-between align-items-center d-md-none bg-cream-dark p-3 rounded mb-2"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseFiltri"
+              aria-expanded="false"
+              aria-controls="collapseFiltri"
+              style="cursor: pointer"
+              onclick="ruotaFrecciaFiltri()"
+            >
+              <h5
+                class="m-0 text-uppercase tracking-wider"
+                style="
+                  font-size: 0.8rem;
+                  font-weight: 700;
+                  color: var(--aa-charcoal);
+                "
+              >
+                <i class="bi bi-funnel"></i> Filtri di Ricerca
+              </h5>
+              <i
+                class="bi bi-chevron-down text-slate transition-transform"
+                id="frecciaFiltri"
+                style="font-size: 1.1rem"
+              ></i>
+            </div>
 
-              <div class="mb-3">
-                <div class="aa-sidebar-title" style="font-size: 0.7rem">
-                  Museo
+            <div class="collapse d-md-block" id="collapseFiltri">
+              <div class="aa-sidebar-section pt-2 pt-md-0">
+                <div class="aa-sidebar-title d-none d-md-block">
+                  <i class="bi bi-funnel"></i> Filtri
                 </div>
-                <div id="filtroMusei">
-                  <button class="aa-filter-btn active" data-museo="">
+
+                <div class="mb-3">
+                  <div class="aa-sidebar-title" style="font-size: 0.7rem">
+                    Museo
+                  </div>
+                  <div id="filtroMusei">
+                    <button class="aa-filter-btn active" data-museo="">
+                      Tutti
+                    </button>
+                  </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="mb-3">
+                  <div class="aa-sidebar-title" style="font-size: 0.7rem">
+                    Linguaggio
+                  </div>
+                  <button class="aa-filter-btn active" data-lang="">
                     Tutti
                   </button>
+                  <button class="aa-filter-btn" data-lang="infantile">
+                    Infantile
+                  </button>
+                  <button class="aa-filter-btn" data-lang="medio">Medio</button>
+                  <button class="aa-filter-btn" data-lang="avanzato">
+                    Avanzato
+                  </button>
                 </div>
-              </div>
 
-              <div class="divider"></div>
-              <div class="mb-3">
-                <div class="aa-sidebar-title" style="font-size: 0.7rem">
-                  Linguaggio
+                <div class="divider"></div>
+
+                <div class="mb-3">
+                  <div class="aa-sidebar-title" style="font-size: 0.7rem">
+                    Prezzo
+                  </div>
+                  <button class="aa-filter-btn active" data-prezzo="">
+                    Tutti
+                  </button>
+                  <button class="aa-filter-btn" data-prezzo="free">
+                    Gratuiti
+                  </button>
+                  <button class="aa-filter-btn" data-prezzo="paid">
+                    A pagamento
+                  </button>
                 </div>
-                <button class="aa-filter-btn active" data-lang="">Tutti</button>
-                <button class="aa-filter-btn" data-lang="infantile">
-                  Infantile
-                </button>
-                <button class="aa-filter-btn" data-lang="medio">Medio</button>
-                <button class="aa-filter-btn" data-lang="avanzato">
-                  Avanzato
-                </button>
-              </div>
 
-              <div class="divider"></div>
+                <div class="divider"></div>
 
-              <div class="mb-3">
-                <div class="aa-sidebar-title" style="font-size: 0.7rem">
-                  Prezzo
+                <div class="mb-3">
+                  <div class="aa-sidebar-title" style="font-size: 0.7rem">
+                    Categoria
+                  </div>
+                  <button class="aa-filter-btn active" data-cat="">
+                    Tutte
+                  </button>
+                  <button class="aa-filter-btn" data-cat="pittura">
+                    Pittura
+                  </button>
+                  <button class="aa-filter-btn" data-cat="scultura">
+                    Scultura
+                  </button>
+                  <button class="aa-filter-btn" data-cat="decorativa">
+                    Decorativa
+                  </button>
+                  <button class="aa-filter-btn" data-cat="arte_antica">
+                    Arte Antica
+                  </button>
+                  <button class="aa-filter-btn" data-cat="altro">Altro</button>
                 </div>
-                <button class="aa-filter-btn active" data-prezzo="">
-                  Tutti
-                </button>
-                <button class="aa-filter-btn" data-prezzo="free">
-                  Gratuiti
-                </button>
-                <button class="aa-filter-btn" data-prezzo="paid">
-                  A pagamento
+
+                <div class="divider"></div>
+
+                <button
+                  class="btn-aa-outline w-100 mb-3"
+                  onclick="resetFiltri()"
+                  style="font-size: 0.8rem"
+                >
+                  <i class="bi bi-x-circle"></i> Reset
                 </button>
               </div>
-
-              <div class="divider"></div>
-
-              <div class="mb-3">
-                <div class="aa-sidebar-title" style="font-size: 0.7rem">
-                  Categoria
-                </div>
-                <button class="aa-filter-btn active" data-cat="">Tutte</button>
-                <button class="aa-filter-btn" data-cat="pittura">
-                  Pittura
-                </button>
-                <button class="aa-filter-btn" data-cat="scultura">
-                  Scultura
-                </button>
-                <button class="aa-filter-btn" data-cat="decorativa">
-                  Decorativa
-                </button>
-                <button class="aa-filter-btn" data-cat="arte_antica">
-                  Arte Antica
-                </button>
-                <button class="aa-filter-btn" data-cat="altro">Altro</button>
-              </div>
-
-              <div class="divider"></div>
-
-              <button
-                class="btn-aa-outline w-100 mb-3"
-                onclick="resetFiltri()"
-                style="font-size: 0.8rem"
-              >
-                <i class="bi bi-x-circle"></i> Reset
-              </button>
             </div>
           </div>
         </div>

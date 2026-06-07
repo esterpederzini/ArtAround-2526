@@ -86,6 +86,7 @@
 
               <a
                 href="/editor-visita"
+                id="btnHeroCreaVisita"
                 class="btn-aa-outline"
                 onclick="return vaiAEditorVisita(event);"
                 style="
@@ -218,6 +219,7 @@
       }
 
       // Carica configurazione museo generica (Requisito Bando)
+      // AGGIORNAMENTO DELLA FUNZIONE IN INDEX.HTML CON CONTROLLI DI VISIBILITÀ RUOLO
       async function caricaConfigMuseoHome() {
         try {
           const response = await fetch("/api/config");
@@ -228,10 +230,24 @@
           const subtitle = document.getElementById("heroSubtitle");
           if (subtitle && config.museo) {
             subtitle.innerHTML = `
-              Scopri contenuti audio per ogni livello: dai percorsi per bambini
-              alle analisi per esperti. Crea la tua guida personalizzata o
-              adotta i contenuti della community per ${config.museo}.
-            `;
+        Scopri contenuti audio per ogni livello: dai percorsi per bambini
+        alle analisi per esperti. Crea la tua guida personalizzata o
+        adotta i contenuti della community per ${config.museo}.
+      `;
+          }
+
+          // ─── NUOVA LOGICA DI CONTROLLO PULSANTE "CREA VISITA" ───
+          // ─── LOGICA CORRETTA DI CONTROLLO PULSANTE "CREA VISITA" ───
+          const u = getUtenteCorrente();
+          const btnCreaVisita = document.getElementById("btnHeroCreaVisita");
+
+          if (btnCreaVisita) {
+            btnCreaVisita.classList.add("d-none-pc");
+            if (u && u.ruolo === "visitatore") {
+              btnCreaVisita.classList.add("d-none");
+            } else {
+              btnCreaVisita.classList.remove("d-none");
+            }
           }
 
           caricaMuseiDaConfig(config);

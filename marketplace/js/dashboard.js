@@ -939,21 +939,35 @@ async function caricaMieiContenuti() {
           <div class="aa-card-header"><i class="bi bi-bookmark-star"></i> Le mie Visite Adottate (${mieVisiteAcquistate.length})</div>
           <div class="aa-card-body p-0" style="overflow-x:auto;">
             <table class="aa-table">
-              <thead><tr><th>Percorso Museale</th><th>Istituzione</th><th>Tappe</th><th>Opzioni</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Percorso Museale</th>
+                  <th>Istituzione</th>
+                  <th>Tappe</th>
+                  <th class="d-none d-md-table-cell">Opzioni</th> <!-- Visibile solo su PC -->
+                </tr>
+              </thead>
               <tbody>
                 ${mieVisiteAcquistate
                   .map(
                     (v) => `
-                  <tr>
+                  <!-- La riga è cliccabile solo su mobile tramite la classe aa-row-clickable-mobile -->
+                  <tr class="aa-row-clickable-mobile" onclick="if(window.innerWidth < 768) apriVisitaModal('${v._id}')">
                     <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
                     <td><small>${v.museo}</small></td>
-                    <td><span class="aa-badge aa-badge-len">${v.tappe?.length || 0} tappe</span></td>
                     <td>
+                      <!-- Su PC (desktop) mostra 'X tappe' -->
+                      <span class="aa-badge aa-badge-len d-none d-md-inline-flex">${v.tappe?.length || 0} tappe</span>
+                      <!-- Su Mobile mostra solo il numero puro -->
+                      <span class="aa-badge aa-badge-len d-inline-flex d-md-none fw-bold" style="padding: 2px 8px">${v.tappe?.length || 0}</span>
+                    </td>
+                    <td class="d-none d-md-table-cell">
+                      <!-- Bottone visibile e funzionante SOLO su PC -->
                       <button class="btn-aa-primary" style="font-size:0.75rem; padding:3px 10px;" onclick="apriVisitaModal('${v._id}')">
                         Visualizza
                       </button>
                     </td>
-                    </tr>
+                  </tr>
                 `,
                   )
                   .join("")}
@@ -971,16 +985,27 @@ async function caricaMieiContenuti() {
           <div class="aa-card-header"><i class="bi bi-file-earmark-music"></i> I miei Contenuti Audio Singoli (${mieiItemsAcquistati.length})</div>
           <div class="aa-card-body p-0" style="overflow-x:auto;">
             <table class="aa-table">
-              <thead><tr><th>Opera</th><th>Museo</th><th>Linguaggio</th><th>Dettagli</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Opera</th>
+                  <th>Museo</th>
+                  <th>Linguaggio</th>
+                  <th class="d-none d-md-table-cell">Dettagli</th> <!-- Visibile solo su PC -->
+                </tr>
+              </thead>
               <tbody>
                 ${mieiItemsAcquistati
                   .map(
                     (item) => `
-                  <tr>
+                  <tr class="aa-row-clickable-mobile" onclick="if(window.innerWidth < 768) apriItemModal('${item._id}')">
                     <td><strong>${item.titolo}</strong></td>
                     <td><small>${item.museo}</small></td>
                     <td>${badgeLinguaggio(item.linguaggio)}</td>
-                    <td><button class="btn-aa-primary" style="font-size:0.75rem;padding:3px 10px" onclick="apriItemModal('${item._id}')">Visualizza</button></td>
+                    <td class="d-none d-md-table-cell">
+                      <button class="btn-aa-primary" style="font-size:0.75rem; padding:3px 10px" onclick="apriItemModal('${item._id}')">
+                        Visualizza
+                      </button>
+                    </td>
                   </tr>
                 `,
                   )
@@ -1063,4 +1088,19 @@ function resetFiltri() {
     btn.classList.toggle("active", btn === primo);
   });
   caricaItems();
+}
+
+// Gestisce l'animazione della freccia dei filtri su mobile
+function ruotaFrecciaFiltri() {
+  const freccia = document.getElementById("frecciaFiltri");
+  if (!freccia) return;
+
+  setTimeout(() => {
+    const collapeElement = document.getElementById("collapseFiltri");
+    if (collapeElement && collapeElement.classList.contains("show")) {
+      freccia.style.transform = "rotate(180deg)";
+    } else {
+      freccia.style.transform = "rotate(0deg)";
+    }
+  }, 150); // Piccolo ritardo per dare il tempo a Bootstrap di assegnare le classi CSS di transizione
 }
