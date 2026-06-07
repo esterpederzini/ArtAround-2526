@@ -257,8 +257,8 @@ async function caricaItems(pagina = stato.paginaItems) {
 }
 
 function renderItemCard(item) {
-  const img = item.immagine
-    ? `<img src="${item.immagine}" class="card-img-top" alt="${item.titolo}" onerror="this.style.display='none'">`
+  const img = item.url
+    ? `<img src="${item.url}" class="card-img-top" alt="${item.titolo}" onerror="this.style.display='none'">`
     : `<div class="aa-item-placeholder">${iconaCategoria(item.categoria)}</div>`;
 
   return `
@@ -296,14 +296,16 @@ function iconaCategoria(cat) {
   return mappa[cat] || "🔍";
 }
 
-// ─── MODAL ITEM DETTAGLIO ────────────────────────────
 async function apriItemModal(id) {
   const modal = document.getElementById("itemModal");
   modal.classList.remove("d-none");
   document.getElementById("modalItemTitolo").textContent = "Caricamento…";
+
+  // Spinner di caricamento coerente con lo stile
   document.getElementById("modalItemBody").innerHTML =
     '<div class="text-center py-4"><div class="aa-spinner"></div></div>';
   document.getElementById("modalItemFooter").innerHTML = "";
+  document.getElementById("modalItemFooter").classList.remove("d-none"); // Assicuriamoci che sia visibile
 
   const item = await apiFetch(`/api/items/${id}`);
   if (!item) {
@@ -313,41 +315,114 @@ async function apriItemModal(id) {
 
   document.getElementById("modalItemTitolo").textContent = item.titolo;
 
+  // 🛡️ Gestione Fallback Immagine (se manca, usa il placeholder di style.css)
+  const mediaHTML = item.immagine
+    ? `<img src="${item.immagine}" class="img-fluid rounded border border-soft w-100" style="max-height: 250px; object-fit: cover;" alt="">`
+    : `<div class="aa-item-placeholder rounded border border-soft d-flex align-items-center justify-content-center" style="height: 180px;">
+         <i class="bi bi-image" style="font-size: 2.5rem; color: var(--aa-tortora);"></i>
+       </div>`;
+
+  // Integrazione dei tuoi metadati nella griglia a due colonne
   document.getElementById("modalItemBody").innerHTML = `
-    ${item.immagine ? `<img src="${item.immagine}" class="w-100 mb-3" style="border-radius:8px;max-height:220px;object-fit:cover" alt="">` : ""}
-    <div class="d-flex flex-wrap gap-2 mb-3">
-      ${badgeLinguaggio(item.linguaggio)}
-      ${badgeLunghezza(item.lunghezza)}
-      <span class="aa-badge aa-badge-len">${item.categoria}</span>
-      <span class="aa-badge aa-badge-len">Profondità: ${item.profonditaContenuto}</span>
+    <div class="row g-3">
+      <div class="col-md-5">
+        ${mediaHTML}
+      </div>
+
+      <div class="col-md-7 d-flex flex-column justify-content-between">
+        <div>
+          <div class="text-uppercase text-slate small fw-bold tracking-wider mb-2" style="letter-spacing: 0.05em;">
+            Classificazione Item
+          </div>
+          <div class="d-flex flex-wrap gap-1 mb-3">
+            ${badgeLinguaggio(item.linguaggio)}
+            ${badgeLunghezza(item.lunghezza)}
+            <span class="badge aa-badge aa-badge-len">${item.categoria}</span>
+            <span class="badge aa-badge aa-badge-len">Prof.: ${item.profonditaContenuto}</span>
+          </div>
+        </div>
+
+        <div class="p-2 rounded bg-cream border border-soft shadow-sm" style="font-size: 0.85rem;">
+          <div class="row g-2">
+            <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Opera ID</span><div class="fw-semibold text-charcoal">${item.operaId || "–"}</div></div>
+            <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Museo</span><div class="fw-semibold text-charcoal">${item.museo || "–"}</div></div>
+            <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Autore</span><div class="text-taupe fw-semibold">${item.creatorId?.username || "–"}</div></div>
+            <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Licenza</span><div class="text-slate fw-semibold">${item.licenza?.tipo || item.licenza || "–"}</div></div>
+          </div>
+        </div>
+      </div>
     </div>
-    <p style="line-height:1.7">${item.descrizione}</p>
+
     <div class="divider"></div>
-    <div class="row g-2 text-sm">
-      <div class="col-6"><span class="aa-label">Opera ID</span><div>${item.operaId}</div></div>
-      <div class="col-6"><span class="aa-label">Museo</span><div>${item.museo}</div></div>
-      <div class="col-6"><span class="aa-label">Autore</span><div>${item.creatorId?.username || "–"}</div></div>
-      <div class="col-6"><span class="aa-label">Licenza</span><div>${item.licenza?.tipo || "–"}</div></div>
+
+    <div class="mb-2">
+      <div class="aa-sidebar-title" style="font-size: 0.75rem; border-bottom: none; margin-bottom: 0.5rem; padding-bottom: 0;">
+        Contenuto Testuale (Sintesi Vocale)
+      </div>
+      <p class="text-charcoal px-3 py-3 rounded bg-cream border-soft" style="font-size: 0.95rem; line-height: 1.6; border-left: 3px solid var(--aa-taupe); margin: 0;">
+        ${item.descrizione || "Nessuna descrizione inserita."}
+      </p>
     </div>
-    ${item.tags?.length ? `<div class="mt-3">${item.tags.map((t) => `<span class="aa-badge aa-badge-len me-1">${t}</span>`).join("")}</div>` : ""}
-    ${item.logVendite?.length > 0 ? `<div class="mt-3 text-slate small">${item.logVendite.length} vendita/e registrata/e</div>` : ""}
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3 pt-2 border-top border-soft">
+      <div>
+        ${item.tags?.length ? item.tags.map((t) => `<span class="badge aa-badge aa-badge-len me-1">${t}</span>`).join("") : "–"}
+      </div>
+      <div>
+        ${item.logVendite?.length > 0 ? `<span class="text-slate small"><i class="bi bi-graph-up"></i> ${item.logVendite.length} vendite</span>` : ""}
+      </div>
+    </div>
   `;
 
-  const u = getUtenteCorrente();
+  // --- LOGICA FOOTER DINAMICA CON CONTROLLI DI PROPRIETÀ E ACQUISTO PRECEDENTE ---
   let footerHtml = ``;
+  const u = getUtenteCorrente();
 
-  if (item.prezzo > 0 && u) {
-    footerHtml += `<button class="btn-aa-gold" onclick="acquistaItem('${item._id}')">
-      <i class="bi bi-bag-check"></i> Acquista €${Number(item.prezzo).toFixed(2)}
-    </button>`;
+  // Verifichiamo se l'utente corrente è il creatore dell'item
+  const idCreatoreItem = item.creatorId?._id || item.creatorId;
+  const isProprietarioItem = u && idCreatoreItem === u._id;
+
+  // Verifichiamo se l'utente corrente ha già acquistato o adottato questo item in passato
+  const giaAcquistatoItem =
+    u &&
+    Array.isArray(item.logVendite) &&
+    item.logVendite.some((log) => {
+      const idAcquirente = log.acquirenteId?._id || log.acquirenteId;
+      return idAcquirente === u._id;
+    });
+
+  // Se l'utente è il proprietario o lo ha già acquistato, mostriamo un badge informativo invece dei pulsanti
+  if (isProprietarioItem) {
+    footerHtml = ``;
+  } else if (giaAcquistatoItem) {
+    footerHtml = `
+      <span class="text-success small me-auto align-self-center fw-semibold">
+        <i class="bi bi-check-circle-fill"></i> Acquistato
+      </span>
+    `;
+  } else {
+    // Se non è proprietario e non l'ha mai comprato, mostriamo i pulsanti d'azione standard
+    const titoloItemEscaped = (item.titolo || "Item")
+      .replace(/'/g, "\\'")
+      .replace(/"/g, "&quot;");
+    const prezzoItem = item.prezzo ? Number(item.prezzo) : 0;
+
+    if (prezzoItem > 0) {
+      footerHtml += `
+        <button class="btn-aa-gold" id="btnAcquistaItem" onclick="eseguiAcquistoDnAdozioneItem('${item._id}', '${titoloItemEscaped}', ${prezzoItem})">
+          <i class="bi bi-bag-check"></i> Acquista €${prezzoItem.toFixed(2)}
+        </button>
+      `;
+    } else {
+      footerHtml += `
+        <button class="btn-aa-primary" id="btnAdottaItem" onclick="eseguiAcquistoDnAdozioneItem('${item._id}', '${titoloItemEscaped}', 0)">
+          <i class="bi bi-heart"></i> Adotta Gratis
+        </button>
+      `;
+    }
   }
 
   document.getElementById("modalItemFooter").innerHTML = footerHtml;
-  document.getElementById("modalItemFooter").classList.add("d-none");
-}
-
-function chiudiItemModal() {
-  document.getElementById("itemModal").classList.add("d-none");
 }
 
 async function acquistaItem(itemId) {
@@ -362,6 +437,10 @@ async function acquistaItem(itemId) {
     showToast("Acquisto completato!", "success");
     chiudiItemModal();
   }
+}
+
+function chiudiItemModal() {
+  document.getElementById("itemModal").classList.add("d-none");
 }
 
 // ─── MODAL VISITA DETTAGLIO ────────────────────────────
@@ -404,7 +483,6 @@ async function apriVisitaModal(id) {
       .join("");
   }
 
-  // Costruisce il corpo del Modal
   // Costruisce il corpo del Modal con tutti i dettagli strutturali
   document.getElementById("modalVisitaBody").innerHTML = `
     <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
@@ -427,11 +505,60 @@ async function apriVisitaModal(id) {
     </div>
   `;
 
-  // Costruisce i bottoni in basso (Footer)
+  // --- LOGICA FOOTER DINAMICA CON CONTROLLI DI PROPRIETÀ E ADOZIONE PRECEDENTE ---
+  let footerHtml = `
+    <button class="btn-aa-outline" onclick="chiudiVisitaModal()">Chiudi</button>
+  `;
   const u = getUtenteCorrente();
-  let footerHtml = ``;
-  document.getElementById("modalVisitaFooter").innerHTML = footerHtml;
-  document.getElementById("modalVisitaFooter").classList.add("d-none");
+
+  // Verifichiamo se l'utente corrente è il creatore della visita
+  const idCreatoreVisita = v.creatorId?._id || v.creatorId;
+  const isProprietarioVisita = u && idCreatoreVisita === u._id;
+
+  // Verifichiamo se l'utente corrente ha già adottato o acquistato questa visita in passato
+  const giaAdottataVisita =
+    u &&
+    Array.isArray(v.logAdozioni) &&
+    v.logAdozioni.some((log) => {
+      const idAdottante = log.adottanteId?._id || log.adottanteId;
+      return idAdottante === u._id;
+    });
+
+  // Se l'utente è il proprietario o la visita è già nel suo account, blocchiamo i bottoni di acquisto
+  if (isProprietarioVisita) {
+    footerHtml = ``;
+  } else if (giaAdottataVisita) {
+    footerHtml =
+      `
+      <span class="text-success small me-auto align-self-center fw-semibold">
+        <i class="bi bi-check-circle-fill"></i> Percorso già sbloccato nel tuo portafoglio
+      </span>
+      ` + footerHtml;
+  } else {
+    // Altrimenti, inseriamo i tasti per l'acquisizione
+    const titoloVisitaEscaped = (v.titolo || v.title || "Visita")
+      .replace(/'/g, "\\'")
+      .replace(/"/g, "&quot;");
+    const prezzoVisita = v.prezzo ? Number(v.prezzo) : 0;
+
+    if (prezzoVisita > 0) {
+      footerHtml += `
+        <button class="btn-aa-gold" id="btnAcquistaVisita" onclick="eseguiAcquistoDnAdozioneVisita('${v._id}', '${titoloVisitaEscaped}', ${prezzoVisita})">
+          <i class="bi bi-bag-check"></i> Acquista €${prezzoVisita.toFixed(2)}
+        </button>
+      `;
+    } else {
+      footerHtml += `
+        <button class="btn-aa-primary" id="btnAdottaVisita" onclick="eseguiAcquistoDnAdozioneVisita('${v._id}', '${titoloVisitaEscaped}', 0)">
+          <i class="bi bi-heart"></i> Adotta Gratis
+        </button>
+      `;
+    }
+  }
+
+  const footerElement = document.getElementById("modalVisitaFooter");
+  footerElement.innerHTML = footerHtml;
+  footerElement.classList.remove("d-none");
 }
 
 function chiudiVisitaModal() {
@@ -514,69 +641,206 @@ async function adottaVisita(visitaId) {
   if (ok) showToast("Visita adottata e salvata nel tuo profilo!", "success");
 }
 
-// ─── MIEI CONTENUTI ──────────────────────────────────
+// ─── SALVATAGGIO REALE NEL DB: VISITE ───────────────────────────
+async function eseguiAcquistoDnAdozioneVisita(visitaId, titolo, prezzo) {
+  const u = getUtenteCorrente();
+  if (!u) {
+    showToast(
+      `Accedi per poter ${prezzo > 0 ? "acquistare" : "adottare"} questa visita.`,
+      "error",
+    );
+    apriLogin();
+    return;
+  }
+
+  try {
+    // Chiamata API reale verso il tuo backend MongoDB
+    const response = await apiFetch(`/api/visite/${visitaId}/adotta`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ adottanteId: u._id }), // Invia l'ID dell'utente loggato
+    });
+
+    // Se il backend risponde positivamente, mostriamo il successo
+    if (response) {
+      const messaggio =
+        prezzo > 0
+          ? `"${titolo}" acquistata correttamente e salvata nel tuo profilo!`
+          : `"${titolo}" adottata correttamente e salvata nel tuo profilo!`;
+
+      showToast(messaggio, "success");
+      chiudiVisitaModal();
+
+      // Opzionale: se sei nella tab "personale", rinfresca la lista
+      if (typeof caricaVisite === "function") caricaVisite();
+    }
+  } catch (error) {
+    console.error("Errore durante il salvataggio della visita:", error);
+    showToast("Errore di rete durante il salvataggio nel database.", "error");
+  }
+}
+
+// ─── SALVATAGGIO REALE NEL DB: ITEM ─────────────────────────────
+async function eseguiAcquistoDnAdozioneItem(itemId, titolo, prezzo) {
+  const u = getUtenteCorrente();
+  if (!u) {
+    showToast(
+      `Accedi per poter ${prezzo > 0 ? "acquistare" : "adottare"} questo contenuto.`,
+      "error",
+    );
+    apriLogin();
+    return;
+  }
+
+  try {
+    // Chiamata API reale (adatta l'endpoint se il tuo backend usa /acquista o /adotta)
+    const endpoint =
+      prezzo > 0
+        ? `/api/items/${itemId}/acquista`
+        : `/api/items/${itemId}/adotta`;
+
+    const response = await apiFetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ utenteId: u._id }),
+    });
+
+    if (response) {
+      const messaggio =
+        prezzo > 0
+          ? `"${titolo}" acquistato correttamente e salvato nel tuo profilo!`
+          : `"${titolo}" adottato correttamente e salvato nel tuo profilo!`;
+
+      showToast(messaggio, "success");
+      chiudiItemModal();
+
+      if (typeof caricaItems === "function") caricaItems();
+    }
+  } catch (error) {
+    console.error("Errore durante il salvataggio dell'item:", error);
+    showToast("Errore di rete durante il salvataggio nel database.", "error");
+  }
+}
+
+// ─── AGGIORNAMENTO TAB "I MIEI CONTENUTI" (CON ITEM ACQUISTATI) ───
 async function caricaMieiContenuti() {
   const u = getUtenteCorrente();
   const container = document.getElementById("mieiContenuti");
 
   if (!u) {
-    container.innerHTML = `<div class="aa-empty"><div class="aa-empty-icon">🔐</div><h5>Accesso richiesto</h5><p>Effettua il login per vedere i tuoi contenuti.</p><a href="/" class="btn-aa-primary">Vai al login</a></div>`;
+    container.innerHTML = `
+      <div class="aa-empty">
+        <div class="aa-empty-icon">🔐</div>
+        <h5>Accesso richiesto</h5>
+        <p>Effettua il login per vedere i tuoi contenuti.</p>
+        <a href="/" class="btn-aa-primary">Vai al login</a>
+      </div>`;
     return;
   }
 
   container.innerHTML =
     '<div class="text-center py-4"><div class="aa-spinner"></div></div>';
 
+  // Scarichiamo i dati in parallelo dal server
+  const [dataItems, dataVisiteCreate, dataVisiteAdottate] = await Promise.all([
+    apiFetch(`/api/items?pubblicato=tutti&limite=100`),
+    apiFetch(`/api/visite?pubblica=tutti&creatorId=${u._id}&limite=100`),
+    apiFetch(`/api/visite?soloMie=true&limite=100`),
+  ]);
+
+  // 1. ITEMS CREATI DA ME
+  const mieiItemsCreati = dataItems?.items
+    ? dataItems.items.filter((i) => (i.creatorId?._id || i.creatorId) === u._id)
+    : [];
+
+  // 2. ITEMS ACQUISTATI/ADOTTATI DA ALTRI (cerchiamo se il nostro ID è nei logVendite)
+  const mieiItemsAcquistati = dataItems?.items
+    ? dataItems.items.filter((i) => {
+        const nonMio = (i.creatorId?._id || i.creatorId) !== u._id;
+        const acquistato = i.logVendite?.some(
+          (log) => (log.acquirenteId?._id || log.acquirenteId) === u._id,
+        );
+        return nonMio && acquistato;
+      })
+    : [];
+
+  // 3. VISITE CREATE DA ME
+  const mieVisiteCreate = dataVisiteCreate?.visite || [];
+
+  // 4. VISITE ACQUISTATE/ADOTTATE DA ALTRI
+  const mieVisiteAcquistate = dataVisiteAdottate?.visite
+    ? dataVisiteAdottate.visite.filter(
+        (v) => v.creatorId?._id !== u._id && v.creatorId !== u._id,
+      )
+    : [];
+
+  // --- CASO 1: AUTORE / ADMIN ---
   if (["autore", "admin"].includes(u.ruolo)) {
-    // 1. Scarichiamo parallelamente sia gli Item che le Visite create da questo autore
-    const [dataItems, dataVisite] = await Promise.all([
-      apiFetch(`/api/items?pubblicato=tutti&limite=100`),
-      apiFetch(`/api/visite?pubblica=tutti&creatorId=${u._id}&limite=100`),
-    ]);
-
-    const mieiItems = dataItems?.items
-      ? dataItems.items.filter(
-          (i) => (i.creatorId?._id || i.creatorId) === u._id,
-        )
-      : [];
-    const mieVisite = dataVisite?.visite ? dataVisite.visite : [];
-
-    if (!mieiItems.length && !mieVisite.length) {
+    if (
+      !mieiItemsCreati.length &&
+      !mieiItemsAcquistati.length &&
+      !mieVisiteCreate.length &&
+      !mieVisiteAcquistate.length
+    ) {
       container.innerHTML = `
         <div class="aa-empty">
           <div class="aa-empty-icon">✏️</div>
-          <h5>Nessun contenuto ancora</h5>
-          <p>Usa il bottone in alto a destra per iniziare a creare i tuoi primi contenuti o percorsi.</p>
+          <h5>Nessun contenuto</h5>
+          <p>Inizia a creare contenuti o adotta guide e item dal catalogo.</p>
         </div>`;
       return;
     }
 
-    // 2. Generiamo l'HTML complessivo inserendo entrambe le tabelle
     let htmlRisultato = "";
 
-    // TABELLA DEGLI ITEM
-    if (mieiItems.length > 0) {
+    // Sezione: Item Creati
+    if (mieiItemsCreati.length > 0) {
       htmlRisultato += `
         <div class="aa-card mb-4">
-          <div class="aa-card-header"><i class="bi bi-collection"></i> I miei Item (${mieiItems.length})</div>
+          <div class="aa-card-header"><i class="bi bi-collection"></i> I miei Item Creati (${mieiItemsCreati.length})</div>
           <div class="aa-card-body p-0" style="overflow-x:auto;">
             <table class="aa-table">
-              <thead>
-                <tr><th>Titolo</th><th>Museo</th><th>Linguaggio</th><th>Prezzo</th><th>Stato</th><th>Azioni</th></tr>
-              </thead>
+              <thead><tr><th>Titolo</th><th>Museo</th><th>Linguaggio</th><th>Stato</th><th>Azioni</th></tr></thead>
               <tbody>
-                ${mieiItems
+                ${mieiItemsCreati
                   .map(
                     (item) => `
                   <tr>
                     <td><strong>${item.titolo}</strong><br><small class="text-slate">${item.operaId}</small></td>
                     <td><small>${item.museo}</small></td>
                     <td>${badgeLinguaggio(item.linguaggio)}</td>
-                    <td>${badgePrezzo(item.prezzo)}</td>
                     <td><span class="aa-badge ${item.pubblicato ? "aa-badge-free" : "aa-badge-len"}">${item.pubblicato ? "Pubblicato" : "Bozza"}</span></td>
+                    <td><a href="/editor-item?id=${item._id}" class="btn-aa-outline" style="font-size:0.75rem;padding:2px 8px">Modifica</a></td>
+                  </tr>
+                `,
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // NUOVA SEZIONE: Item Acquistati / Adottati
+    if (mieiItemsAcquistati.length > 0) {
+      htmlRisultato += `
+        <div class="aa-card mb-4">
+          <div class="aa-card-header" style="background: var(--aa-gold-pale);"><i class="bi bi-bag-check"></i> Item Adottati / Acquistati (${mieiItemsAcquistati.length})</div>
+          <div class="aa-card-body p-0" style="overflow-x:auto;">
+            <table class="aa-table">
+              <thead><tr><th>Titolo Item</th><th>Museo</th><th>Autore Originale</th><th>Linguaggio</th><th>Opzioni</th></tr></thead>
+              <tbody>
+                ${mieiItemsAcquistati
+                  .map(
+                    (item) => `
+                  <tr>
+                    <td><strong>${item.titolo}</strong></td>
+                    <td><small>${item.museo}</small></td>
+                    <td><span class="text-taupe">${item.autore_visita || "Community"}</span></td>
+                    <td>${badgeLinguaggio(item.linguaggio)}</td>
                     <td>
-                      <a href="/editor-item?id=${item._id}" class="btn-aa-outline" style="font-size:0.75rem;padding:2px 8px">Modifica</a>
-                      <button class="btn-aa-danger ms-1" onclick="eliminaItem('${item._id}')">✕</button>
+                      <button class="btn-aa-primary" style="font-size:0.75rem;padding:2px 8px" onclick="apriItemModal('${item._id}')">Vedi</button>
                     </td>
                   </tr>
                 `,
@@ -589,37 +853,54 @@ async function caricaMieiContenuti() {
       `;
     }
 
-    // NUOVA: TABELLA DELLE VISITE (Risolve il problema del nome autore)
-    if (mieVisite.length > 0) {
+    // Sezione: Visite Create
+    if (mieVisiteCreate.length > 0) {
       htmlRisultato += `
-        <div class="aa-card">
-          <div class="aa-card-header"><i class="bi bi-map"></i> Le mie Visite / Percorsi (${mieVisite.length})</div>
+        <div class="aa-card mb-4">
+          <div class="aa-card-header"><i class="bi bi-map"></i> Le mie Visite Create (${mieVisiteCreate.length})</div>
           <div class="aa-card-body p-0" style="overflow-x:auto;">
             <table class="aa-table">
-              <thead>
-                <tr><th>Titolo Visita</th><th>Museo</th><th>Autore</th><th>Tappe</th><th>Prezzo</th><th>Stato</th><th>Azioni</th></tr>
-              </thead>
+              <thead><tr><th>Titolo Visita</th><th>Museo</th><th>Tappe</th><th>Azioni</th></tr></thead>
               <tbody>
-                ${mieVisite
-                  .map((v) => {
-                    const nTappe = Array.isArray(v.tappe) ? v.tappe.length : 0;
-                    // Estrazione sicura dello username dall'oggetto popolato o ripiego su utente corrente
-                    const autoreNome =
-                      v.creatorId?.username || u.username || "–";
-                    return `
-                    <tr>
-                      <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
-                      <td><small class="text-slate">${v.museo || "–"}</small></td>
-                      <td>${autoreNome}</td>
-                      <td><span class="aa-badge aa-badge-len">${nTappe} tappe</span></td>
-                      <td>€ ${Number(v.prezzo || 0).toFixed(2)}</td>
-                      <td><span class="aa-badge ${v.pubblica ? "aa-badge-paid" : "aa-badge-free"}">${v.pubblica ? "Pubblica" : "Bozza"}</span></td>
-                      <td>
-                        <a href="/editor-visita?id=${v._id}" class="btn-aa-outline" style="font-size:0.75rem;padding:2px 8px">Modifica</a>
-                      </td>
-                    </tr>
-                  `;
-                  })
+                ${mieVisiteCreate
+                  .map(
+                    (v) => `
+                  <tr>
+                    <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
+                    <td><small>${v.museo}</small></td>
+                    <td><span class="aa-badge aa-badge-len">${v.tappe?.length || 0} tappe</span></td>
+                    <td><a href="/editor-visita?id=${v._id}" class="btn-aa-outline" style="font-size:0.75rem;padding:2px 8px">Modifica</a></td>
+                  </tr>
+                `,
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // Sezione: Visite Acquistate
+    if (mieVisiteAcquistate.length > 0) {
+      htmlRisultato += `
+        <div class="aa-card">
+          <div class="aa-card-header" style="background: var(--aa-gold-pale);"><i class="bi bi-bag-heart"></i> Visite Adottate / Acquistate (${mieVisiteAcquistate.length})</div>
+          <div class="aa-card-body p-0" style="overflow-x:auto;">
+            <table class="aa-table">
+              <thead><tr><th>Titolo Visita</th><th>Museo</th><th>Tappe</th><th>Azioni</th></tr></thead>
+              <tbody>
+                ${mieVisiteAcquistate
+                  .map(
+                    (v) => `
+                  <tr>
+                    <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
+                    <td><small>${v.museo}</small></td>
+                    <td><span class="aa-badge aa-badge-len">${v.tappe?.length || 0} tappe</span></td>
+                    <td><a href="/editor-visita?id=${v._id}" class="btn-aa-gold" style="font-size:0.75rem;padding:2px 10px">Personalizza</a></td>
+                  </tr>
+                `,
+                  )
                   .join("")}
               </tbody>
             </table>
@@ -630,7 +911,76 @@ async function caricaMieiContenuti() {
 
     container.innerHTML = htmlRisultato;
   } else {
-    container.innerHTML = `<div class="aa-empty"><div class="aa-empty-icon">👤</div><h5>Visitatore</h5><p>Esplora il catalogo e adotta le visite che ti interessano.</p><button class="btn-aa-primary" onclick="switchTab('visite', document.getElementById('tabVisiteBtn'))">Vedi Visite</button></div>`;
+    // --- CASO 2: VISITATORE SEMPLICE ---
+    if (!mieVisiteAcquistate.length && !mieiItemsAcquistati.length) {
+      container.innerHTML = `
+        <div class="aa-empty">
+          <div class="aa-empty-icon">👤</div>
+          <h5>La tua area personale è vuota</h5>
+          <p>Esplora il catalogo per adottare guide ed elementi multimediali.</p>
+        </div>`;
+      return;
+    }
+
+    let htmlVisitatore = "";
+
+    // Tabella delle visite acquistate dal visitatore
+    if (mieVisiteAcquistate.length > 0) {
+      htmlVisitatore += `
+        <div class="aa-card mb-4">
+          <div class="aa-card-header"><i class="bi bi-bookmark-star"></i> Le mie Visite Adottate (${mieVisiteAcquistate.length})</div>
+          <div class="aa-card-body p-0" style="overflow-x:auto;">
+            <table class="aa-table">
+              <thead><tr><th>Percorso Museale</th><th>Istituzione</th><th>Tappe</th><th>Opzioni</th></tr></thead>
+              <tbody>
+                ${mieVisiteAcquistate
+                  .map(
+                    (v) => `
+                  <tr>
+                    <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
+                    <td><small>${v.museo}</small></td>
+                    <td><span class="aa-badge aa-badge-len">${v.tappe?.length || 0} tappe</span></td>
+                    <td><button class="btn-aa-primary" style="font-size:0.75rem;padding:3px 10px" onclick="apriVisitaModal('${v._id}')"><i class="bi bi-play-circle"></i> Esegui</button></td>
+                  </tr>
+                `,
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // Tabella degli item acquistati dal visitatore
+    if (mieiItemsAcquistati.length > 0) {
+      htmlVisitatore += `
+        <div class="aa-card">
+          <div class="aa-card-header"><i class="bi bi-file-earmark-music"></i> I miei Contenuti Audio Singoli (${mieiItemsAcquistati.length})</div>
+          <div class="aa-card-body p-0" style="overflow-x:auto;">
+            <table class="aa-table">
+              <thead><tr><th>Opera</th><th>Museo</th><th>Linguaggio</th><th>Ascolta</th></tr></thead>
+              <tbody>
+                ${mieiItemsAcquistati
+                  .map(
+                    (item) => `
+                  <tr>
+                    <td><strong>${item.titolo}</strong></td>
+                    <td><small>${item.museo}</small></td>
+                    <td>${badgeLinguaggio(item.linguaggio)}</td>
+                    <td><button class="btn-aa-primary" style="font-size:0.75rem;padding:3px 10px" onclick="apriItemModal('${item._id}')"><i class="bi bi-soundwave"></i> Apri</button></td>
+                  </tr>
+                `,
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    container.innerHTML = htmlVisitatore;
   }
 }
 

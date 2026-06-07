@@ -102,14 +102,14 @@ export default function NavigatorItemViewer() {
   const handleLogisticsRef = useRef(null);
 
   const handleSimplify = () => {
-    const levels = ["infantile", "elementare", "medio", "specialistico"];
+    const levels = ["infantile", "medio", "avanzato"];
     const idx = levels.indexOf(languageLevelRef.current);
     if (idx > 0)
       updateContentRef.current(levels[idx - 1], selectedDurationRef.current);
   };
 
   const handleAdvance = () => {
-    const levels = ["infantile", "elementare", "medio", "specialistico"];
+    const levels = ["infantile", "medio", "avanzato"];
     const idx = levels.indexOf(languageLevelRef.current);
     if (idx < levels.length - 1)
       updateContentRef.current(levels[idx + 1], selectedDurationRef.current);
@@ -643,12 +643,7 @@ export default function NavigatorItemViewer() {
 
                         {/* MODIFICATO: Struttura a griglia 2x2 per i 4 livelli di linguaggio delle specifiche */}
                         <Row className="g-2 mb-4">
-                          {[
-                            "infantile",
-                            "elementare",
-                            "medio",
-                            "specialistico",
-                          ].map((l) => (
+                          {["infantile", "medio", "avanzato"].map((l) => (
                             <Col xs={6} key={l}>
                               <button
                                 className={`btn-difficolta-custom w-100 ${languageLevel === l ? "active" : ""}`}

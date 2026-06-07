@@ -38,7 +38,6 @@ const itemSchema = new mongoose.Schema(
     artista: { type: String, default: "Ignoto" },
     periodo: { type: String },
     url: { type: String, default: null },
-    immagine: { type: String, default: null },
     lunghezza: {
       type: String,
       enum: ["3s", "15s", "1m", "4m", "3m", "5m", "10m"],
@@ -46,7 +45,7 @@ const itemSchema = new mongoose.Schema(
     },
     linguaggio: {
       type: String,
-      enum: ["infantile", "elementare", "medio", "specialistico"],
+      enum: ["infantile", "medio", "avanzato"],
       required: true,
     },
     categoria: { type: String, default: "altro" },
@@ -63,6 +62,7 @@ const itemSchema = new mongoose.Schema(
       required: false,
     },
     profonditaContenuto: { type: String, default: "standard" },
+    logVendite: [logVenditaSchema],
   },
   { timestamps: true, strict: false },
 );
@@ -70,5 +70,4 @@ const itemSchema = new mongoose.Schema(
 itemSchema.index({ museo: 1, pubblicato: 1 });
 itemSchema.index({ operaId: 1, linguaggio: 1 });
 
-// Specifichiamo "items" come nome della collezione
 module.exports = mongoose.model("Item", itemSchema, "items");

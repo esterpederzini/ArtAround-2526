@@ -137,6 +137,7 @@ a:hover {
   font-size: 0.85rem;
   padding: 0.35rem 1rem;
   border-radius: 20px;
+  background: transparent;
 }
 .aa-navbar .btn-login:hover {
   background: var(--aa-gold);

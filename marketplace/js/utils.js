@@ -213,10 +213,6 @@ function badgeLinguaggio(linguaggio) {
       bgClass =
         "bg-warning-subtle text-warning-emphasis border border-warning-subtle";
       break;
-    case "specialistico":
-      bgClass =
-        "bg-danger-subtle text-danger-emphasis border border-danger-subtle";
-      break;
   }
 
   return `<span class="aa-badge ${bgClass}">${tagLabel}</span>`;

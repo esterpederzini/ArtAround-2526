@@ -235,19 +235,39 @@ exports.pubblicaItem = async (req, res) => {
 
 exports.acquistaItem = async (req, res) => {
   try {
-    const acquirenteId = req.auth?.sub;
-    const item = await Item.findById(req.params.id);
+    const acquirenteId = req.auth?.sub; // ID dell'utente loggato
+    const itemId = req.params.id;
+
+    // 1. Recuperiamo l'item solo per sapere il prezzo e capire se è acquisto o adozione
+    const item = await Item.findById(itemId);
     if (!item) return risposta(res, 404, null, "Item non trovato");
-    item.logVendite.push({
+
+    const tipoTransazione = item.prezzo > 0 ? "acquisto" : "adozione";
+
+    // 2. Prepariamo il blocco del log da inserire
+    const nuovoLog = {
       acquirenteId,
-      prezzo: item.prezzo,
-      tipo: "acquisto",
-    });
-    await item.save();
+      prezzo: item.prezzo || 0,
+      tipo: tipoTransazione,
+      dataAcquisto: new Date(),
+    };
+
+    // 3. AGGIORNAMENTO ATOMICO: Spingiamo il log direttamente nel DB senza usare .save()
+    // runValidators: false impedisce a Mongoose di controllare gli enum di lunghezza/linguaggio
+    const itemAggiornato = await Item.findByIdAndUpdate(
+      itemId,
+      { $push: { logVendite: nuovoLog } },
+      { new: true, runValidators: false },
+    );
+
+    // 4. Salviamo l'item anche nel profilo dell'utente
     await User.findByIdAndUpdate(acquirenteId, {
-      $push: { acquistiEffettuati: { itemId: item._id, prezzo: item.prezzo } },
+      $push: {
+        acquistiEffettuati: { itemId: item._id, prezzo: item.prezzo || 0 },
+      },
     });
-    risposta(res, 200, item, "Acquisto registrato");
+
+    risposta(res, 200, itemAggiornato, "Operazione registrata con successo");
   } catch (err) {
     risposta(res, 500, null, err.message);
   }
@@ -402,8 +422,10 @@ exports.adottaVisita = async (req, res) => {
     const adottanteId = req.auth?.sub;
     const visita = await Visita.findById(req.params.id);
     if (!visita) return risposta(res, 404, null, "Visita non trovata");
-    visita.logAdozioni.push({ adottanteId, prezzo: visita.prezzo });
+
+    visita.logAdozioni.push({ adottanteId, prezzo: visita.prezzo || 0 });
     await visita.save();
+
     await User.findByIdAndUpdate(adottanteId, {
       $addToSet: { visiteSalvate: visita._id },
     });

@@ -5,14 +5,13 @@ const tappaSchema = new mongoose.Schema(
     ordine: Number,
     logistica: String,
     item_default: {
-      type: String, // OBBLIGATORIO: String se i tuoi ID sono "it_ramesse_..."
-      ref: "Item", // Deve corrispondere al nome del modello in Item.js
+      type: String,
+      ref: "Item",
     },
     varianti_difficolta: {
       infantile: String,
-      elementare: String,
       medio: String,
-      specialistico: String,
+      avanzato: String,
     },
   },
   { _id: false },
@@ -20,16 +19,29 @@ const tappaSchema = new mongoose.Schema(
 
 const visitaSchema = new mongoose.Schema(
   {
-    titolo: { type: String }, // Opzionale se usi 'title'
-    title: { type: String }, // Aggiunto per matchare "title" del JSON
+    titolo: { type: String },
+    title: { type: String },
     museo: { type: String },
     image: { type: String },
     type: { type: String },
     duration: { type: String },
     stops: { type: Number },
-    livello_base: { type: String }, // Match con "livello_base"
-    info_generale: { type: String }, // Match con "info_generale"
+    livello_base: { type: String },
+    info_generale: { type: String },
     tappe: [tappaSchema],
+    descrizione: { type: String },
+    prezzo: { type: Number, default: 0 },
+    pubblica: { type: Boolean, default: true },
+    creatorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+
+    // CORREZIONE FONDAMENTALE: Cambiamo "acquirenti" con la struttura cercata dal controller
+    logAdozioni: [
+      {
+        adottanteId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        dataAdozione: { type: Date, default: Date.now },
+        prezzo: { type: Number, default: 0 },
+      },
+    ],
   },
   { timestamps: true, strict: false, strictPopulate: false },
 );
