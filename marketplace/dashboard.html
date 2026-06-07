@@ -91,9 +91,7 @@
                 <button class="aa-filter-btn" data-lang="infantile">
                   Infantile
                 </button>
-                <button class="aa-filter-btn" data-lang="medio">
-                  Medio
-                </button>
+                <button class="aa-filter-btn" data-lang="medio">Medio</button>
                 <button class="aa-filter-btn" data-lang="avanzato">
                   Avanzato
                 </button>
@@ -282,35 +280,113 @@
     <div class="aa-toast-container" id="toastContainer"></div>
     <div id="loginModal" class="aa-modal-overlay d-none">
       <div class="aa-modal" style="max-width: 420px">
-        <div class="aa-modal-header">
-          <h4>Accedi ad ArtAround</h4>
-          <button class="aa-modal-close" onclick="chiudiLogin()">✕</button>
-        </div>
-        <div class="aa-modal-body">
-          <div class="aa-form-group">
-            <label class="aa-label">Username</label>
-            <input
-              type="text"
-              id="loginUsername"
-              class="aa-input"
-              placeholder="es. autore1"
-            />
+        <div id="authLoginSection">
+          <div class="aa-modal-header">
+            <h4>Accedi ad ArtAround</h4>
+            <button class="aa-modal-close" onclick="chiudiLogin()">✕</button>
           </div>
-          <div class="aa-form-group">
-            <label class="aa-label">Password</label>
-            <input
-              type="password"
-              id="loginPassword"
-              class="aa-input"
-              placeholder="••••••••"
-            />
+          <div class="aa-modal-body">
+            <div class="aa-form-group">
+              <label class="aa-label">Username o Email</label>
+              <input
+                type="text"
+                id="loginUsername"
+                class="aa-input"
+                placeholder="es. autore1"
+              />
+            </div>
+            <div class="aa-form-group">
+              <label class="aa-label">Password</label>
+              <input
+                type="password"
+                id="loginPassword"
+                class="aa-input"
+                placeholder="••••••••"
+              />
+            </div>
+            <div class="text-center mt-3" style="font-size: 0.85rem">
+              Non hai un account?
+              <a
+                href="#"
+                onclick="
+                  toggleAuthModal('register');
+                  return false;
+                "
+                class="text-gold fw-semibold"
+                >Registrati ora</a
+              >
+            </div>
+          </div>
+          <div class="aa-modal-footer">
+            <button class="btn-aa-outline" onclick="chiudiLogin()">
+              Annulla
+            </button>
+            <button class="btn-aa-primary" onclick="eseguiLogin()">
+              Accedi
+            </button>
           </div>
         </div>
-        <div class="aa-modal-footer">
-          <button class="btn-aa-outline" onclick="chiudiLogin()">
-            Annulla
-          </button>
-          <button class="btn-aa-primary" onclick="eseguiLogin()">Accedi</button>
+
+        <div id="authRegisterSection" class="d-none">
+          <div class="aa-modal-header">
+            <h4>Crea il tuo Account</h4>
+            <button class="aa-modal-close" onclick="chiudiLogin()">✕</button>
+          </div>
+          <div class="aa-modal-body">
+            <div class="aa-form-group">
+              <label class="aa-label"
+                >Username <span class="text-danger">*</span></label
+              >
+              <input
+                type="text"
+                id="regUsername"
+                class="aa-input"
+                placeholder="Scegli un username (min 3 car.)"
+              />
+            </div>
+            <div class="aa-form-group">
+              <label class="aa-label"
+                >Email <span class="text-danger">*</span></label
+              >
+              <input
+                type="email"
+                id="regEmail"
+                class="aa-input"
+                placeholder="Inserisci la tua email"
+              />
+            </div>
+            <div class="aa-form-group">
+              <label class="aa-label"
+                >Password <span class="text-danger">*</span></label
+              >
+              <input
+                type="password"
+                id="regPassword"
+                class="aa-input"
+                placeholder="Minimo 8 caratteri"
+              />
+            </div>
+            <div class="text-center mt-3" style="font-size: 0.85rem">
+              Hai già un account?
+              <a
+                href="#"
+                onclick="
+                  toggleAuthModal('login');
+                  return false;
+                "
+                class="text-gold fw-semibold"
+                >Accedi qui</a
+              >
+            </div>
+          </div>
+          <div class="aa-modal-footer">
+            <button class="btn-aa-outline" onclick="chiudiLogin()">
+              Annulla
+            </button>
+            <button class="btn-aa-primary" onclick="eseguiRegistrazione()">
+              Registrati
+            </button>
+          </div>
         </div>
       </div>
     </div>

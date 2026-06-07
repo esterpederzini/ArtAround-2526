@@ -84,6 +84,69 @@ async function eseguiLogin() {
   }
 }
 
+// Funzione per scambiare la vista tra Login e Registrazione all'interno del Modal
+function toggleAuthModal(modalita) {
+  const loginSec = document.getElementById("authLoginSection");
+  const registerSec = document.getElementById("authRegisterSection");
+
+  if (modalita === "register") {
+    loginSec?.classList.add("d-none");
+    registerSec?.classList.remove("d-none");
+  } else {
+    registerSec?.classList.add("d-none");
+    loginSec?.classList.remove("d-none");
+  }
+}
+
+// Funzione per inviare i dati di registrazione a MongoDB
+async function eseguiRegistrazione() {
+  const username = document.getElementById("regUsername")?.value.trim();
+  const email = document.getElementById("regEmail")?.value.trim();
+  const password = document.getElementById("regPassword")?.value;
+
+  // Validazioni formali lato client coerenti con i vincoli del modello Mongoose
+  if (!username || !email || !password) {
+    showToast(
+      "Tutti i campi contrassegnati da asterisco sono obbligatori",
+      "error",
+    );
+    return;
+  }
+  if (username.length < 3) {
+    showToast("L'username deve contenere almeno 3 caratteri", "error");
+    return;
+  }
+  if (password.length < 8) {
+    showToast("La password deve contenere almeno 8 caratteri", "error");
+    return;
+  }
+
+  // Inoltro della chiamata verso le nuove API di backend
+  const data = await apiFetch("/api/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, email, password }),
+  });
+
+  if (data) {
+    showToast(
+      "Registrazione avvenuta con successo! Eseguo l'accesso...",
+      "success",
+    );
+
+    // Automatizziamo il login immediato salvando la sessione restituita
+    localStorage.setItem("aa_utente", JSON.stringify(data.user || data));
+    localStorage.setItem("aa_token", data.token);
+
+    chiudiLogin();
+    aggiornaUtenteUI();
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  }
+}
+
 function logout() {
   localStorage.removeItem("aa_utente");
   localStorage.removeItem("aa_token");

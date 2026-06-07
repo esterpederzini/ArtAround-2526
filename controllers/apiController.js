@@ -477,6 +477,58 @@ exports.loginUtente = async (req, res) => {
   }
 };
 
+exports.registraUtente = async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+
+    // 1. Verifica preliminare della presenza dei dati obbligatori
+    if (!username || !email || !password) {
+      return risposta(res, 400, null, "Parametri di registrazione incompleti");
+    }
+
+    // 2. Controllo duplicati (Evita eccezioni Mongo per violazione di vincoli univoci)
+    const utenteEsistente = await User.findOne({
+      $or: [
+        { username: username.trim() },
+        { email: email.toLowerCase().trim() },
+      ],
+    });
+
+    if (utenteEsistente) {
+      const messaggioErrore =
+        utenteEsistente.username === username.trim()
+          ? "Questo username è già utilizzato da un altro utente"
+          : "Questa email risulta già iscritta alla piattaforma";
+      return risposta(res, 400, null, messaggioErrore);
+    }
+
+    // 3. Creazione del nuovo record (il ruolo va in automatico a "visitatore")
+    const nuovoUtente = new User({
+      username: username.trim(),
+      email: email.toLowerCase().trim(),
+      password: password, // Mongoose eseguirà l'hashing nel pre-save hook
+      ruolo: "visitatore",
+    });
+
+    await nuovoUtente.save();
+
+    // 4. Generazione del token d'autenticazione immediato per automatizzare l'accesso
+    const token = createAuthToken(nuovoUtente);
+
+    // Escludiamo la password dall'output per sicurezza
+    const utenteOutput = nuovoUtente.toJSON();
+
+    return res.status(201).json({
+      successo: true,
+      messaggio: "Utente registrato correttamente",
+      data: { user: utenteOutput, token },
+    });
+  } catch (err) {
+    console.error("Errore registrazione:", err);
+    return risposta(res, 500, null, err.message);
+  }
+};
+
 // ─── LOG & STATS ────────────────────────────────────────────
 exports.getLogVendite = async (req, res) => {
   try {

@@ -506,9 +506,7 @@ async function apriVisitaModal(id) {
   `;
 
   // --- LOGICA FOOTER DINAMICA CON CONTROLLI DI PROPRIETÀ E ADOZIONE PRECEDENTE ---
-  let footerHtml = `
-    <button class="btn-aa-outline" onclick="chiudiVisitaModal()">Chiudi</button>
-  `;
+  let footerHtml = ``;
   const u = getUtenteCorrente();
 
   // Verifichiamo se l'utente corrente è il creatore della visita
@@ -531,7 +529,7 @@ async function apriVisitaModal(id) {
     footerHtml =
       `
       <span class="text-success small me-auto align-self-center fw-semibold">
-        <i class="bi bi-check-circle-fill"></i> Percorso già sbloccato nel tuo portafoglio
+        <i class="bi bi-check-circle-fill"></i> Visita acquistata
       </span>
       ` + footerHtml;
   } else {
@@ -769,9 +767,19 @@ async function caricaMieiContenuti() {
 
   // 4. VISITE ACQUISTATE/ADOTTATE DA ALTRI
   const mieVisiteAcquistate = dataVisiteAdottate?.visite
-    ? dataVisiteAdottate.visite.filter(
-        (v) => v.creatorId?._id !== u._id && v.creatorId !== u._id,
-      )
+    ? dataVisiteAdottate.visite.filter((v) => {
+        // A. Non deve essere una visita creata dall'utente stesso
+        const nonMia = v.creatorId?._id !== u._id && v.creatorId !== u._id;
+
+        // B. L'utente deve aver inserito la propria firma nell'array logAdozioni del database
+        const adottataRealmente =
+          Array.isArray(v.logAdozioni) &&
+          v.logAdozioni.some(
+            (log) => (log.adottanteId?._id || log.adottanteId) === u._id,
+          );
+
+        return nonMia && adottataRealmente;
+      })
     : [];
 
   // --- CASO 1: AUTORE / ADMIN ---
@@ -829,7 +837,7 @@ async function caricaMieiContenuti() {
           <div class="aa-card-header" style="background: var(--aa-gold-pale);"><i class="bi bi-bag-check"></i> Item Adottati / Acquistati (${mieiItemsAcquistati.length})</div>
           <div class="aa-card-body p-0" style="overflow-x:auto;">
             <table class="aa-table">
-              <thead><tr><th>Titolo Item</th><th>Museo</th><th>Autore Originale</th><th>Linguaggio</th><th>Opzioni</th></tr></thead>
+              <thead><tr><th>Titolo Item</th><th>Museo</th><th>Autore Originale</th><th>Linguaggio</th></tr></thead>
               <tbody>
                 ${mieiItemsAcquistati
                   .map(
@@ -840,7 +848,7 @@ async function caricaMieiContenuti() {
                     <td><span class="text-taupe">${item.autore_visita || "Community"}</span></td>
                     <td>${badgeLinguaggio(item.linguaggio)}</td>
                     <td>
-                      <button class="btn-aa-primary" style="font-size:0.75rem;padding:2px 8px" onclick="apriItemModal('${item._id}')">Vedi</button>
+                      <button class="btn-aa-primary" style="font-size:0.75rem;padding:2px 8px" onclick="apriItemModal('${item._id}')">Visualizza</button>
                     </td>
                   </tr>
                 `,
@@ -940,8 +948,12 @@ async function caricaMieiContenuti() {
                     <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
                     <td><small>${v.museo}</small></td>
                     <td><span class="aa-badge aa-badge-len">${v.tappe?.length || 0} tappe</span></td>
-                    <td><button class="btn-aa-primary" style="font-size:0.75rem;padding:3px 10px" onclick="apriVisitaModal('${v._id}')"><i class="bi bi-play-circle"></i> Esegui</button></td>
-                  </tr>
+                    <td>
+                      <button class="btn-aa-primary" style="font-size:0.75rem; padding:3px 10px;" onclick="apriVisitaModal('${v._id}')">
+                        Visualizza
+                      </button>
+                    </td>
+                    </tr>
                 `,
                   )
                   .join("")}
@@ -959,7 +971,7 @@ async function caricaMieiContenuti() {
           <div class="aa-card-header"><i class="bi bi-file-earmark-music"></i> I miei Contenuti Audio Singoli (${mieiItemsAcquistati.length})</div>
           <div class="aa-card-body p-0" style="overflow-x:auto;">
             <table class="aa-table">
-              <thead><tr><th>Opera</th><th>Museo</th><th>Linguaggio</th><th>Ascolta</th></tr></thead>
+              <thead><tr><th>Opera</th><th>Museo</th><th>Linguaggio</th><th>Dettagli</th></tr></thead>
               <tbody>
                 ${mieiItemsAcquistati
                   .map(
@@ -968,7 +980,7 @@ async function caricaMieiContenuti() {
                     <td><strong>${item.titolo}</strong></td>
                     <td><small>${item.museo}</small></td>
                     <td>${badgeLinguaggio(item.linguaggio)}</td>
-                    <td><button class="btn-aa-primary" style="font-size:0.75rem;padding:3px 10px" onclick="apriItemModal('${item._id}')"><i class="bi bi-soundwave"></i> Apri</button></td>
+                    <td><button class="btn-aa-primary" style="font-size:0.75rem;padding:3px 10px" onclick="apriItemModal('${item._id}')">Visualizza</button></td>
                   </tr>
                 `,
                   )
