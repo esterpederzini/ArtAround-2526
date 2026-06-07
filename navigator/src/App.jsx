@@ -6,6 +6,7 @@ import NavigatorLayout from "./components/NavigatorLayout";
 import NavigatorItemViewer from "./components/NavigatorItemViewer";
 import NavigatorHome from "./components/NavigatorHome";
 import NavigatorVisitOverview from "./components/NavigatorVisitOverview";
+import NavigatorLibrary from "./components/NavigatorLibrary";
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -50,17 +51,15 @@ function App() {
           </div>
         ) : (
           <Routes>
-            {/* 🔓 TUTTE LE ROTTE SONO LIBERE E ACCESSIBILI DI DEFAULT */}
             <Route element={<NavigatorLayout isMobile={isMobile} />}>
               <Route path="/" element={<NavigatorHome />} />
               <Route path="/home" element={<NavigatorHome />} />
+              <Route path="/library" element={<NavigatorLibrary />} />
               <Route path="/visit/:id" element={<NavigatorVisitOverview />} />
               <Route
                 path="/visit/:id/:operaIndex"
                 element={<NavigatorItemViewer />}
               />
-
-              {/* Fallback di sicurezza: se inseriscono spazzatura nell'URL, si torna alla Home */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>

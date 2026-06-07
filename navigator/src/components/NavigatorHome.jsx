@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../CSS/NavigatorHome.css";
-import NavigatorLogin from "./NavigatorLogin"; // <-- IMPORTIAMO IL TUO FILE LOGIN QUI!
+import NavigatorLogin from "./NavigatorLogin";
+import NavigatorSideBar from "./NavigatorSideBar";
 
 const NavigatorHome = () => {
   const [visits, setVisits] = useState([]);
@@ -47,6 +48,12 @@ const NavigatorHome = () => {
   }, []);
 
   const filteredVisits = visits.filter((visita) => {
+    const isPrivata = visita.pubblica === false;
+    if (isPrivata) return false;
+
+    const haPrezzo = visita.prezzo && Number(visita.prezzo) > 0;
+    if (haPrezzo) return false;
+
     const search = searchTerm.toLowerCase();
     const idVisita = (visita._id || "").toLowerCase();
     const titoloVisita = (visita.title || visita.titolo || "").toLowerCase();
@@ -82,52 +89,10 @@ const NavigatorHome = () => {
       className="home-dark-container"
       style={{ "--hero-bg-image": `url(${stringUrlImmagine})` }}
     >
-      <div
-        className={`sidebar-overlay ${sidebarOpen ? "visible" : ""}`}
-        onClick={closeSidebar}
+      <NavigatorSideBar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
-
-      {/* SIDEBAR */}
-      <aside className={`side-bar ${sidebarOpen ? "open" : ""}`}>
-        <div className="side-bar-header">
-          <div className="profile-thumb">
-            <i className="bi bi-person-circle"></i>
-          </div>
-          <div className="profile-info">
-            <strong>{isLoggato ? userName : "Menu"}</strong>
-          </div>
-          <button className="close-btn" onClick={closeSidebar}>
-            <i className="bi bi-x"></i>
-          </button>
-        </div>
-
-        <nav className="side-nav">
-          <div className="side-nav-item" onClick={() => handleNav("/")}>
-            <i className="bi bi-house-door"></i>
-            <span>Home</span>
-          </div>
-          <div
-            className="side-nav-item"
-            onClick={() => handleNav("/marketplace")}
-          >
-            <i className="bi bi-shop"></i>
-            <span>Marketplace</span>
-          </div>
-        </nav>
-
-        <div className="side-bar-footer">
-          {isLoggato && (
-            <button
-              className="settings-btn"
-              onClick={handleLogout}
-              style={{ color: "#ff4444" }}
-            >
-              <i className="bi bi-box-arrow-right"></i>
-              <span>Logout</span>
-            </button>
-          )}
-        </div>
-      </aside>
 
       {/* HEADER PRINCIPALE CON CENTRATURA ASSOLUTA */}
       <header
@@ -213,7 +178,7 @@ const NavigatorHome = () => {
                     <img
                       src={
                         visita.immagine ||
-                        Brass.image ||
+                        visita.image ||
                         config?.defaultCardImage ||
                         "/img/default_item_image.jpg"
                       }
