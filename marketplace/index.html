@@ -219,7 +219,6 @@
       }
 
       // Carica configurazione museo generica (Requisito Bando)
-      // AGGIORNAMENTO DELLA FUNZIONE IN INDEX.HTML CON CONTROLLI DI VISIBILITÀ RUOLO
       async function caricaConfigMuseoHome() {
         try {
           const response = await fetch("/api/config");
@@ -230,23 +229,23 @@
           const subtitle = document.getElementById("heroSubtitle");
           if (subtitle && config.museo) {
             subtitle.innerHTML = `
-        Scopri contenuti audio per ogni livello: dai percorsi per bambini
-        alle analisi per esperti. Crea la tua guida personalizzata o
-        adotta i contenuti della community per ${config.museo}.
-      `;
+              Scopri contenuti audio per ogni livello: dai percorsi per bambini
+              alle analisi per esperti. Crea la tua guida personalizzata o
+              adotta i contenuti della community per ${config.museo}.
+            `;
           }
 
-          // ─── NUOVA LOGICA DI CONTROLLO PULSANTE "CREA VISITA" ───
-          // ─── LOGICA CORRETTA DI CONTROLLO PULSANTE "CREA VISITA" ───
+          // ─── 🛠️ LOGICA BLINDATA DI CONTROLLO PULSANTE "CREA VISITA" ───
           const u = getUtenteCorrente();
           const btnCreaVisita = document.getElementById("btnHeroCreaVisita");
 
           if (btnCreaVisita) {
-            btnCreaVisita.classList.add("d-none-pc");
-            if (u && u.ruolo === "visitatore") {
-              btnCreaVisita.classList.add("d-none");
-            } else {
+            // Condizione rigida: deve essere loggato E deve essere autore o admin
+            if (u && (u.ruolo === "autore" || u.ruolo === "admin")) {
               btnCreaVisita.classList.remove("d-none");
+            } else {
+              // Nasconde il tasto a visitatori anonimi e visitatori semplici
+              btnCreaVisita.classList.add("d-none");
             }
           }
 
@@ -332,11 +331,14 @@
         return true;
       }
 
-      // Esecuzione immediata dei moduli all'avvio
-      aggiornaUtenteUI();
-      caricaStats();
-      caricaConfigMuseoHome();
-      caricaVisitePreview();
+      async function initInizialeHome() {
+        aggiornaUtenteUI();
+        await caricaStats();
+        await caricaConfigMuseoHome(); // Inizializza il pulsante con lo stato utente aggiornato
+        caricaVisitePreview();
+      }
+
+      initInizialeHome();
     </script>
   </body>
 </html>

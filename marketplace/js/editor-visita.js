@@ -469,15 +469,44 @@ async function salvaVisita() {
     }, 500);
   }
 }
-
-// ─── CARICA VISITA PER MODIFICA ──────────────────────
+// ─── MODIFICA PROTETTA IN EDITOR-VISITA.JS PER GESTIRE IL CLONE ───
 async function caricaVisitaPerModifica(id) {
   const v = await apiFetch(`/api/visite/${id}`);
   if (!v) return;
 
-  document.getElementById("visitaId").value = v._id;
-  document.getElementById("visitaTitolo").value = v.titolo || v.title || "";
-  document.getElementById("visitaMuseo").value = v.museo;
+  const u = getUtenteCorrente();
+
+  // Rileviamo l'id del creatore originale
+  const idCreatoreOriginale = v.creatorId?._id || v.creatorId || "";
+
+  // VERIFICA DI PROPRIETÀ: L'utente loggato è il vero creatore?
+  const isVeroProprietario = u && String(idCreatoreOriginale) === String(u._id);
+
+  if (isVeroProprietario) {
+    // CASO A: È l'autore originale. Manteniamo l'ID per fare l'aggiornamento (PUT)
+    document.getElementById("visitaId").value = v._id;
+    document.getElementById("visitaAutore").value = idCreatoreOriginale;
+    document.getElementById("editorTitolo").textContent =
+      `Modifica: ${v.titolo || v.title || "Visita"}`;
+    showToast(`La tua visita è stata caricata per la modifica`, "info");
+  } else {
+    // CASO B: È un altro autore che l'ha acquistata! FORZIAMO IL CLONE (POST)
+    document.getElementById("visitaId").value = ""; // <-- CANCELLIAMO L'ID ORIGINARIO! Così farà una POST
+    document.getElementById("visitaAutore").value = u._id; // <-- L'autore diventa l'utente corrente loggato
+
+    // Cambiamo il titolo aggiungendo un prefisso per far capire che è un clone personalizzato
+    const nuovoTitolo = `Copia di ${v.titolo || v.title || "Visita"}`;
+    document.getElementById("visitaTitolo").value = nuovoTitolo;
+    document.getElementById("editorTitolo").textContent =
+      `Personalizza: ${nuovoTitolo}`;
+
+    showToast(
+      `Guida acquistata: generata una copia autonoma da personalizzare`,
+      "success",
+    );
+  }
+
+  // ---- Da qui in poi il tuo codice originale per popolare i campi rimane IDENTICO ----
   document.getElementById("visitaDescrizione").value = v.descrizione || "";
   document.getElementById("visitaTags").value = (v.tags || []).join(", ");
   document.getElementById("visitaDurata").value = v.durataTotaleStimata || 60;
@@ -490,13 +519,8 @@ async function caricaVisitaPerModifica(id) {
     v.licenza?.tipo || "gratuito";
   document.getElementById("visitaPrezzo").value = v.prezzo || 0;
   document.getElementById("visitaPubblica").checked = v.pubblica;
-  document.getElementById("visitaAutore").value =
-    v.creatorId?._id || v.creatorId || "";
 
-  const visitLabel = v.titolo || v.title || "Visita";
-  document.getElementById("editorTitolo").textContent =
-    `Modifica: ${visitLabel}`;
-
+  // Ricostruzione tappe...
   let rawTappe = Array.isArray(v.tappe) ? v.tappe : [];
   if (rawTappe.length === 0 && Array.isArray(v.items) && v.items.length > 0) {
     rawTappe = v.items.map((row) => ({
@@ -540,8 +564,6 @@ async function caricaVisitaPerModifica(id) {
   renderCatalogo(
     document.getElementById("cercaCatalogo")?.value.toLowerCase() || "",
   );
-
-  showToast(`Visita "${visitLabel}" caricata per modifica`, "info");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 

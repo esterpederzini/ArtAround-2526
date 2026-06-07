@@ -617,7 +617,7 @@ export default function NavigatorItemViewer() {
                   />
                 </div>
                 <Card.Body className="pt-0">
-                  <div className="config-box mx-3 mb-4">
+                  <div className="config-box mx-3 mb-3">
                     <div
                       className="d-flex align-items-center justify-content-between"
                       onClick={() => setIsConfigOpen(!isConfigOpen)}
@@ -641,12 +641,17 @@ export default function NavigatorItemViewer() {
                           Livello di analisi
                         </p>
 
-                        {/* MODIFICATO: Struttura a griglia 2x2 per i 4 livelli di linguaggio delle specifiche */}
-                        <Row className="g-2 mb-4">
+                        {/* CONFIGURAZIONE SU UN'UNICA RIGA ORIZZONTALE (xs={4}) */}
+                        <Row className="g-2 mb-4 text-nowrap">
                           {["infantile", "medio", "avanzato"].map((l) => (
-                            <Col xs={6} key={l}>
+                            <Col xs={4} key={l}>
                               <button
                                 className={`btn-difficolta-custom w-100 ${languageLevel === l ? "active" : ""}`}
+                                style={{
+                                  fontSize: "0.78rem",
+                                  padding: "8px 2px",
+                                  textTransform: "capitalize",
+                                }}
                                 onClick={() =>
                                   updateContent(l, selectedDuration)
                                 }
@@ -820,9 +825,9 @@ export default function NavigatorItemViewer() {
         show={showAccessMenu}
         onHide={() => setShowAccessMenu(false)}
         centered
-        className="museum-modal"
+        dialogClassName="museum-modal"
       >
-        <Modal.Body className="museum-modal-content text-center">
+        <Modal.Body className="text-center">
           <h6 className="text-white mb-4 text-uppercase">Assistente</h6>
           <div className="d-grid gap-2">
             <p

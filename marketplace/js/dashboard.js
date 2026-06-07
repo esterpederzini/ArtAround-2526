@@ -416,7 +416,7 @@ async function apriItemModal(id) {
     } else {
       footerHtml += `
         <button class="btn-aa-primary" id="btnAdottaItem" onclick="eseguiAcquistoDnAdozioneItem('${item._id}', '${titoloItemEscaped}', 0)">
-          <i class="bi bi-heart"></i> Adotta Gratis
+          Acquista Gratis
         </button>
       `;
     }
@@ -548,7 +548,7 @@ async function apriVisitaModal(id) {
     } else {
       footerHtml += `
         <button class="btn-aa-primary" id="btnAdottaVisita" onclick="eseguiAcquistoDnAdozioneVisita('${v._id}', '${titoloVisitaEscaped}', 0)">
-          <i class="bi bi-heart"></i> Adotta Gratis
+          Acquista Gratis
         </button>
       `;
     }
@@ -721,6 +721,7 @@ async function eseguiAcquistoDnAdozioneItem(itemId, titolo, prezzo) {
 }
 
 // ─── AGGIORNAMENTO TAB "I MIEI CONTENUTI" (CON ITEM ACQUISTATI) ───
+// ─── AGGIORNAMENTO TAB "I MIEI CONTENUTI" (CON ITEM ACQUISTATI) ───
 async function caricaMieiContenuti() {
   const u = getUtenteCorrente();
   const container = document.getElementById("mieiContenuti");
@@ -768,16 +769,12 @@ async function caricaMieiContenuti() {
   // 4. VISITE ACQUISTATE/ADOTTATE DA ALTRI
   const mieVisiteAcquistate = dataVisiteAdottate?.visite
     ? dataVisiteAdottate.visite.filter((v) => {
-        // A. Non deve essere una visita creata dall'utente stesso
         const nonMia = v.creatorId?._id !== u._id && v.creatorId !== u._id;
-
-        // B. L'utente deve aver inserito la propria firma nell'array logAdozioni del database
         const adottataRealmente =
           Array.isArray(v.logAdozioni) &&
           v.logAdozioni.some(
             (log) => (log.adottanteId?._id || log.adottanteId) === u._id,
           );
-
         return nonMia && adottataRealmente;
       })
     : [];
@@ -830,14 +827,14 @@ async function caricaMieiContenuti() {
       `;
     }
 
-    // NUOVA SEZIONE: Item Acquistati / Adottati
+    // 🛠️ SEZIONE CORRETTA: Item Acquistati / Adottati per Autori con BOTTONE VISUALIZZA
     if (mieiItemsAcquistati.length > 0) {
       htmlRisultato += `
         <div class="aa-card mb-4">
           <div class="aa-card-header" style="background: var(--aa-gold-pale);"><i class="bi bi-bag-check"></i> Item Adottati / Acquistati (${mieiItemsAcquistati.length})</div>
           <div class="aa-card-body p-0" style="overflow-x:auto;">
             <table class="aa-table">
-              <thead><tr><th>Titolo Item</th><th>Museo</th><th>Autore Originale</th><th>Linguaggio</th></tr></thead>
+              <thead><tr><th>Titolo Item</th><th>Museo</th><th>Autore Originale</th><th>Linguaggio</th><th>Azioni</th></tr></thead>
               <tbody>
                 ${mieiItemsAcquistati
                   .map(
@@ -871,16 +868,17 @@ async function caricaMieiContenuti() {
               <thead><tr><th>Titolo Visita</th><th>Museo</th><th>Tappe</th><th>Azioni</th></tr></thead>
               <tbody>
                 ${mieVisiteCreate
-                  .map(
-                    (v) => `
-                  <tr>
-                    <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
-                    <td><small>${v.museo}</small></td>
-                    <td><span class="aa-badge aa-badge-len">${v.tappe?.length || 0} tappe</span></td>
-                    <td><a href="/editor-visita?id=${v._id}" class="btn-aa-outline" style="font-size:0.75rem;padding:2px 8px">Modifica</a></td>
-                  </tr>
-                `,
-                  )
+                  .map((v) => {
+                    const numTappe = v.tappe?.length || 0;
+                    return `
+                        <tr>
+                          <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
+                          <td><small>${v.museo}</small></td>
+                          <td><span class="aa-badge aa-badge-len">${numTappe} ${numTappe === 1 ? "stop" : "stops"}</span></td>
+                          <td><a href="/editor-visita?id=${v._id}" class="btn-aa-outline" style="font-size:0.75rem;padding:2px 8px">Modifica</a></td>
+                        </tr>
+                      `;
+                  })
                   .join("")}
               </tbody>
             </table>
@@ -899,16 +897,17 @@ async function caricaMieiContenuti() {
               <thead><tr><th>Titolo Visita</th><th>Museo</th><th>Tappe</th><th>Azioni</th></tr></thead>
               <tbody>
                 ${mieVisiteAcquistate
-                  .map(
-                    (v) => `
-                  <tr>
-                    <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
-                    <td><small>${v.museo}</small></td>
-                    <td><span class="aa-badge aa-badge-len">${v.tappe?.length || 0} tappe</span></td>
-                    <td><a href="/editor-visita?id=${v._id}" class="btn-aa-gold" style="font-size:0.75rem;padding:2px 10px">Personalizza</a></td>
-                  </tr>
-                `,
-                  )
+                  .map((v) => {
+                    const numTappe = v.tappe?.length || 0;
+                    return `
+                        <tr>
+                          <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
+                          <td><small>${v.museo}</small></td>
+                          <td><span class="aa-badge aa-badge-len">${numTappe} ${numTappe === 1 ? "stop" : "stops"}</span></td>
+                          <td><a href="/editor-visita?id=${v._id}" class="btn-aa-gold" style="font-size:0.75rem;padding:2px 10px">Personalizza</a></td>
+                        </tr>
+                      `;
+                  })
                   .join("")}
               </tbody>
             </table>
@@ -932,7 +931,6 @@ async function caricaMieiContenuti() {
 
     let htmlVisitatore = "";
 
-    // Tabella delle visite acquistate dal visitatore
     if (mieVisiteAcquistate.length > 0) {
       htmlVisitatore += `
         <div class="aa-card mb-4">
@@ -944,32 +942,30 @@ async function caricaMieiContenuti() {
                   <th>Percorso Museale</th>
                   <th>Istituzione</th>
                   <th>Tappe</th>
-                  <th class="d-none d-md-table-cell">Opzioni</th> <!-- Visibile solo su PC -->
+                  <th class="d-none d-md-table-cell">Opzioni</th>
                 </tr>
               </thead>
               <tbody>
                 ${mieVisiteAcquistate
-                  .map(
-                    (v) => `
-                  <!-- La riga è cliccabile solo su mobile tramite la classe aa-row-clickable-mobile -->
-                  <tr class="aa-row-clickable-mobile" onclick="if(window.innerWidth < 768) apriVisitaModal('${v._id}')">
-                    <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
-                    <td><small>${v.museo}</small></td>
-                    <td>
-                      <!-- Su PC (desktop) mostra 'X tappe' -->
-                      <span class="aa-badge aa-badge-len d-none d-md-inline-flex">${v.tappe?.length || 0} tappe</span>
-                      <!-- Su Mobile mostra solo il numero puro -->
-                      <span class="aa-badge aa-badge-len d-inline-flex d-md-none fw-bold" style="padding: 2px 8px">${v.tappe?.length || 0}</span>
-                    </td>
-                    <td class="d-none d-md-table-cell">
-                      <!-- Bottone visibile e funzionante SOLO su PC -->
-                      <button class="btn-aa-primary" style="font-size:0.75rem; padding:3px 10px;" onclick="apriVisitaModal('${v._id}')">
-                        Visualizza
-                      </button>
-                    </td>
-                  </tr>
-                `,
-                  )
+                  .map((v) => {
+                    const numTappe = v.tappe?.length || 0;
+                    const stringaStops = `${numTappe} ${numTappe === 1 ? "stop" : "stops"}`;
+                    return `
+                        <tr class="aa-row-clickable-mobile" onclick="if(window.innerWidth < 768) apriVisitaModal('${v._id}')">
+                          <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
+                          <td><small>${v.museo}</small></td>
+                          <td>
+                            <span class="aa-badge aa-badge-len d-none d-md-inline-flex">${stringaStops}</span>
+                            <span class="aa-badge aa-badge-len d-inline-flex d-md-none fw-bold" style="padding: 2px 8px">${numTappe}</span>
+                          </td>
+                          <td class="d-none d-md-table-cell">
+                            <button class="btn-aa-primary" style="font-size:0.75rem; padding:3px 10px;" onclick="apriVisitaModal('${v._id}')">
+                              Visualizza
+                            </button>
+                          </td>
+                        </tr>
+                      `;
+                  })
                   .join("")}
               </tbody>
             </table>
@@ -978,7 +974,6 @@ async function caricaMieiContenuti() {
       `;
     }
 
-    // Tabella degli item acquistati dal visitatore
     if (mieiItemsAcquistati.length > 0) {
       htmlVisitatore += `
         <div class="aa-card">
@@ -990,7 +985,7 @@ async function caricaMieiContenuti() {
                   <th>Opera</th>
                   <th>Museo</th>
                   <th>Linguaggio</th>
-                  <th class="d-none d-md-table-cell">Dettagli</th> <!-- Visibile solo su PC -->
+                  <th class="d-none d-md-table-cell">Dettagli</th>
                 </tr>
               </thead>
               <tbody>
