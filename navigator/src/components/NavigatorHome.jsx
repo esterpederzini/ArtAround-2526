@@ -1,21 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../CSS/NavigatorHome.css";
+import NavigatorLogin from "./NavigatorLogin"; // <-- IMPORTIAMO IL TUO FILE LOGIN QUI!
 
 const NavigatorHome = () => {
   const [visits, setVisits] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [config, setConfig] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // UNICO STATO NECCESSARIO: controlla l'apertura del file login importato
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
   const navigate = useNavigate();
 
-  // Dati sessione
-  const sessionRaw = localStorage.getItem("user_session");
-  const sessionData = sessionRaw ? JSON.parse(sessionRaw) : null;
-  const userName = sessionData?.user?.username || "ArtAround User";
+  // ─── GESTIONE AUTENTICAZIONE CONDIVISA ───────────────────
+  const token =
+    localStorage.getItem("aa_token") ||
+    JSON.parse(localStorage.getItem("user_session") || "{}")?.token;
+  const utenteRaw = localStorage.getItem("aa_utente");
+  const utenteObj = utenteRaw
+    ? JSON.parse(utenteRaw)
+    : JSON.parse(localStorage.getItem("user_session") || "{}")?.user;
+
+  const isLoggato = !!token;
+  const userName = isLoggato ? utenteObj?.username || "Utente" : null;
 
   useEffect(() => {
-    // Usa il percorso assoluto partendo dalla radice /api
     fetch("/api/config")
       .then((res) => res.json())
       .then((data) => setConfig(data))
@@ -27,8 +38,6 @@ const NavigatorHome = () => {
     fetch("/api/visite")
       .then((res) => res.json())
       .then((json) => {
-        // Importante: il controller restituisce { successo: true, data: { visite: [...] } }
-        // Quindi dobbiamo mappare correttamente la risposta in base alla struttura di apiController.js
         if (json.successo && json.data) {
           const dataVisite = json.data.visite || json.data;
           setVisits(Array.isArray(dataVisite) ? dataVisite : []);
@@ -37,7 +46,6 @@ const NavigatorHome = () => {
       .catch((err) => console.error("Errore fetch visite:", err));
   }, []);
 
-  // Filtro ricerca
   const filteredVisits = visits.filter((visita) => {
     const search = searchTerm.toLowerCase();
     const idVisita = (visita._id || "").toLowerCase();
@@ -50,10 +58,7 @@ const NavigatorHome = () => {
 
   const handleNav = (path) => {
     closeSidebar();
-
     if (path === "/marketplace") {
-      // Forza il ricaricamento completo ignorando il router di React
-      // location.replace sostituisce l'ingresso nella cronologia, evitando loop
       window.location.replace(window.location.origin + "/");
     } else {
       navigate(path);
@@ -62,7 +67,9 @@ const NavigatorHome = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("user_session");
-    navigate("/login");
+    localStorage.removeItem("aa_token");
+    localStorage.removeItem("aa_utente");
+    window.location.reload();
   };
 
   const stringUrlImmagine =
@@ -80,26 +87,25 @@ const NavigatorHome = () => {
         onClick={closeSidebar}
       />
 
-      {/* SIDEBAR AGGIORNATA */}
+      {/* SIDEBAR */}
       <aside className={`side-bar ${sidebarOpen ? "open" : ""}`}>
         <div className="side-bar-header">
           <div className="profile-thumb">
             <i className="bi bi-person-circle"></i>
           </div>
           <div className="profile-info">
-            <strong>{userName}</strong>
+            <strong>{isLoggato ? userName : "Menu"}</strong>
           </div>
           <button className="close-btn" onClick={closeSidebar}>
             <i className="bi bi-x"></i>
           </button>
         </div>
+
         <nav className="side-nav">
           <div className="side-nav-item" onClick={() => handleNav("/")}>
             <i className="bi bi-house-door"></i>
             <span>Home</span>
           </div>
-
-          {/* NUOVO: Collegamento al Marketplace nella Sidebar */}
           <div
             className="side-nav-item"
             onClick={() => handleNav("/marketplace")}
@@ -108,21 +114,61 @@ const NavigatorHome = () => {
             <span>Marketplace</span>
           </div>
         </nav>
+
         <div className="side-bar-footer">
-          <button
-            className="settings-btn"
-            onClick={handleLogout}
-            style={{ color: "#ff4444" }}
-          >
-            <i className="bi bi-box-arrow-right"></i>
-            <span>Logout</span>
-          </button>
+          {isLoggato && (
+            <button
+              className="settings-btn"
+              onClick={handleLogout}
+              style={{ color: "#ff4444" }}
+            >
+              <i className="bi bi-box-arrow-right"></i>
+              <span>Logout</span>
+            </button>
+          )}
         </div>
       </aside>
 
-      <header className="home-header">
-        <i className="bi bi-list menu-icon" onClick={toggleSidebar}></i>
-        <span className="brand-name">{"ArtAround"}</span>
+      {/* HEADER PRINCIPALE CON CENTRATURA ASSOLUTA */}
+      <header
+        className="home-header d-flex align-items-center px-3"
+        style={{ position: "relative" }}
+      >
+        <div style={{ width: "80px" }} className="d-flex align-items-center">
+          <i
+            className="bi bi-list menu-icon-fixed"
+            onClick={toggleSidebar}
+            style={{ fontSize: "1.5rem", cursor: "pointer" }}
+          ></i>
+        </div>
+
+        <div className="flex-grow-1 text-center">
+          <span className="brand-name">{"ArtAround"}</span>
+        </div>
+
+        <div
+          style={{ width: "80px" }}
+          className="d-flex align-items-center justify-content-end"
+        >
+          {!isLoggato && (
+            <button
+              className="btn btn-sm"
+              style={{
+                borderRadius: "20px",
+                fontSize: "0.82rem",
+                backgroundColor: "transparent",
+                border: "1px solid var(--aa-gold-light, #d4af5a)",
+                color: "var(--aa-gold-light, #d4af5a)",
+                fontWeight: "700",
+                padding: "4px 12px",
+                whiteSpace: "nowrap",
+              }}
+              onClick={() => setIsLoginOpen(true)} // <-- CAMERA LO STATO LOCALE PER APRIRE IL MODAL IMPORTATO
+            >
+              Accedi
+            </button>
+          )}
+        </div>
       </header>
 
       <section
@@ -137,7 +183,6 @@ const NavigatorHome = () => {
             {config?.motto ||
               "Curated journeys through the finest collections."}
           </p>
-
           <div className="search-bar">
             <i className="bi bi-search"></i>
             <input
@@ -154,7 +199,6 @@ const NavigatorHome = () => {
         <div className="section-header">
           <h2>{searchTerm ? "Risultati" : "Esplora visite"}</h2>
         </div>
-
         <div className="horizontal-scroll">
           {filteredVisits.length > 0 ? (
             filteredVisits.map((visita) => {
@@ -169,7 +213,7 @@ const NavigatorHome = () => {
                     <img
                       src={
                         visita.immagine ||
-                        visita.image ||
+                        Brass.image ||
                         config?.defaultCardImage ||
                         "/img/default_item_image.jpg"
                       }
@@ -198,6 +242,12 @@ const NavigatorHome = () => {
           )}
         </div>
       </section>
+
+      {/* ─── 🏛️ COMPONENTE LOGIN REALE UTILIZZATO COME MODAL ─── */}
+      <NavigatorLogin
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+      />
     </div>
   );
 };

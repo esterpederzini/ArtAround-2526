@@ -1,15 +1,20 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import "../CSS/NavigatorLogin.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash, faUniversity } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEye,
+  faEyeSlash,
+  faUniversity,
+} from "@fortawesome/free-solid-svg-icons";
 
-const NavigatorLogin = () => {
+const NavigatorLogin = ({ isOpen, onClose }) => {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
+
+  // Se la prop isOpen è false, il componente si smonta e non occupa spazio
+  if (!isOpen) return null;
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -31,8 +36,13 @@ const NavigatorLogin = () => {
           token,
           loginTimestamp: new Date().getTime(),
         };
+
         localStorage.setItem("user_session", JSON.stringify(sessionData));
-        navigate("/");
+        localStorage.setItem("aa_token", token);
+        localStorage.setItem("aa_utente", JSON.stringify(userData));
+
+        onClose();
+        window.location.reload();
       } else {
         setError(json.messaggio || "Credenziali non valide");
       }
@@ -42,65 +52,86 @@ const NavigatorLogin = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-
-        {/* Icon */}
-        <div className="logo-icon">
-          <FontAwesomeIcon icon={faUniversity} />
+    <div className="navigator-modal-overlay" onClick={onClose}>
+      {/* stopPropagation evita che il modal si chiuda cliccando al suo interno */}
+      <div
+        className="navigator-modal-card"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header del Modal */}
+        <div className="navigator-modal-header d-flex justify-content-between align-items-center">
+          <h4 className="m-0 d-flex align-items-center">
+            <FontAwesomeIcon
+              icon={faUniversity}
+              className="me-2 text-gold-accent"
+            />
+            Accedi
+          </h4>
+          <button
+            className="navigator-modal-close-btn"
+            type="button"
+            onClick={onClose}
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Heading */}
-        <h1>Bentornato</h1>
-        <p className="subtitle">Museum Explorer</p>
-
-        {/* Form */}
+        {/* Form di Accesso */}
         <form onSubmit={handleLogin}>
-          <div className="login-field">
-            <label htmlFor="identifier">Username</label>
-            <input
-              id="identifier"
-              type="text"
-              placeholder="Inserisci il tuo username"
-              // className="login-input"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              required
-              autoComplete="username"
-            />
-          </div>
-
-          <div className="login-field">
-            <label htmlFor="password">Password</label>
-            <div className="password-input-container">
+          <div className="navigator-modal-body">
+            {/* Campo Username */}
+            <div className="login-modal-field">
+              <label htmlFor="modal-identifier">Username</label>
               <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Inserisci la password"
-                // className="login-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                id="modal-identifier"
+                type="text"
+                placeholder="Inserisci il tuo username"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
                 required
-                autoComplete="current-password"
+                autoComplete="username"
               />
-              <span
-                className="password-toggle-icon"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? "Nascondi password" : "Mostra password"}
-              >
-                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
-              </span>
             </div>
+
+            {/* Campo Password */}
+            <div className="login-modal-field">
+              <label htmlFor="modal-password">Password</label>
+              <div className="password-input-wrapper">
+                <input
+                  id="modal-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Inserisci la password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                />
+                <span
+                  className="password-toggle-inside"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                </span>
+              </div>
+            </div>
+
+            {error && <p className="modal-error-msg">⚠️ {error}</p>}
           </div>
 
-          {error && <p className="error-msg">{error}</p>}
-
-          <button type="submit" className="login-btn">
-            Accedi
-          </button>
+          {/* Footer Azioni */}
+          <div className="navigator-modal-footer d-flex justify-content-end gap-2">
+            <button
+              type="button"
+              className="modal-btn-cancel"
+              onClick={onClose}
+            >
+              Annulla
+            </button>
+            <button type="submit" className="modal-btn-submit">
+              Entra
+            </button>
+          </div>
         </form>
-
-        <p className="footer-text">ArtAround &mdash; Museum Explorer</p>
       </div>
     </div>
   );

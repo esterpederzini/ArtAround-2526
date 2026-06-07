@@ -1,19 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap");
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 :root {
   --gold: #e18f37;
   --gold-glow: rgba(225, 143, 55, 0.25);
   --gold-border: rgba(225, 143, 55, 0.4);
-  --bg: #111113;
-  --card-bg: rgba(22, 22, 26, 0.88);
+  --bg-overlay: rgba(10, 10, 12, 0.82);
+  --card-bg: rgba(22, 22, 26, 0.95);
   --input-bg: rgba(255, 255, 255, 0.05);
   --input-border: rgba(255, 255, 255, 0.1);
   --text: #f4f0ea;
@@ -22,51 +14,40 @@
   --error: #e05c5c;
 }
 
-/* ── BACKGROUND ── */
-.login-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 16px;
-  background-color: var(--bg);
-  background-image:
-    url("https://img.freepik.com/premium-photo/closeup-black-paint-strokes-canvas-abstract-art-background-with-intricate-brush-marks_1268487-10036.jpg?semt=ais_hybrid&w=740&q=80");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+/* ── OVERLAY FIX: Copre interamente la viewport in primo piano ── */
+.navigator-modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: var(--bg-overlay) !important;
+  backdrop-filter: blur(12px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px 16px !important;
+  z-index: 9999 !important;
   font-family: "DM Sans", sans-serif;
 }
 
-/* dark overlay so text stays readable */
-.login-container::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: rgba(10, 10, 12, 0.78);
-  z-index: 0;
-}
-
-/* ── CARD ── */
-.login-card {
+/* ── Struttura Card del Modal (Eredita il vecchio stile) ── */
+.navigator-modal-card {
   position: relative;
-  z-index: 1;
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
   background: var(--card-bg);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
-  padding: 44px 36px 36px;
-  text-align: center;
   box-shadow:
     0 0 0 1px rgba(225, 143, 55, 0.08),
     0 32px 64px -16px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  animation: modalScaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* subtle gold top-edge accent */
-.login-card::before {
+/* Linea superiore d'accento in oro */
+.navigator-modal-card::before {
   content: "";
   position: absolute;
   top: 0;
@@ -78,49 +59,50 @@
   border-radius: 1px;
 }
 
-/* ── LOGO ICON ── */
-.logo-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--gold-glow);
-  border: 1px solid var(--gold-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 28px;
-  font-size: 26px;
-  color: var(--gold);
-  box-shadow: 0 0 24px var(--gold-glow);
+/* ── Header Interno ── */
+.navigator-modal-header {
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* ── HEADINGS ── */
-.login-card h1 {
+.navigator-modal-header h4 {
   font-family: "Cormorant Garamond", serif;
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   font-weight: 600;
   color: var(--text);
-  letter-spacing: 0.01em;
-  margin-bottom: 6px;
-  line-height: 1.1;
+  margin: 0;
 }
 
-.subtitle {
-  font-size: 0.9rem;
-  font-weight: 400;
+.text-gold-accent {
+  color: var(--gold) !important;
+  filter: drop-shadow(0 0 8px var(--gold-glow));
+}
+
+.navigator-modal-close-btn {
+  background: transparent;
+  border: none;
   color: var(--text-muted);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 36px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 4px;
 }
 
-/* ── FORM FIELDS ── */
-.login-field {
+.navigator-modal-close-btn:hover {
+  color: var(--text);
+}
+
+/* ── Corpo e Campi Input (Sbiancati e Leggibili) ── */
+.navigator-modal-body {
+  padding: 24px 28px;
+}
+
+.login-modal-field {
   text-align: left;
   margin-bottom: 18px;
 }
 
-.login-field label {
+.login-modal-field label {
   display: block;
   font-size: 0.78rem;
   font-weight: 500;
@@ -130,120 +112,127 @@
   margin-bottom: 8px;
 }
 
-.login-field input {
-  width: 100%;
-  padding: 14px 16px;
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  border-radius: 12px;
-  color: var(--text);
+.login-modal-field input {
+  width: 100% !important;
+  padding: 14px 16px !important;
+  background: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  border-radius: 12px !important;
+  color: var(--text) !important;
   font-family: "DM Sans", sans-serif;
   font-size: 0.95rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-}
-
-.login-field input::placeholder {
-  color: var(--text-muted);
-}
-
-.login-field input:focus {
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
   outline: none;
-  border-color: var(--gold);
-  background: rgba(225, 143, 55, 0.04);
-  box-shadow: 0 0 0 3px var(--gold-glow);
 }
 
-/* ── PASSWORD TOGGLE ── */
-.password-input-container {
+/* FIX CRITICO: Placeholder bianchi opachi, perfetti sullo sfondo scuro */
+.login-modal-field input::placeholder {
+  color: rgba(255, 255, 255, 0.35) !important;
+  opacity: 1 !important;
+}
+
+.login-modal-field input:focus {
+  border-color: var(--gold) !important;
+  background: rgba(225, 143, 55, 0.04) !important;
+  box-shadow: 0 0 0 3px var(--gold-glow) !important;
+}
+
+/* Gestione posizionamento icona occhio */
+.password-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
-.password-input-container input {
-  padding-right: 46px;
+.password-input-wrapper input {
+  padding-right: 46px !important;
 }
 
-.password-toggle-icon {
+.password-toggle-inside {
   position: absolute;
-  right: 14px;
+  right: 16px;
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
+  font-size: 14px;
+  z-index: 5;
   transition: color 0.2s;
-  z-index: 2;
 }
 
-.password-toggle-icon:hover {
+.password-toggle-inside:hover {
   color: var(--gold);
 }
 
-/* ── ERROR ── */
-.error-msg {
+/* Errori */
+.modal-error-msg {
   color: var(--error);
   font-size: 0.82rem;
-  margin-top: -8px;
-  margin-bottom: 14px;
+  margin-top: 4px;
+  margin-bottom: 0;
   text-align: left;
-  padding-left: 2px;
+  font-weight: 500;
 }
 
-/* ── LOGIN BUTTON ── */
-.login-btn {
-  width: 100%;
-  padding: 15px;
-  margin-top: 8px;
+/* ── Footer e Bottoni ── */
+.navigator-modal-footer {
+  padding: 16px 28px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.modal-btn-cancel {
+  background: transparent;
+  border: 1px solid var(--input-border);
+  color: var(--text-soft);
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border-color: var(--text-soft);
+}
+
+.modal-btn-submit {
   background: var(--gold);
   color: #111113;
   border: none;
+  padding: 10px 24px;
   border-radius: 12px;
-  font-family: "DM Sans", sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  transition:
+    background 0.2s,
+    box-shadow 0.2s,
+    transform 0.1s;
 }
 
-.login-btn:hover {
+.modal-btn-submit:hover {
   background: #eda04a;
   box-shadow: 0 4px 20px rgba(225, 143, 55, 0.35);
 }
 
-.login-btn:active {
-  transform: scale(0.985);
+.modal-btn-submit:active {
+  transform: scale(0.97);
 }
 
-/* ── FOOTER ── */
-.footer-text {
-  margin-top: 32px;
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-/* ── RESPONSIVE — desktop gets a wider feel ── */
-@media (min-width: 768px) {
-  .login-card {
-    max-width: 460px;
-    padding: 52px 48px 44px;
+/* Animazione di ingresso */
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
   }
-
-  .login-card h1 {
-    font-size: 2.6rem;
-  }
-}
-
-@media (min-width: 1200px) {
-  .login-container {
-    /* subtle left-offset on large screens for visual interest */
-    justify-content: center;
-  }
-
-  .login-card {
-    max-width: 480px;
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
