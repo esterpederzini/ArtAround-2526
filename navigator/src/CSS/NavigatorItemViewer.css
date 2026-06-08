@@ -900,6 +900,16 @@
   }
 }
 
+.museum-map-modal .btn-close {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23e18f37'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") !important;
+  opacity: 1 !important; /* Evita l'effetto sbiadito di default di Bootstrap */
+}
+
+/* Opzionale: aggiunge un leggero effetto feedback al passaggio del mouse */
+.museum-map-modal .btn-close:hover {
+  opacity: 0.8 !important;
+}
+
 /* ── DESKTOP (≥1200px): layout a tutto schermo, nessuno split ── */
 @media (min-width: 1200px) {
   .navigator-viewer-layout {

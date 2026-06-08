@@ -12,6 +12,7 @@ const NavigatorHome = () => {
 
   // UNICO STATO NECCESSARIO: controlla l'apertura del file login importato
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [heroImageReady, setHeroImageReady] = useState(false);
 
   const navigate = useNavigate();
 
@@ -84,6 +85,21 @@ const NavigatorHome = () => {
     config?.defaultCardImage ||
     "/img/default_item_image.jpg";
 
+  // Precarica l'immagine hero in memoria prima di applicarla allo sfondo,
+  // così non appare mai il fallback per un frame
+  useEffect(() => {
+    if (!config) return;
+    const url = config.heroImage || config.defaultCardImage;
+    if (!url) {
+      setHeroImageReady(true);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => setHeroImageReady(true);
+    img.onerror = () => setHeroImageReady(true);
+    img.src = url;
+  }, [config]);
+
   return (
     <div
       className="home-dark-container"
@@ -139,7 +155,9 @@ const NavigatorHome = () => {
       <section
         className="hero-modern"
         style={{
-          backgroundImage: `linear-gradient(to top, var(--bg-dark) 5%, transparent 60%), url(${stringUrlImmagine})`,
+          backgroundImage: heroImageReady
+            ? `linear-gradient(to top, var(--bg-dark) 5%, transparent 60%), url(${stringUrlImmagine})`
+            : "none",
         }}
       >
         <div className="hero-content">

@@ -2,6 +2,7 @@
   "museo": "Museo Egizio di Torino",
   "logoUrl": "/navigator/img/logo-egizio.png",
   "heroImage": "/navigator/img/museum_hero.jpg",
+  "motto": "Un viaggio millenario tra arte e storia",
   "mappe": {
     "-1": "/navigator/maps/mappa-museo-piano_-1.png",
     "0": "/navigator/maps/mappa-museo-piano_0.png",

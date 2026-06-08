@@ -355,7 +355,6 @@ export default function NavigatorItemViewer() {
       }
       if (
         cmd.includes("mappa") ||
-        cmd.includes("dove si trova") ||
         cmd.includes("dove mi trovo") ||
         cmd.includes("posizione")
       ) {
@@ -408,20 +407,12 @@ export default function NavigatorItemViewer() {
           cfg?.logistica_globale?.bar || "Il bar si trova al piano terra",
         );
       }
-      if (
-        cmd.includes("shop") ||
-        cmd.includes("negozio") ||
-        cmd.includes("bookshop")
-      ) {
+      if (cmd.includes("shop") || cmd.includes("negozio")) {
         handleLogisticsRef.current(
           cfg?.logistica_globale?.shop || "Lo shop si trova al piano terra",
         );
       }
-      if (
-        cmd.includes("ostacoli") ||
-        cmd.includes("accessibilita") ||
-        cmd.includes("accessibile")
-      ) {
+      if (cmd.includes("ostacoli") || cmd.includes("accessibilita")) {
         handleLogisticsRef.current(
           cfg?.logistica_globale?.ostacoli ||
             "Nessun ostacolo segnalato sul percorso",
@@ -430,28 +421,19 @@ export default function NavigatorItemViewer() {
       if (
         cmd.includes("chi e l'autore") ||
         cmd.includes("chi e lautore") ||
-        cmd.includes("chi e l artista") ||
-        cmd.includes("chi e lartista") ||
-        cmd.includes("chi l ha dipinto")
+        cmd.includes("chi e l'artista") ||
+        cmd.includes("chi e lartista")
       ) {
         handleLogisticsRef.current(
           `L'autore è ${item?.artista || "sconosciuto"}`,
         );
       }
-      if (
-        cmd.includes("qual e lo stile") ||
-        cmd.includes("che stile") ||
-        cmd.includes("cos e il")
-      ) {
+      if (cmd.includes("qual e lo stile")) {
         handleLogisticsRef.current(
           `Lo stile è: ${item?.stile || "non specificato"}`,
         );
       }
-      if (
-        cmd.includes("cos e questo") ||
-        cmd.includes("che cos e") ||
-        cmd.includes("cosa sto guardando")
-      ) {
+      if (cmd.includes("cosa sto guardando")) {
         handleLogisticsRef.current(
           `${item?.titolo || "Opera"} — ${item?.categoria || ""}. ${item?.artista ? "Autore: " + item.artista : ""}`,
         );
@@ -1230,8 +1212,8 @@ export default function NavigatorItemViewer() {
             </li>
             <li className="mb-3">
               <i className="bi bi-info-square me-2 text-warning"></i>
-              <strong>Info opera:</strong> "Chi è l'autore", "Qual è lo stile",
-              "Cos'è questo", "Cosa sto guardando"
+              <strong>Info opera:</strong> "Chi è l'autore", "Chi è l'artista",
+              "Qual è lo stile", "Cosa sto guardando"
             </li>
             <li className="mb-3">
               <i className="bi bi-map me-2 text-warning"></i>
@@ -1239,13 +1221,13 @@ export default function NavigatorItemViewer() {
             </li>
             <li className="mb-3">
               <i className="bi bi-gear me-2 text-warning"></i>
-              <strong>Livello:</strong> "Più semplice", "Non capisco", "Troppo
-              semplice", "Meno scolastico"
+              <strong>Livello:</strong> "Più semplice", "Non capisco", "Più
+              difficile"
             </li>
             <li className="mb-3">
               <i className="bi bi-clock me-2 text-warning"></i>
-              <strong>Durata:</strong> "Dimmi di più", "Più lungo", "Dimmi di
-              meno", "Più corto", "Riduci"
+              <strong>Durata:</strong> "Dimmi di più", "Approfondisci", "Più
+              lungo", "Dimmi di meno", "Più corto", "Riduci"
             </li>
             <li className="mb-3">
               <i className="bi bi-play-circle me-2 text-warning"></i>
@@ -1254,8 +1236,8 @@ export default function NavigatorItemViewer() {
             </li>
             <li className="mb-3">
               <i className="bi bi-geo-alt me-2 text-warning"></i>
-              <strong>Logistica:</strong> "Dov'è il bagno", "Dov'è l'uscita",
-              "Dov'è il bar", "Dov'è lo shop", "Ci sono ostacoli"
+              <strong>Logistica:</strong> "Bagno", "Toilette", "Uscita", "Bar",
+              "Shop", "Ostacoli", "Accessibilità"
             </li>
           </ul>
           <button

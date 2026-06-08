@@ -10,7 +10,12 @@ import NavigatorLibrary from "./components/NavigatorLibrary";
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [showIntro, setShowIntro] = useState(true);
+
+  // 1. Initialize showIntro by checking if the session flag already exists
+  const [showIntro, setShowIntro] = useState(() => {
+    const hasSeenIntro = sessionStorage.getItem("artaround_intro_seen");
+    return !hasSeenIntro; // If it doesn't exist, returns true (shows intro)
+  });
 
   useEffect(() => {
     const handleResize = () => {
@@ -22,11 +27,15 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowIntro(false);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
+    // 2. If the intro needs to be shown, start the timer and save the state in the session
+    if (showIntro) {
+      const timer = setTimeout(() => {
+        sessionStorage.setItem("artaround_intro_seen", "true");
+        setShowIntro(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showIntro]);
 
   const text = ["A", "r", "t", "A", "r", "o", "u", "n", "d"];
 

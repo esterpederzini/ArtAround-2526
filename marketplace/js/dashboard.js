@@ -583,7 +583,24 @@ async function caricaVisiteTab(pagina = stato.paginaVisite) {
     return;
   }
 
-  grid.innerHTML = data.visite.map((v) => renderVisitaCard(v)).join("");
+  // Filtra le visite in base al ruolo dell'utente:
+  // - Visita pubblica (gratis o a pagamento): visibile a tutti
+  // - Visita privata: visibile solo al suo creatore
+  const u = getUtenteCorrente();
+  const visiteFiltrate = data.visite.filter((v) => {
+    if (v.pubblica !== false) return true; // pubblica: sempre visibile
+    if (!u) return false; // privata + non loggato: nascosta
+    const idCreatore = v.creatorId?._id || v.creatorId;
+    return idCreatore === u._id; // privata: visibile solo all'autore
+  });
+
+  if (!visiteFiltrate.length) {
+    grid.innerHTML =
+      '<div class="col-12"><div class="aa-empty"><div class="aa-empty-icon">🗺️</div><h5>Nessuna visita disponibile</h5><p>Crea la prima visita dall\'Editor.</p><a href="/editor-visita" class="btn-aa-primary mt-2">Crea Visita</a></div></div>';
+    return;
+  }
+
+  grid.innerHTML = visiteFiltrate.map((v) => renderVisitaCard(v)).join("");
   renderPaginazione(
     "paginazioneVisite",
     pagina,
