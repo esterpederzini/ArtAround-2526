@@ -7,6 +7,7 @@ var tuttiItems = tuttiItems || [];
 var dragSrc = dragSrc || null;
 
 // ─── INIT ────────────────────────────────────────────
+// ─── INIT ────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
   // Sincronizza lo stato visivo della navbar globale usando utils.js
   aggiornaUtenteUI();
@@ -17,6 +18,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Se l'utente non ha fatto il login (è un ospite anonimo)
   // Se l'utente non ha fatto il login (è un ospite anonimo)
   if (!utente) {
+    // Applichiamo lo sfondo blu scuro direttamente al body
+    document.body.style.backgroundColor = "#1e2640";
+
     // 1. Nascondiamo la navbar globale per liberare la parte superiore dello schermo
     const navbar = document.querySelector(".aa-navbar");
     if (navbar) {
@@ -28,26 +32,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       // 2. Rendiamo visibile il contenitore principale
       mainContainer.classList.remove("d-none");
 
-      // 3. Sostituiamo l'intero layout interno (la row g-4 originale sparisce)
+      // 3. Sostituiamo l'intero layout interno adattando i colori alla palette scura
       mainContainer.innerHTML = `
         <div class="row justify-content-center align-items-center flex-grow-1" style="min-height: 85vh;">
           <div class="col-md-8 col-lg-6 text-center">
             <div style="font-size: 5rem; margin-bottom: 1rem;">🗺️</div>
+            
             <h2 style="color: var(--aa-gold); font-family: var(--aa-font-serif); font-size: 2.5rem; font-weight: 600;">
               Crea il tuo percorso su misura!
             </h2>
-            <p class="lead mt-3" style="color: var(--aa-slate);">
+            
+            <p class="lead mt-3" style="color: #ffffff; font-weight: 400;">
               Vuoi diventare un curatore virtuale e progettare la tua visita museale perfetta per ${configMuseo ? configMuseo.museo : "il museo"}?
             </p>
-            <p class="mb-4 text-muted">
+            
+            <p class="mb-4" style="color: #cbd5e1; font-size: 0.95rem;">
               Devi effettuare l'accesso per poter mescolare i contenuti del catalogo, creare il tuo itinerario e modificarlo quando vuoi.
             </p>
             
             <div class="d-flex justify-content-center gap-3 mt-2">
-              <a href="/dashboard" class="btn-aa-outline">
+              <a href="/dashboard" class="btn-aa-outline" style="color: #f2ede7; border-color: rgba(242, 237, 231, 0.4); background: rgba(255,255,255,0.05);">
                 <i class="bi bi-arrow-left"></i> Torna alla Dashboard
               </a>
-              <button class="btn-aa-primary" onclick="apriLogin()">
+              
+              <button class="btn-aa-primary" onclick="apriLogin()" style="background-color: var(--aa-gold); border-color: var(--aa-gold); color: var(--aa-ink); font-weight: 600;">
                 <i class="bi bi-person"></i> Accedi ora
               </button>
             </div>
@@ -57,6 +65,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     return;
   }
+
+  document.body.style.backgroundColor = "var(--aa-cream)";
 
   if (configMuseo && configMuseo.museo) {
     const inputMuseo = document.getElementById("visitaMuseo");

@@ -6,36 +6,71 @@ let museoConfigurato = "";
 let mappaOpereLocali = {}; // Mappa per l'autocompilazione immediata client-side
 
 // ─── INIT ────────────────────────────────────────────
+// ─── INIT ────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
   // Sincronizza lo stato visivo della navbar globale
   aggiornaUtenteUI();
 
   if (!richiedeAutore()) {
-    const container =
-      document.querySelector(".container") ||
-      document.querySelector(".container-fluid");
+    // 1. Applichiamo lo sfondo blu scuro strano direttamente al body
+    document.body.style.backgroundColor = "#1e2640";
+
+    // 2. Nascondiamo la navbar globale
+    const navbar = document.querySelector(".aa-navbar");
+    if (navbar) {
+      navbar.classList.add("d-none");
+    }
+
+    // 3. Intercettiamo il VERO container dell'HTML (mainContent)
+    const container = document.getElementById("mainContent");
     if (container) {
+      // Rimuoviamo il d-none per farlo vedere e forziamo il 100% di larghezza
+      container.classList.remove("d-none");
+      container.style.maxWidth = "100%";
+      container.style.width = "100%";
+
+      // Iniettiamo la struttura centrata a schermo intero (min-height: 85vh)
       container.innerHTML = `
-        <div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+        <div class="row justify-content-center align-items-center flex-grow-1" style="min-height: 85vh;">
           <div class="col-md-8 col-lg-6 text-center">
             <div style="font-size: 5rem; margin-bottom: 1rem;">🎨</div>
-            <h2 style="color: var(--aa-gold); font-family: 'Playfair Display', serif;">
+            
+            <h2 style="color: var(--aa-gold); font-family: var(--aa-font-serif); font-size: 2.5rem; font-weight: 600;">
               L'ispirazione ha bussato, ma serve il pass!
             </h2>
-            <p class="lead mt-3 text-slate">
-              Attualmente stai esplorando ArtAround come <strong>Visitatore</strong>. 
+            
+            <p class="lead mt-3" style="color: #ffffff; font-weight: 400;">
+              Attualmente stai esplorando ArtAround come <strong>Visitatore</strong>.
             </p>
-            <p class="mb-4">
-              Solo gli utenti con il ruolo di <strong>Autore</strong> possono scolpire nuovi contenuti, progettare percorsi museali e condividerli con la community. 
+            
+            <p class="mb-4" style="color: #cbd5e1; font-size: 0.95rem;">
+              Solo gli utenti con il ruolo di <strong>Autore</strong> possono creare o modificare i singoli Contenuti (Item) del catalogo. 
+              Effettua l'accesso con un account abilitato per sbloccare l'area di creazione.
             </p>
-            <a href="/dashboard" class="btn-aa-primary mt-2">
-              <i class="bi bi-arrow-left"></i> Torna alla Dashboard
-            </a>
+            
+            <div class="d-flex justify-content-center gap-3 mt-2">
+              <a href="/dashboard" class="btn-aa-outline" style="color: #f2ede7; border-color: rgba(242, 237, 231, 0.4); background: rgba(255,255,255,0.05);">
+                <i class="bi bi-arrow-left"></i> Torna alla Dashboard
+              </a>
+              
+              <button class="btn-aa-primary" onclick="apriLogin()" style="background-color: var(--aa-gold); border-color: var(--aa-gold); color: var(--aa-ink); font-weight: 600;">
+                <i class="bi bi-person"></i> Accedi ora
+              </button>
+            </div>
           </div>
         </div>
       `;
     }
+    return;
   }
+
+  // Se l'utente è un autore valido, ripristiniamo lo sfondo crema e mostriamo l'HTML standard
+  document.body.style.backgroundColor = "var(--aa-cream)";
+  const containerNormale = document.getElementById("mainContent");
+  if (containerNormale) {
+    containerNormale.classList.remove("d-none");
+  }
+
   await inizializzaMuseoDaConfig();
 
   const utente = getUtenteCorrente();
