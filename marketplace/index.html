@@ -71,10 +71,11 @@
               <i class="bi bi-palette2"></i> Marketplace & Editor
             </div>
             <h1>Esplora e crea<br /><em>esperienze museali</em></h1>
-            <p id="heroSubtitle">
-              Scopri contenuti audio per ogni livello: dai percorsi per bambini
-              alle analisi per esperti. Crea la tua guida personalizzata o
-              adotta i contenuti della community.
+            <p class="lead mb-4 text-slate-dark">
+              Esplora le meraviglie del patrimonio artistico e culturale. Scopri
+              i contenuti multimediali ufficiali e i percorsi personalizzati
+              creati per il
+              <strong class="text-ink" id="heroNomeMuseo">il museo</strong>.
             </p>
             <div
               class="d-flex gap-3 mt-4 flex-wrap"
@@ -235,6 +236,10 @@
             `;
           }
 
+          if (document.getElementById("heroNomeMuseo")) {
+            document.getElementById("heroNomeMuseo").textContent = config.museo;
+          }
+
           // ─── 🛠️ LOGICA BLINDATA DI CONTROLLO PULSANTE "CREA VISITA" ───
           const u = getUtenteCorrente();
           const btnCreaVisita = document.getElementById("btnHeroCreaVisita");
@@ -281,36 +286,47 @@
       async function caricaVisitePreview() {
         const container = document.getElementById("visitePreview");
         const data = await apiFetch("/api/visite?limite=3&pubblica=true");
-        if (!data || !data.visite.length) {
+        if (!data || !data.visite || !data.visite.length) {
           container.innerHTML =
             '<div class="col-12"><div class="aa-empty">Nessuna visita disponibile.</div></div>';
           return;
         }
-        container.innerHTML = data.visite
+
+        // ─── 🛡️ FILTRO DI SICUREZZA LATO CLIENT ───
+        const visitePubbliche = data.visite.filter((v) => v.pubblica !== false);
+
+        if (!visitePubbliche.length) {
+          container.innerHTML =
+            '<div class="col-12"><div class="aa-empty">Nessuna visita disponibile.</div></div>';
+          return;
+        }
+
+        container.innerHTML = visitePubbliche
+          .slice(0, 3)
           .map(
             (v) => `
           <div class="col-md-4">
-            <div class="aa-visita-card" style="cursor:pointer" onclick="window.location='/dashboard?tab=visite'">
+            <div class="aa-visita-card d-flex flex-column h-100" style="cursor:pointer" onclick="window.location='/dashboard?tab=visite'">
               <div class="vcard-header">
                 <h5>${v.titolo || v.title || "Visita senza nome"}</h5>
                 <small style="opacity:0.65">${v.museo}</small>
               </div>
-              <div class="vcard-body">
-                <p class="small text-slate mb-2" style="line-height:1.4">${(v.descrizione || "Guida multimediale").substring(0, 85)}...</p>
-                <div class="mb-3 d-flex gap-1 flex-wrap align-items-center">
-                   ${badgeLinguaggio(v.livello_base)}
-                   ${(v.tags || [])
-                     .slice(0, 2)
-                     .map(
-                       (t) => `<span class="aa-badge aa-badge-len">${t}</span>`,
-                     )
-                     .join("")}
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                  <span class="${v.prezzo ? "aa-price" : "aa-badge aa-badge-free"}">
-                    ${v.prezzo ? "€ " + v.prezzo.toFixed(2) : "Gratuita"}
-                  </span>
-                  <span class="text-slate small">${(v.tappe || v.items || []).length} tappe</span>
+              
+              <div class="vcard-body d-flex flex-column flex-grow-1">
+                <p class="small text-slate mb-4" style="line-height:1.4">${(v.descrizione || "Guida multimediale").substring(0, 85)}...</p>
+                
+                <div class="mt-auto d-flex justify-content-between gap-2 pt-3">
+                   
+                   <div class="d-flex gap-3">
+                      ${badgeLinguaggio(v.livello_base)}
+                      
+                      <span class="${v.prezzo ? "aa-price" : "aa-badge aa-badge-free"}" style="font-weight: 600;">
+                        ${v.prezzo ? "€ " + v.prezzo.toFixed(2) : "Gratuita"}
+                      </span>
+                   </div>
+
+                   <span class="text-slate small fw-medium"><i class="bi bi-geo-alt me-1"></i>${(v.tappe || v.items || []).length} tappe</span>
+                   
                 </div>
               </div>
             </div>
@@ -319,7 +335,6 @@
           )
           .join("");
       }
-
       // Controllo di sicurezza prima di reindirizzare all'editor percorsi
       function vaiAEditorVisita(event) {
         const u = getUtenteCorrente();

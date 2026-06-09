@@ -44,12 +44,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (["autore", "admin"].includes(u.ruolo)) {
       document.getElementById("sidebarLog")?.classList.remove("d-none");
 
+      // Mostra la riga 2 della toolbar (bottoni autore su seconda riga)
+      document.getElementById("authorActions")?.classList.remove("d-none");
+
       // Sincronizza i bottoni di creazione basandoti sulla tab iniziale ("items")
       document.getElementById("btnNuovoItem")?.classList.remove("d-none");
       document.getElementById("btnNuovaVisita")?.classList.add("d-none");
-
-      // MOSTRA IL PULSANTE DEL LOG VENDITE
-      document.getElementById("btnLogVendite")?.classList.remove("d-none");
     }
   }
 
@@ -316,8 +316,8 @@ async function apriItemModal(id) {
   document.getElementById("modalItemTitolo").textContent = item.titolo;
 
   // 🛡️ Gestione Fallback Immagine (se manca, usa il placeholder di style.css)
-  const mediaHTML = item.immagine
-    ? `<img src="${item.immagine}" class="img-fluid rounded border border-soft w-100" style="max-height: 250px; object-fit: cover;" alt="">`
+  const mediaHTML = item.url
+    ? `<img src="${item.url}" class="img-fluid rounded border border-soft w-100" style="max-height: 250px; object-fit: cover;" alt="">`
     : `<div class="aa-item-placeholder rounded border border-soft d-flex align-items-center justify-content-center" style="height: 180px;">
          <i class="bi bi-image" style="font-size: 2.5rem; color: var(--aa-tortora);"></i>
        </div>`;

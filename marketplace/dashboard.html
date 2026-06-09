@@ -209,48 +209,55 @@
             </button>
           </div>
 
-          <div class="d-flex gap-2 align-items-center mb-4">
-            <input
-              type="text"
-              id="campoCerca"
-              class="aa-input"
-              placeholder="Cerca per titolo, artista, tag..."
-              oninput="debounceCerca()"
-              style="max-width: 300px"
-            />
+          <div class="aa-toolbar mb-4">
+            <!-- RIGA 1: sempre visibile – ricerca e limite pagine -->
+            <div class="aa-toolbar-row aa-toolbar-search">
+              <input
+                type="text"
+                id="campoCerca"
+                class="aa-input"
+                placeholder="Cerca per titolo, artista, tag..."
+                oninput="debounceCerca()"
+              />
+              <select
+                id="selectLimit"
+                class="aa-select"
+                onchange="cambiaLimite(this.value)"
+                style="width: auto"
+              >
+                <option value="12">12 / pag</option>
+                <option value="24">24 / pag</option>
+                <option value="48">48 / pag</option>
+              </select>
+            </div>
 
-            <select
-              id="selectLimit"
-              class="aa-select"
-              onchange="cambiaLimite(this.value)"
-              style="width: auto"
+            <!-- RIGA 2: visibile solo se autore/admin, va su riga separata -->
+            <div
+              class="aa-toolbar-row aa-toolbar-author d-none"
+              id="authorActions"
             >
-              <option value="12">12 / pag</option>
-              <option value="24">24 / pag</option>
-              <option value="48">48 / pag</option>
-            </select>
-            <button
-              id="btnLogVendite"
-              class="btn-aa-outline d-none"
-              onclick="apriLogModal()"
-            >
-              <i class="bi bi-graph-up-arrow"></i> Log Vendite
-            </button>
-            <a
-              href="/editor-item"
-              id="btnNuovoItem"
-              class="btn-aa-primary d-none"
-            >
-              <i class="bi bi-plus-circle"></i> Nuovo Item
-            </a>
-
-            <a
-              href="/editor-visita"
-              id="btnNuovaVisita"
-              class="btn-aa-primary d-none"
-            >
-              <i class="bi bi-plus-circle"></i> Nuova Visita
-            </a>
+              <button
+                id="btnLogVendite"
+                class="btn-aa-outline"
+                onclick="apriLogModal()"
+              >
+                <i class="bi bi-graph-up-arrow"></i> Log Vendite
+              </button>
+              <a
+                href="/editor-item"
+                id="btnNuovoItem"
+                class="btn-aa-primary d-none"
+              >
+                <i class="bi bi-plus-circle"></i> Nuovo Item
+              </a>
+              <a
+                href="/editor-visita"
+                id="btnNuovaVisita"
+                class="btn-aa-primary d-none"
+              >
+                <i class="bi bi-plus-circle"></i> Nuova Visita
+              </a>
+            </div>
           </div>
 
           <div id="tabItems">
