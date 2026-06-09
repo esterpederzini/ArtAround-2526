@@ -1363,24 +1363,18 @@ border: 1px solid var(--aa-stone) !important;
 
 
 
-/* ─── TOOLBAR DUE RIGHE ────────────────────────────────────── */
-.aa-toolbar {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-}
+/* ─── TOOLBAR AUTORE: SECONDA RIGA SU MOBILE ───────────────── */
 
-/* Ogni riga è un flex row */
-.aa-toolbar-row {
+/* Su desktop i bottoni autore stanno inline nella stessa riga.
+   Su mobile il wrapper occupa tutta la larghezza → va automaticamente a capo. */
+.aa-author-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex-wrap: wrap;
 }
 
-/* Riga 1: campo cerca si espande, select rimane compatto */
-.aa-toolbar-search #campoCerca {
-  flex: 1 1 180px;
-  max-width: 300px;
+@media (max-width: 768px) {
+  .aa-author-actions {
+    flex-basis: 100%;
+  }
 }

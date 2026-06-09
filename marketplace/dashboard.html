@@ -209,33 +209,27 @@
             </button>
           </div>
 
-          <div class="aa-toolbar mb-4">
-            <!-- RIGA 1: sempre visibile – ricerca e limite pagine -->
-            <div class="aa-toolbar-row aa-toolbar-search">
-              <input
-                type="text"
-                id="campoCerca"
-                class="aa-input"
-                placeholder="Cerca per titolo, artista, tag..."
-                oninput="debounceCerca()"
-              />
-              <select
-                id="selectLimit"
-                class="aa-select"
-                onchange="cambiaLimite(this.value)"
-                style="width: auto"
-              >
-                <option value="12">12 / pag</option>
-                <option value="24">24 / pag</option>
-                <option value="48">48 / pag</option>
-              </select>
-            </div>
+          <div class="d-flex gap-2 align-items-center flex-wrap mb-4">
+            <input
+              type="text"
+              id="campoCerca"
+              class="aa-input"
+              placeholder="Cerca per titolo, artista, tag..."
+              oninput="debounceCerca()"
+              style="max-width: 300px"
+            />
 
-            <!-- RIGA 2: visibile solo se autore/admin, va su riga separata -->
-            <div
-              class="aa-toolbar-row aa-toolbar-author d-none"
-              id="authorActions"
+            <select
+              id="selectLimit"
+              class="aa-select"
+              onchange="cambiaLimite(this.value)"
+              style="width: auto"
             >
+              <option value="12">12 / pag</option>
+              <option value="24">24 / pag</option>
+              <option value="48">48 / pag</option>
+            </select>
+            <div id="authorActions" class="aa-author-actions d-none">
               <button
                 id="btnLogVendite"
                 class="btn-aa-outline"

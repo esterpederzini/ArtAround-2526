@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (["autore", "admin"].includes(u.ruolo)) {
       document.getElementById("sidebarLog")?.classList.remove("d-none");
 
-      // Mostra la riga 2 della toolbar (bottoni autore su seconda riga)
+      // Mostra il gruppo bottoni autore
       document.getElementById("authorActions")?.classList.remove("d-none");
 
       // Sincronizza i bottoni di creazione basandoti sulla tab iniziale ("items")
