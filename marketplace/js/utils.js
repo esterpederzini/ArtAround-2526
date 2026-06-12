@@ -293,22 +293,25 @@ function richiedeAutore() {
 function badgeLinguaggio(linguaggio) {
   if (!linguaggio) return "";
 
-  let bgClass = "bg-secondary text-white"; // Fallback di sicurezza
+  let bgClass = "";
   const tagLabel = linguaggio.charAt(0).toUpperCase() + linguaggio.slice(1);
 
+  // Mappiamo i tipi di linguaggio sui background definiti nel foglio style.css
   switch (linguaggio.toLowerCase()) {
     case "infantile":
-      bgClass =
-        "bg-success-subtle text-success-emphasis border border-success-subtle";
-      break;
     case "elementare":
-      // Allineato al bando: Azzurro pastello per il livello Junior
-      bgClass = "bg-info-subtle text-info-emphasis border border-info-subtle";
+      bgClass = "aa-badge-lang-elementare"; // Verde pastello
       break;
     case "medio":
-      bgClass =
-        "bg-warning-subtle text-warning-emphasis border border-warning-subtle";
+    case "intermedio":
+      bgClass = "aa-badge-lang-intermedio"; // Azzurro pastello
       break;
+    case "avanzato":
+    case "specialistico":
+      bgClass = "aa-badge-lang-avanzato"; // Arancione/Giallo pastello
+      break;
+    default:
+      bgClass = "bg-secondary text-white";
   }
 
   return `<span class="aa-badge ${bgClass}">${tagLabel}</span>`;

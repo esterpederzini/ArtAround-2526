@@ -81,6 +81,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await popolaSelectOpere();
 
+  // Sostituisci il vecchio ciclo dei listener con questo strutturato:
   [
     "titolo",
     "descrizione",
@@ -90,7 +91,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     "prezzo",
     "immagineUrl",
   ].forEach((id) => {
-    document.getElementById(id)?.addEventListener("input", aggiornaPreview);
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", aggiornaPreview);
+      if (el.tagName === "SELECT") {
+        el.addEventListener("change", aggiornaPreview);
+      }
+    }
   });
 
   document.getElementById("descrizione")?.addEventListener("input", (e) => {
@@ -280,16 +287,11 @@ function aggiornaPreview() {
   document.getElementById("prevLen").textContent = lunghezza;
   document.getElementById("prevLicenza").textContent = licenza;
 
-  // ─── CORREZIONE: Usa la funzione globale di utils.js per il badge colorato ───
   const prevLangContainer = document.getElementById("prevLang")?.parentElement;
   if (prevLangContainer) {
-    // Rimuoviamo il vecchio elemento statico e rigeneriamo il badge dinamicamente
     const vecchioBadge = document.getElementById("prevLang");
-    if (vecchioBadge) {
-      vecchioBadge.remove();
-    }
+    if (vecchioBadge) vecchioBadge.remove();
 
-    // Creiamo il nuovo badge e gli assegniamo l'ID per i cicli di aggiornamento successivi
     const htmlNuovoBadge = badgeLinguaggio(linguaggio);
     prevLangContainer.insertAdjacentHTML("afterbegin", htmlNuovoBadge);
 

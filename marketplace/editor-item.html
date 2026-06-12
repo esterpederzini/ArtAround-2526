@@ -36,7 +36,7 @@
               <a class="nav-link" href="/editor-visita">Editor Visita</a>
             </li>
             <li class="nav-item d-none id-autore-nav">
-              <a class="nav-link active" href="/editor-item">Nuovo Item</a>
+              <a class="nav-link active" href="/editor-item">Editor Item</a>
             </li>
           </ul>
           <div class="d-flex align-items-center gap-2">
@@ -110,36 +110,10 @@
 
               <div class="row g-3 mb-3">
                 <div class="col-md-4">
-                  <div class="aa-form-group">
-                    <label class="aa-label">ID Opera Fissa</label>
-                    <input
-                      type="text"
-                      id="operaId"
-                      class="aa-input"
-                      readonly
-                      style="
-                        background-color: var(--aa-cream);
-                        cursor: not-allowed;
-                      "
-                      placeholder="Codice opera..."
-                    />
-                  </div>
+                  <input type="hidden" id="itemId" value="" />
                 </div>
                 <div class="col-md-8">
-                  <div class="aa-form-group">
-                    <label class="aa-label">Titolo Ufficiale Opera</label>
-                    <input
-                      type="text"
-                      id="operaTitoloUfficiale"
-                      class="aa-input"
-                      readonly
-                      style="
-                        background-color: var(--aa-cream);
-                        cursor: not-allowed;
-                      "
-                      placeholder="Nome reale nel museo..."
-                    />
-                  </div>
+                  <input type="hidden" id="operaTitoloUfficiale" value="" />
                 </div>
               </div>
 
