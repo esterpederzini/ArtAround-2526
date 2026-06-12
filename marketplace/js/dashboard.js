@@ -656,7 +656,7 @@ async function adottaVisita(visitaId) {
   if (ok) showToast("Visita adottata e salvata nel tuo profilo!", "success");
 }
 
-// ─── SALVATAGGIO REALE NEL DB: VISITE ───────────────────────────
+// ─── SALVATAGGIO REALE NEL DB: VISITE (CON BLOCCO AUTO-ACQUISTO) ───
 async function eseguiAcquistoDnAdozioneVisita(visitaId, titolo, prezzo) {
   const u = getUtenteCorrente();
   if (!u) {
@@ -669,14 +669,26 @@ async function eseguiAcquistoDnAdozioneVisita(visitaId, titolo, prezzo) {
   }
 
   try {
-    // Chiamata API reale verso il tuo backend MongoDB
+    // 🛡️ CONTROLLO DI SICUREZZA LATO CLIENT
+    // Richiediamo i dettagli della visita per verificare l'identità del creatore
+    const visita = await apiFetch(`/api/visite/${visitaId}`);
+    const idCreatore = visita?.creatorId?._id || visita?.creatorId;
+
+    if (idCreatore && String(idCreatore) === String(u._id)) {
+      showToast(
+        "Operazione annullata: non puoi acquistare o adottare una visita creata da te.",
+        "error",
+      );
+      chiudiVisitaModal();
+      return;
+    }
+
     const response = await apiFetch(`/api/visite/${visitaId}/adotta`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ adottanteId: u._id }), // Invia l'ID dell'utente loggato
+      body: JSON.stringify({ adottanteId: u._id }),
     });
 
-    // Se il backend risponde positivamente, mostriamo il successo
     if (response) {
       const messaggio =
         prezzo > 0
@@ -686,8 +698,7 @@ async function eseguiAcquistoDnAdozioneVisita(visitaId, titolo, prezzo) {
       showToast(messaggio, "success");
       chiudiVisitaModal();
 
-      // Opzionale: se sei nella tab "personale", rinfresca la lista
-      if (typeof caricaVisite === "function") caricaVisite();
+      if (typeof caricaVisiteTab === "function") caricaVisiteTab();
     }
   } catch (error) {
     console.error("Errore durante il salvataggio della visita:", error);
@@ -695,7 +706,7 @@ async function eseguiAcquistoDnAdozioneVisita(visitaId, titolo, prezzo) {
   }
 }
 
-// ─── SALVATAGGIO REALE NEL DB: ITEM ─────────────────────────────
+// ─── SALVATAGGIO REALE NEL DB: ITEM (CON BLOCCO AUTO-ACQUISTO) ───
 async function eseguiAcquistoDnAdozioneItem(itemId, titolo, prezzo) {
   const u = getUtenteCorrente();
   if (!u) {
@@ -708,7 +719,20 @@ async function eseguiAcquistoDnAdozioneItem(itemId, titolo, prezzo) {
   }
 
   try {
-    // Chiamata API reale (adatta l'endpoint se il tuo backend usa /acquista o /adotta)
+    // 🛡️ CONTROLLO DI SICUREZZA LATO CLIENT
+    // Richiediamo i dettagli dell'item per verificare al volo l'identità del creatore
+    const item = await apiFetch(`/api/items/${itemId}`);
+    const idCreatore = item?.creatorId?._id || item?.creatorId;
+
+    if (idCreatore && String(idCreatore) === String(u._id)) {
+      showToast(
+        "Operazione annullata: non puoi acquistare o adottare un contenuto creato da te.",
+        "error",
+      );
+      chiudiItemModal();
+      return;
+    }
+
     const endpoint =
       prezzo > 0
         ? `/api/items/${itemId}/acquista`
