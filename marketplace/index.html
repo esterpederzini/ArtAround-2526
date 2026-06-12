@@ -88,7 +88,7 @@
               <a
                 href="/editor-visita"
                 id="btnHeroCreaVisita"
-                class="btn-aa-outline"
+                class="btn-aa-outline d-none"
                 onclick="return vaiAEditorVisita(event);"
                 style="
                   color: var(--aa-cream);
@@ -163,35 +163,158 @@
 
     <div id="loginModal" class="aa-modal-overlay d-none">
       <div class="aa-modal" style="max-width: 420px">
-        <div class="aa-modal-header">
-          <h4>Accedi ad ArtAround</h4>
-          <button class="aa-modal-close" onclick="chiudiLogin()">✕</button>
-        </div>
-        <div class="aa-modal-body">
-          <div class="aa-form-group">
-            <label class="aa-label">Username</label>
-            <input
-              type="text"
-              id="loginUsername"
-              class="aa-input"
-              placeholder="es. autore1"
-            />
+        <div id="authLoginSection">
+          <div class="aa-modal-header">
+            <h4>Accedi ad ArtAround</h4>
+            <button class="aa-modal-close" onclick="chiudiLogin()">✕</button>
           </div>
-          <div class="aa-form-group">
-            <label class="aa-label">Password</label>
-            <input
-              type="password"
-              id="loginPassword"
-              class="aa-input"
-              placeholder="••••••••"
-            />
+          <div class="aa-modal-body">
+            <div class="aa-form-group">
+              <label class="aa-label">Username o Email</label>
+              <input
+                type="text"
+                id="loginUsername"
+                class="aa-input"
+                placeholder="es. autore1"
+              />
+            </div>
+            <div class="aa-form-group">
+              <label class="aa-label">Password</label>
+              <input
+                type="password"
+                id="loginPassword"
+                class="aa-input"
+                placeholder="••••••••"
+              />
+            </div>
+            <div class="text-center mt-3" style="font-size: 0.85rem">
+              Non hai un account?
+              <a
+                href="#"
+                onclick="
+                  toggleAuthModal('register');
+                  return false;
+                "
+                class="text-gold fw-semibold"
+                >Registrati ora</a
+              >
+            </div>
+          </div>
+          <div class="aa-modal-footer">
+            <button class="btn-aa-outline" onclick="chiudiLogin()">
+              Annulla
+            </button>
+            <button class="btn-aa-primary" onclick="eseguiLogin()">
+              Accedi
+            </button>
           </div>
         </div>
-        <div class="aa-modal-footer">
-          <button class="btn-aa-outline" onclick="chiudiLogin()">
-            Annulla
-          </button>
-          <button class="btn-aa-primary" onclick="eseguiLogin()">Accedi</button>
+
+        <div id="authRegisterSection" class="d-none">
+          <div class="aa-modal-header">
+            <h4>Crea il tuo Account</h4>
+            <button class="aa-modal-close" onclick="chiudiLogin()">✕</button>
+          </div>
+          <div class="aa-modal-body">
+            <div class="aa-form-group">
+              <label class="aa-label"
+                >Username <span class="text-danger">*</span></label
+              >
+              <input
+                type="text"
+                id="regUsername"
+                class="aa-input"
+                placeholder="Scegli un username (min 3 car.)"
+              />
+            </div>
+            <div class="aa-form-group">
+              <label class="aa-label"
+                >Email <span class="text-danger">*</span></label
+              >
+              <input
+                type="email"
+                id="regEmail"
+                class="aa-input"
+                placeholder="Inserisci la tua email"
+              />
+            </div>
+            <div class="aa-form-group">
+              <label class="aa-label"
+                >Password <span class="text-danger">*</span></label
+              >
+              <input
+                type="password"
+                id="regPassword"
+                class="aa-input"
+                placeholder="Minimo 8 caratteri"
+              />
+            </div>
+
+            <div class="aa-form-group mb-3">
+              <label class="aa-label">Tipo di Account</label>
+              <div
+                class="d-flex gap-4 mt-1 p-2 rounded bg-cream border border-soft"
+                style="background-color: var(--aa-cream)"
+              >
+                <div class="form-check m-0 d-flex align-items-center gap-2">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="regRuolo"
+                    id="ruoloVisitatore"
+                    value="visitatore"
+                    checked
+                    style="cursor: pointer"
+                  />
+                  <label
+                    class="form-check-label small fw-medium text-charcoal"
+                    for="ruoloVisitatore"
+                    style="cursor: pointer; margin: 0"
+                  >
+                    <i class="bi bi-person"></i> Visitatore
+                  </label>
+                </div>
+                <div class="form-check m-0 d-flex align-items-center gap-2">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="regRuolo"
+                    id="ruoloAutore"
+                    value="autore"
+                    style="cursor: pointer"
+                  />
+                  <label
+                    class="form-check-label small fw-medium text-charcoal"
+                    for="ruoloAutore"
+                    style="cursor: pointer; margin: 0"
+                  >
+                    <i class="bi bi-pen"></i> Autore (Creatore)
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-center mt-3" style="font-size: 0.85rem">
+              Hai già un account?
+              <a
+                href="#"
+                onclick="
+                  toggleAuthModal('login');
+                  return false;
+                "
+                class="text-gold fw-semibold"
+                >Accedi qui</a
+              >
+            </div>
+          </div>
+          <div class="aa-modal-footer">
+            <button class="btn-aa-outline" onclick="chiudiLogin()">
+              Annulla
+            </button>
+            <button class="btn-aa-primary" onclick="eseguiRegistrazione()">
+              Registrati
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -245,11 +368,11 @@
           const btnCreaVisita = document.getElementById("btnHeroCreaVisita");
 
           if (btnCreaVisita) {
-            // Condizione rigida: deve essere loggato E deve essere autore o admin
+            // Il pulsante viene mostrato ESCLUSIVAMENTE se l'utente è registrato come autore o admin
             if (u && (u.ruolo === "autore" || u.ruolo === "admin")) {
               btnCreaVisita.classList.remove("d-none");
             } else {
-              // Nasconde il tasto a visitatori anonimi e visitatori semplici
+              // Forza il mantenimento del blocco nascosto per visitatori e anonimi
               btnCreaVisita.classList.add("d-none");
             }
           }

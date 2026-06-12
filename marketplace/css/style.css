@@ -1378,3 +1378,23 @@ border: 1px solid var(--aa-stone) !important;
     flex-basis: 100%;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   🎨 PERSONALIZZAZIONE COLORE RADIO BUTTON (TEMA GOLD)
+   ───────────────────────────────────────────────────────────── */
+/* Colore di sfondo quando il radio button è selezionato */
+.form-check-input:checked {
+  background-color: var(--aa-gold) !important;
+  border-color: var(--aa-gold) !important;
+}
+
+.form-check-input:focus {
+  border-color: var(--aa-gold-light) !important;
+  box-shadow: 0 0 0 0.25rem rgba(184, 150, 46, 0.25) !important;
+}
+
+.form-check-input {
+  cursor: pointer;
+  width: 1.15em;
+  height: 1.15em;
+}

@@ -915,7 +915,7 @@ async function caricaMieiContenuti() {
                         <tr>
                           <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
                           <td><small>${v.museo}</small></td>
-                          <td><span class="aa-badge aa-badge-len">${numTappe} ${numTappe === 1 ? "stop" : "stops"}</span></td>
+                          <td><span class="aa-badge aa-badge-len">${numTappe} ${numTappe === 1 ? "tappa" : "tappe"}</span></td>
                           <td><a href="/editor-visita?id=${v._id}" class="btn-aa-outline" style="font-size:0.75rem;padding:2px 8px">Modifica</a></td>
                         </tr>
                       `;
@@ -944,7 +944,7 @@ async function caricaMieiContenuti() {
                         <tr>
                           <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
                           <td><small>${v.museo}</small></td>
-                          <td><span class="aa-badge aa-badge-len">${numTappe} ${numTappe === 1 ? "stop" : "stops"}</span></td>
+                          <td><span class="aa-badge aa-badge-len">${numTappe} ${numTappe === 1 ? "tappa" : "tappe"}</span></td>
                           <td><a href="/editor-visita?id=${v._id}" class="btn-aa-gold" style="font-size:0.75rem;padding:2px 10px">Personalizza</a></td>
                         </tr>
                       `;

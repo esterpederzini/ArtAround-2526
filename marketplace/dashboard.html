@@ -400,6 +400,51 @@
                 placeholder="Minimo 8 caratteri"
               />
             </div>
+
+            <div class="aa-form-group mb-3">
+              <label class="aa-label">Tipo di Account</label>
+              <div
+                class="d-flex gap-4 mt-1 p-2 rounded bg-cream border border-soft"
+                style="background-color: var(--aa-cream)"
+              >
+                <div class="form-check m-0 d-flex align-items-center gap-2">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="regRuolo"
+                    id="ruoloVisitatore"
+                    value="visitatore"
+                    checked
+                    style="cursor: pointer"
+                  />
+                  <label
+                    class="form-check-label small fw-medium text-charcoal"
+                    for="ruoloVisitatore"
+                    style="cursor: pointer; margin: 0"
+                  >
+                    <i class="bi bi-person"></i> Visitatore
+                  </label>
+                </div>
+                <div class="form-check m-0 d-flex align-items-center gap-2">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="regRuolo"
+                    id="ruoloAutore"
+                    value="autore"
+                    style="cursor: pointer"
+                  />
+                  <label
+                    class="form-check-label small fw-medium text-charcoal"
+                    for="ruoloAutore"
+                    style="cursor: pointer; margin: 0"
+                  >
+                    <i class="bi bi-pen"></i> Autore (Creatore)
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <div class="text-center mt-3" style="font-size: 0.85rem">
               Hai già un account?
               <a

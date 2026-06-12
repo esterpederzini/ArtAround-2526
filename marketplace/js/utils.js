@@ -49,8 +49,24 @@ async function apiFetch(url, opzioni = {}) {
 // LOGIN
 // ─── COMPONENTE AUTH UNIVERSALE (utils.js) ───────────────────────────
 
+// ─── FUNZIONE APRI LOGIN UNIVERSALE ED INATTACCABILE ───
 function apriLogin() {
-  document.getElementById("loginModal")?.classList.remove("d-none");
+  const modal = document.getElementById("loginModal");
+  if (!modal) return;
+
+  // 1. Mostriamo il contenitore del modal rimuovendo il d-none globale
+  modal.classList.remove("d-none");
+
+  // 2. 🛡️ FIX SELETTORI LOCALI: Evita conflitti di ID duplicati tra index e dashboard
+  // Invece di usare document.getElementById, cerchiamo i blocchi "figli" dentro il modal attivo
+  const loginSec = modal.querySelector("#authLoginSection");
+  const registerSec = modal.querySelector("#authRegisterSection");
+
+  if (loginSec && registerSec) {
+    // Forza lo stato iniziale standard: mostra la form di Login, nascondi la Registrazione
+    loginSec.classList.remove("d-none");
+    registerSec.classList.add("d-none");
+  }
 }
 
 function chiudiLogin() {
@@ -98,11 +114,21 @@ function toggleAuthModal(modalita) {
   }
 }
 
-// Funzione per inviare i dati di registrazione a MongoDB
+// Esponiamo esplicitamente la funzione a livello globale per gli onclick dell'HTML
+window.toggleAuthModal = toggleAuthModal;
+// Funzione per inviare i dati di registrazione a MongoDB con ruolo dinamico
 async function eseguiRegistrazione() {
   const username = document.getElementById("regUsername")?.value.trim();
   const email = document.getElementById("regEmail")?.value.trim();
   const password = document.getElementById("regPassword")?.value;
+
+  // 🛠️ ESTRAZIONE DEL RUOLO DAL RADIO BUTTON SELEZIONATO
+  const elementoRuoloSelezionato = document.querySelector(
+    'input[name="regRuolo"]:checked',
+  );
+  const ruolo = elementoRuoloSelezionato
+    ? elementoRuoloSelezionato.value
+    : "visitatore";
 
   // Validazioni formali lato client coerenti con i vincoli del modello Mongoose
   if (!username || !email || !password) {
@@ -121,29 +147,28 @@ async function eseguiRegistrazione() {
     return;
   }
 
-  // Inoltro della chiamata verso le nuove API di backend
+  // Inoltro della chiamata inserendo il campo 'ruolo' nel corpo JSON
   const data = await apiFetch("/api/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, email, password }),
+    body: JSON.stringify({ username, email, password, ruolo }), // <-- Cambiato qui!
   });
 
   if (data) {
     showToast(
-      "Registrazione avvenuta con successo! Eseguo l'accesso...",
+      "Registrazione avvenuta con successo! Inizializzazione profilo...",
       "success",
     );
 
-    // Automatizziamo il login immediato salvando la sessione restituita
+    // Automatizziamo il login immediato salvando la sessione
     localStorage.setItem("aa_utente", JSON.stringify(data.user || data));
     localStorage.setItem("aa_token", data.token);
 
     chiudiLogin();
     aggiornaUtenteUI();
 
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
+    // Ricarica subito la pagina per sincronizzare le viste autore della dashboard
+    window.location.reload();
   }
 }
 
@@ -208,25 +233,33 @@ function showToast(messaggio, tipo = "info", durata = 3500) {
 // ─── AUTH ────────────────────────────────────────────
 function getAuthToken() {
   try {
-    return localStorage.getItem("aa_token");
+    const token = localStorage.getItem("aa_token");
+    // 🛡️ SICUREZZA: Se il token è nullo, non definito o contiene stringhe spurie, restituisce null
+    if (!token || token === "undefined" || token === "null") {
+      return null;
+    }
+    return token;
   } catch {
     return null;
   }
 }
 
 function isTokenScaduto(token) {
-  if (!token) return true;
+  // Se il token manca o non è una stringa valida, non considerarlo scaduto (l'utente è semplicemente anonimo)
+  if (!token || token === "undefined" || token === "null") return false;
+
   try {
-    // Il JWT è composto da tre parti separate da un punto. La seconda è il payload.
-    const base64Url = token.split(".")[1];
+    const parti = token.split(".");
+    if (parti.length < 3) return true; // Struttura JWT non valida, consideralo corrotto
+
+    const base64Url = parti[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
     const payload = JSON.parse(window.atob(base64));
 
-    // Il timestamp di scadenza del JWT (exp) è in secondi, Date.now() in millisecondi
     const adesso = Math.floor(Date.now() / 1000);
     return payload.exp < adesso;
   } catch (e) {
-    return true; // Se il token è corrotto o non valido, consideralo scaduto
+    return true; // Se il token è corrotto, consideralo scaduto per sicurezza
   }
 }
 

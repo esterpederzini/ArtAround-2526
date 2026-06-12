@@ -485,7 +485,7 @@ exports.loginUtente = async (req, res) => {
 
 exports.registraUtente = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, ruolo } = req.body;
 
     // 1. Verifica preliminare della presenza dei dati obbligatori
     if (!username || !email || !password) {
@@ -508,12 +508,18 @@ exports.registraUtente = async (req, res) => {
       return risposta(res, 400, null, messaggioErrore);
     }
 
-    // 3. Creazione del nuovo record (il ruolo va in automatico a "visitatore")
+    // 🛠️ VALIDAZIONE SICURA DEL RUOLO RICHIESTO
+    // Accetta solo "visitatore" o "autore". Qualsiasi altro valore (o se omesso) diventa "visitatore"
+    const ruoloValido = ["visitatore", "autore"].includes(ruolo)
+      ? ruolo
+      : "visitatore";
+
+    // 3. Creazione del nuovo record con il ruolo dinamico validato
     const nuovoUtente = new User({
       username: username.trim(),
       email: email.toLowerCase().trim(),
       password: password, // Mongoose eseguirà l'hashing nel pre-save hook
-      ruolo: "visitatore",
+      ruolo: ruoloValido,
     });
 
     await nuovoUtente.save();
@@ -534,7 +540,6 @@ exports.registraUtente = async (req, res) => {
     return risposta(res, 500, null, err.message);
   }
 };
-
 // ─── LOG & STATS ────────────────────────────────────────────
 exports.getLogVendite = async (req, res) => {
   try {
