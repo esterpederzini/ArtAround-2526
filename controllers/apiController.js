@@ -273,7 +273,7 @@ exports.acquistaItem = async (req, res) => {
   }
 };
 
-// ─── VISITE (MODIFICATA PER NAVIGATOR) ──────────────────────
+// ─── VISITE (CORRETTA CON POPULATE LOG ADOZIONI) ───────────
 exports.getVisite = async (req, res) => {
   try {
     const { museo, creatorId, soloMie, pagina = 1, limite = 12 } = req.query;
@@ -298,6 +298,12 @@ exports.getVisite = async (req, res) => {
         .populate({
           path: "tappe.item_default",
           select: "titolo operaId lunghezza linguaggio url autore audioUrl",
+        })
+        /* ─── 🛠️ MODIFICA DI SICUREZZA INSERITA QUI ─── */
+        /* Diciamo a Mongoose di andare a prendere l'oggetto User per ogni adozione, estraendo solo lo username */
+        .populate({
+          path: "logAdozioni.adottanteId",
+          select: "username",
         })
         .sort({ createdAt: -1 })
         .skip(skip)

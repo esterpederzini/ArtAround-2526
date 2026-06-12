@@ -1042,40 +1042,143 @@ async function eliminaItem(itemId) {
   }
 }
 
-// ─── LOG VENDITE ─────────────────────────────────────
+// ─── LOG VENDITE CON RECOVERY DEGLI USERNAME DA ID STRINGA ───
 async function apriLogModal() {
   document.getElementById("logModal").classList.remove("d-none");
   const body = document.getElementById("logBody");
   body.innerHTML =
     '<div class="text-center py-4"><div class="aa-spinner"></div></div>';
 
-  const items = await apiFetch("/api/log/vendite");
-  if (!items || !items.length) {
+  const u = getUtenteCorrente();
+  if (!u) {
     body.innerHTML =
-      '<div class="aa-empty"><div class="aa-empty-icon">📋</div><p>Nessuna vendita registrata.</p></div>';
+      '<div class="aa-empty"><p>Effettua il login per consultare i log.</p></div>';
     return;
   }
 
-  let rows = "";
-  items.forEach((item) => {
-    item.logVendite.forEach((log) => {
-      rows += `
-        <tr>
-          <td><strong>${item.titolo}</strong></td>
-          <td><small>${item.operaId}</small></td>
-          <td>${log.acquirenteId?.username || "–"}</td>
-          <td><span class="aa-badge ${log.tipo === "acquisto" ? "aa-badge-paid" : "aa-badge-free"}">${log.tipo}</span></td>
-          <td>€ ${Number(log.prezzo || 0).toFixed(2)}</td>
-          <td><small>${new Date(log.dataAcquisto).toLocaleDateString("it-IT")}</small></td>
-        </tr>
-      `;
+  // 🛠️ SCARICHIAMO ANCHE LA LISTA UTENTI IN PARALLELO
+  const [dataItems, dataVisite, dataUtenti] = await Promise.all([
+    apiFetch("/api/items?pubblicato=tutti&limite=500"),
+    apiFetch(`/api/visite?pubblica=tutti&creatorId=${u._id}&limite=500`),
+    apiFetch("/api/utenti"), // Recupera l'elenco di tutti gli account del sistema
+  ]);
+
+  // Creiamo una mappa rapida ID -> Username per convertire al volo le stringhe orfane
+  const mappaUtenti = {};
+  if (dataUtenti && Array.isArray(dataUtenti)) {
+    dataUtenti.forEach((user) => {
+      if (user._id) mappaUtenti[String(user._id)] = user.username;
     });
-  });
+  }
+
+  let rows = "";
+  let totaleGuadagnato = 0;
+
+  // 1. FILTRAGGIO LOG VENDITE - ITEM DELL'AUTORE
+  if (dataItems && dataItems.items) {
+    dataItems.items.forEach((item) => {
+      const idCreatore = item.creatorId?._id || item.creatorId;
+      if (idCreatore === u._id && Array.isArray(item.logVendite)) {
+        item.logVendite.forEach((log) => {
+          const idAcquirenteObj = log.acquirenteId;
+          const idAcquirenteStr = String(
+            idAcquirenteObj?._id || idAcquirenteObj || "",
+          );
+
+          if (idAcquirenteStr && idAcquirenteStr !== String(u._id)) {
+            const importo = Number(log.prezzo || 0);
+            totaleGuadagnato += importo;
+
+            // Recupero nome: prima prova dal populate nativo, poi dalla mappa, infine fallback anonimo
+            const nomeAcquirente =
+              idAcquirenteObj?.username ||
+              mappaUtenti[idAcquirenteStr] ||
+              "Utente Anonimo";
+
+            rows += `
+              <tr>
+                <td><span class="aa-badge aa-badge-len"><i class="bi bi-file-earmark-music"></i> Item</span></td>
+                <td><strong>${item.titolo}</strong><br><small class="text-slate">${item.operaId || "–"}</small></td>
+                <td><span class="text-taupe fw-medium">${nomeAcquirente}</span></td>
+                <td><span class="aa-badge ${importo > 0 ? "aa-badge-paid" : "aa-badge-free"}">${importo > 0 ? "Vendita" : "Adozione"}</span></td>
+                <td class="fw-bold text-charcoal">${importo > 0 ? "€ " + importo.toFixed(2) : "Gratis"}</td>
+                <td><small class="text-slate">${log.dataAcquisto ? new Date(log.dataAcquisto).toLocaleDateString("it-IT") : "–"}</small></td>
+              </tr>
+            `;
+          }
+        });
+      }
+    });
+  }
+
+  // 2. FILTRAGGIO LOG VENDITE - VISITE DELL'AUTORE
+  if (dataVisite && dataVisite.visite) {
+    dataVisite.visite.forEach((visita) => {
+      if (Array.isArray(visita.logAdozioni)) {
+        visita.logAdozioni.forEach((log) => {
+          const idAdottanteObj = log.adottanteId;
+          const idAdottanteStr = String(
+            idAdottanteObj?._id || idAdottanteObj || "",
+          );
+
+          if (idAdottanteStr && idAdottanteStr !== String(u._id)) {
+            const importo = Number(visita.prezzo || 0);
+            totaleGuadagnato += importo;
+
+            // 🛠️ RISOLUZIONE MANUALE DELLO USERNAME
+            // Se Mongoose restituisce solo la stringa dell'ID, la cerchiamo dentro la mappa utenti
+            const nomeAcquirente =
+              idAdottanteObj?.username ||
+              mappaUtenti[idAdottanteStr] ||
+              "Utente Anonimo";
+
+            rows += `
+              <tr>
+                <td><span class="aa-badge aa-badge-paid" style="background:#edf2f7; color:#2b6cb0;"><i class="bi bi-map"></i> Visita</span></td>
+                <td><strong>${visita.titolo || visita.title || "Visita senza nome"}</strong><br><small class="text-slate">${visita.museo}</small></td>
+                <td><span class="text-taupe fw-medium"> ${nomeAcquirente}</span></td>
+                <td><span class="aa-badge ${importo > 0 ? "aa-badge-paid" : "aa-badge-free"}">${importo > 0 ? "Vendita" : "Adozione"}</span></td>
+                <td class="fw-bold text-charcoal">${importo > 0 ? "€ " + importo.toFixed(2) : "Gratis"}</td>
+                <td><small class="text-slate">${log.dataAdozione ? new Date(log.dataAdozione).toLocaleDateString("it-IT") : "–"}</small></td>
+              </tr>
+            `;
+          }
+        });
+      }
+    });
+  }
+
+  // RENDER FINALE
+  if (!rows) {
+    body.innerHTML =
+      '<div class="aa-empty"><div class="aa-empty-icon">📊</div><h5>Nessun movimento</h5><p>I tuoi contenuti non sono ancora stati acquistati o adottati da altri utenti.</p></div>';
+    return;
+  }
 
   body.innerHTML = `
+    <div class="p-3 mb-3 rounded bg-cream border border-soft d-flex justify-content-between align-items-center">
+       <div>
+         <span class="aa-label m-0" style="font-size:0.65rem;">Account Monitorato</span>
+         <div class="fw-bold text-charcoal" style="font-size:1.1rem;"> ${u.username}</div>
+       </div>
+       <div class="text-end">
+         <span class="aa-label m-0" style="font-size:0.65rem;">Totale Incassato</span>
+         <div class="fw-bold text-success" style="font-size:1.25rem;">€ ${totaleGuadagnato.toFixed(2)}</div>
+       </div>
+    </div>
+
     <div style="overflow-x:auto">
       <table class="aa-table">
-        <thead><tr><th>Item</th><th>Opera ID</th><th>Acquirente</th><th>Tipo</th><th>Importo</th><th>Data</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Contenuto Canale</th>
+            <th>Acquirente</th>
+            <th>Modalità</th>
+            <th>Corrispettivo</th>
+            <th>Data Evento</th>
+          </tr>
+        </thead>
         <tbody>${rows}</tbody>
       </table>
     </div>
