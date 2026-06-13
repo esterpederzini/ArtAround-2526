@@ -47,7 +47,7 @@ router.post(
 router.put(
   "/visite/:id",
   requireAuth,
-  requireRole("autore", "admin"),
+  requireRole("autore", "admin", "visitatore"),
   ctrl.aggiornaVisita,
 );
 router.delete(

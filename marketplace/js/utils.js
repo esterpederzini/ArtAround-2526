@@ -366,7 +366,6 @@ function lunghezzaInMinuti(lunghezza) {
     "3s": 0.05,
     "15s": 0.25,
     "1m": 1,
-    "4m": 4, // Allineato al bando: 4 minuti per le tracce accademiche
   };
   return mappa[lunghezza] || 1;
 }

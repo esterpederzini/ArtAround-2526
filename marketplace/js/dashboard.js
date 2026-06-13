@@ -1002,18 +1002,55 @@ async function caricaMieiContenuti() {
     container.innerHTML = htmlRisultato;
   } else {
     // --- CASO 2: VISITATORE SEMPLICE ---
-    if (!mieVisiteAcquistate.length && !mieiItemsAcquistati.length) {
+    // 1. MODIFICA: Controlliamo se ha creato visite, oltre ad averle acquistate
+    if (
+      !mieVisiteAcquistate.length &&
+      !mieiItemsAcquistati.length &&
+      !mieVisiteCreate.length
+    ) {
       container.innerHTML = `
         <div class="aa-empty">
           <div class="aa-empty-icon">👤</div>
           <h5>La tua area personale è vuota</h5>
-          <p>Esplora il catalogo per adottare guide ed elementi multimediali.</p>
+          <p>Esplora il catalogo per adottare guide o crea un tuo percorso personalizzato.</p>
         </div>`;
       return;
     }
 
     let htmlVisitatore = "";
 
+    // 2. AGGIUNTA: Mostra le visite create dal visitatore stesso
+    if (mieVisiteCreate.length > 0) {
+      htmlVisitatore += `
+        <div class="aa-card mb-4">
+          <div class="aa-card-header" style="background: var(--aa-primary-pale);"><i class="bi bi-map"></i> Le mie Visite Create (${mieVisiteCreate.length})</div>
+          <div class="aa-card-body p-0" style="overflow-x:auto;">
+            <table class="aa-table">
+              <thead><tr><th>Titolo Visita</th><th>Museo</th><th>Tappe</th><th>Azioni</th></tr></thead>
+              <tbody>
+                ${mieVisiteCreate
+                  .map((v) => {
+                    const numTappe = v.tappe?.length || 0;
+                    return `
+                        <tr>
+                          <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
+                          <td><small>${v.museo}</small></td>
+                          <td><span class="aa-badge aa-badge-len">${numTappe} ${numTappe === 1 ? "tappa" : "tappe"}</span></td>
+                          <td>
+                            <a href="/editor-visita?id=${v._id}" class="btn-aa-outline" style="font-size:0.75rem;padding:2px 8px">Modifica</a>
+                          </td>
+                        </tr>
+                      `;
+                  })
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // Sezione: Visite Adottate da altri (lasciala così com'era prima)
     if (mieVisiteAcquistate.length > 0) {
       htmlVisitatore += `
         <div class="aa-card mb-4">
@@ -1057,6 +1094,7 @@ async function caricaMieiContenuti() {
       `;
     }
 
+    // Sezione: Contenuti Audio Singoli (lasciala così com'era prima)
     if (mieiItemsAcquistati.length > 0) {
       htmlVisitatore += `
         <div class="aa-card">

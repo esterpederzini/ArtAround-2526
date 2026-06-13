@@ -189,8 +189,9 @@ async function gestisciCambioSelezioneOpera(valoreScelto) {
   const campiSchedaTecnica = ["artista", "stile", "periodo", "categoria"];
 
   if (valoreScelto && valoreScelto !== "") {
-    inputOperaIdNascosto.value = valoreScelto;
-
+    if (inputOperaIdNascosto) {
+      inputOperaIdNascosto.value = valoreScelto;
+    }
     badge.textContent = "Opera Catalogata";
     badge.className = "badge ms-2 bg-success text-white";
     badge.classList.remove("d-none");
@@ -215,7 +216,7 @@ async function gestisciCambioSelezioneOpera(valoreScelto) {
     disabilitaCampiOpere([...campiSchedaTecnica, "operaTitoloUfficiale"], true);
     document.getElementById("titolo").value = "";
   } else {
-    inputOperaIdNascosto.value = "";
+    if (inputOperaIdNascosto) inputOperaIdNascosto.value = "";
     document.getElementById("operaTitoloUfficiale").value = "";
     badge.classList.add("d-none");
     disabilitaCampiOpere(
@@ -332,33 +333,40 @@ function stimaProfondita(len) {
 
 // ─── INVIO E SALVATAGGIO DEI DATI ─────────────────────
 async function salvaItem() {
-  const operaId = document.getElementById("operaId").value.trim();
-  const museo = document.getElementById("museo").value.trim();
-  const titolo = document.getElementById("titolo").value.trim();
-  const autoreId = document.getElementById("autoreId").value;
-  const desc = document.getElementById("descrizione").value.trim();
-  const lunghezza = document.getElementById("lunghezza").value;
-  const linguaggio = document.getElementById("linguaggio").value;
-  const categoria = document.getElementById("categoria").value;
-  const profondita = document.getElementById("profonditaContenuto").value;
-  const tagsRaw = document.getElementById("tags").value;
+  const operaId = document.getElementById("operaId")?.value?.trim() || "";
+  const museo = document.getElementById("museo")?.value?.trim() || "";
+  const titolo = document.getElementById("titolo")?.value?.trim() || "";
+  const autoreId = document.getElementById("autoreId")?.value || "";
+  const desc = document.getElementById("descrizione")?.value?.trim() || "";
+  const lunghezza = document.getElementById("lunghezza")?.value || "3s";
+  const linguaggio = document.getElementById("linguaggio")?.value || "medio";
+  const categoria = document.getElementById("categoria")?.value || "pittura";
+  const profondita =
+    document.getElementById("profonditaContenuto")?.value || "standard";
+  const tagsRaw = document.getElementById("tags")?.value || "";
   const tags = tagsRaw
     .split(",")
     .map((t) => t.trim())
     .filter(Boolean);
-  const immagineUrl = document.getElementById("immagineUrl").value.trim();
-  const licenzaTipo = document.getElementById("licenzaTipo").value;
-  const licenzaNote = document.getElementById("licenzaNote").value.trim();
-  const prezzo = Number(document.getElementById("prezzo").value) || 0;
-  const pubblicato = document.getElementById("pubblicato").checked;
-  const id = document.getElementById("itemId").value;
+  const immagineUrl =
+    document.getElementById("immagineUrl")?.value?.trim() || "";
+  const licenzaTipo =
+    document.getElementById("licenzaTipo")?.value || "gratuito";
+  const licenzaNote =
+    document.getElementById("licenzaNote")?.value?.trim() || "";
+  const prezzo = Number(document.getElementById("prezzo")?.value) || 0;
 
-  const artista = document.getElementById("artista").value.trim();
-  const stile = document.getElementById("stile").value.trim();
-  const periodo = document.getElementById("periodo").value.trim();
-  const titoloOpera = document
-    .getElementById("operaTitoloUfficiale")
-    .value.trim();
+  // Per il checkbox usiamo l'operatore ? e un fallback a true/false se l'elemento manca
+  const pubblicato = document.getElementById("pubblicato")
+    ? document.getElementById("pubblicato").checked
+    : true;
+  const id = document.getElementById("itemId")?.value || "";
+
+  const artista = document.getElementById("artista")?.value?.trim() || "";
+  const stile = document.getElementById("stile")?.value?.trim() || "";
+  const periodo = document.getElementById("periodo")?.value?.trim() || "";
+  const titoloOpera =
+    document.getElementById("operaTitoloUfficiale")?.value?.trim() || "";
 
   if (!operaId)
     return showToast(
