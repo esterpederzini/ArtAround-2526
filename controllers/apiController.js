@@ -273,7 +273,6 @@ exports.acquistaItem = async (req, res) => {
   }
 };
 
-// ─── VISITE (CORRETTA CON POPULATE LOG ADOZIONI) ───────────
 exports.getVisite = async (req, res) => {
   try {
     const { museo, creatorId, soloMie, pagina = 1, limite = 12 } = req.query;
@@ -294,10 +293,12 @@ exports.getVisite = async (req, res) => {
     const skip = (Number(pagina) - 1) * Number(limite);
     const [visite, totale] = await Promise.all([
       Visita.find(filtro)
-        .populate("creatorId", "username")
+        .populate("creatorId", "username") // Estrae lo username del creatore della visita
         .populate({
           path: "tappe.item_default",
-          select: "titolo operaId lunghezza linguaggio url autore audioUrl",
+          // AGGIORNATO: inseriti autore, autore_visita e licenza nella select per esporli nella card del marketplace
+          select:
+            "titolo operaId lunghezza linguaggio url autore autore_visita licenza audioUrl",
         })
         /* ─── 🛠️ MODIFICA DI SICUREZZA INSERITA QUI ─── */
         /* Diciamo a Mongoose di andare a prendere l'oggetto User per ogni adozione, estraendo solo lo username */
@@ -325,24 +326,25 @@ exports.getVisite = async (req, res) => {
 
 exports.getVisitaById = async (req, res) => {
   try {
-    // 1. Recupero della visita dal database [cite: 420]
+    // 1. Recupero della visita dal database con il corretto riempimento (populate) dei campi
     const visita = await Visita.findOne({
       $or: [{ _id: req.params.id }, { id: req.params.id }],
     })
-      .populate("creatorId", "username email")
+      .populate("creatorId", "username email") // Estrae esplicitamente lo username dell'autore della visita
       .populate({
         path: "tappe.item_default",
         model: "Item",
+        // ABBIAMO AGGIUNTO: "licenza" e "autore_visita" dentro la select dei campi da estrarre
         select:
-          "titolo operaId lunghezza linguaggio url descrizione autore categoria prezzo licenza audioUrl periodo stile mappa_x mappa_y piano",
+          "titolo operaId lunghezza linguaggio url descrizione autore autore_visita categoria prezzo licenza audioUrl periodo stile mappa_x mappa_y piano",
       });
 
     if (!visita) return risposta(res, 404, null, "Visita non trovata");
 
-    // Trasformiamo in oggetto JS semplice per poter aggiungere campi [cite: 263, 264]
+    // Trasformiamo in oggetto JS semplice per poter aggiungere campi
     const visitaObj = visita.toObject();
 
-    // 2. Ciclo sulle tappe per calcolare la durata reale [cite: 266]
+    // 2. Ciclo sulle tappe per calcolare la durata reale
     if (visitaObj.tappe && Array.isArray(visitaObj.tappe)) {
       for (let tappa of visitaObj.tappe) {
         // Controllo di sicurezza: se l'item_default o l'audioUrl mancano, salta alla prossima tappa
@@ -351,8 +353,7 @@ exports.getVisitaById = async (req, res) => {
         try {
           const audioFileName = tappa.item_default.audioUrl.split("/").pop();
 
-          // Costruiamo il percorso assoluto [cite: 239]
-          // NOTA: 'navigator/public/audio' è dove risiedono i file sorgente [cite: 239]
+          // Costruiamo il percorso assoluto
           const audioFilePath = path.join(
             process.cwd(),
             "navigator",
@@ -369,12 +370,11 @@ exports.getVisitaById = async (req, res) => {
           }
         } catch (audioErr) {
           console.error("Errore lettura metadati audio:", audioErr.message);
-          // Non blocchiamo l'intera risposta se un singolo file audio ha problemi
         }
       }
     }
 
-    // 3. Invio della risposta corretta [cite: 264]
+    // 3. Invio della risposta corretta
     risposta(res, 200, visitaObj);
   } catch (err) {
     console.error("ERRORE CRITICO getVisitaById:", err.message);

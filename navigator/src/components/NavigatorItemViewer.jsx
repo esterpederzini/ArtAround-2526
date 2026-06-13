@@ -329,10 +329,6 @@ export default function NavigatorItemViewer() {
     handleLogisticsRef.current = handleLogistics;
   });
 
-  useEffect(() => {
-    if (currentItem) setIsPlaying(true);
-  }, [currentItem]);
-
   // ---------- COMANDI VOCALI ----------
   useEffect(() => {
     if (!recognition) return;

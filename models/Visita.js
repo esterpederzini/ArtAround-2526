@@ -33,8 +33,10 @@ const visitaSchema = new mongoose.Schema(
     prezzo: { type: Number, default: 0 },
     pubblica: { type: Boolean, default: true },
     creatorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-
-    // CORREZIONE FONDAMENTALE: Cambiamo "acquirenti" con la struttura cercata dal controller
+    licenza: {
+      tipo: { type: String, default: "gratuito" },
+      note: { type: String, default: "" },
+    },
     logAdozioni: [
       {
         adottanteId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
