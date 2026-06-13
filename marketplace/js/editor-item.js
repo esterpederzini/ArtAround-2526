@@ -333,6 +333,10 @@ function stimaProfondita(len) {
 
 // ─── INVIO E SALVATAGGIO DEI DATI ─────────────────────
 async function salvaItem() {
+  const utenteCorrente = getUtenteCorrente();
+  const operaSelectEl = document.getElementById("operaSelect");
+  const operaIdScelto = operaSelectEl?.value || "";
+  const operaCatalogata = mappaOpereLocali[operaIdScelto] || {};
   const operaId = document.getElementById("operaId")?.value?.trim() || "";
   const museo = document.getElementById("museo")?.value?.trim() || "";
   const titolo = document.getElementById("titolo")?.value?.trim() || "";
@@ -386,25 +390,39 @@ async function salvaItem() {
   if (!autoreId)
     return showToast("Sessione autore non valida. Riesegui il login.", "error");
 
+  const percorsoFallback = "/img/default_item_image.jpg";
+  const linkImmagine = immagineUrl || percorsoFallback;
+
   const payload = {
-    operaId,
-    museo,
-    titolo,
-    titoloOpera: titoloOpera || titolo,
+    operaId: operaId,
+    museo: museo,
+    titolo: titolo,
     descrizione: desc,
-    lunghezza,
-    linguaggio,
-    categoria,
+    lunghezza: lunghezza,
+    linguaggio: linguaggio,
+    categoria: categoria,
     profonditaContenuto: profondita,
-    tags,
-    immagine: immagineUrl || "/img/default_item_image.jpg",
-    licenza: { tipo: licenzaTipo, note: licenzaNote },
-    prezzo,
-    pubblicato,
+    tags: tags,
+    prezzo: prezzo,
+    pubblicato: pubblicato,
     creatorId: autoreId,
-    artista,
-    stile,
-    periodo,
+    url: linkImmagine,
+    immagine: linkImmagine,
+    audioUrl: "",
+    artista: artista || "Ignoto",
+    stile: stile || "Periodo storico non specificato",
+    periodo: periodo || "",
+    titoloOpera: titoloOpera || titolo,
+    autore_visita: utenteCorrente?.username || "Autore",
+    autore: utenteCorrente?.username || "Autore",
+    piano: operaCatalogata.piano || "0",
+    mappa_x: Number(operaCatalogata.mappa_x) || 0,
+    mappa_y: Number(operaCatalogata.mappa_y) || 0,
+
+    licenza: {
+      tipo: licenzaTipo,
+      note: licenzaNote,
+    },
   };
 
   const metodo = id ? "PUT" : "POST";

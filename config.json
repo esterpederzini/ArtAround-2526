@@ -19,5 +19,77 @@
     "bar": "Il bar caffetteria è situato al piano -1.",
     "shop": "Il bookshop è all'ingresso principale.",
     "emergenza": "Seguire le luci verdi verso le scale di sicurezza."
-  }
+  },
+  "posizione_opere": [
+    {
+      "operaId": "ME-001",
+      "titoloOpera": "Statua di Ramses II",
+      "piano": "0",
+      "mappa_x": 78,
+      "mappa_y": 52
+    },
+    {
+      "operaId": "ME-002",
+      "titoloOpera": "Tomba di Kha e Merit",
+      "piano": "1",
+      "mappa_x": 48,
+      "mappa_y": 52
+    },
+    {
+      "operaId": "ME-003",
+      "titoloOpera": "Tempio di Ellesiya",
+      "piano": "0",
+      "mappa_x": 58,
+      "mappa_y": 62
+    },
+    {
+      "operaId": "ME-004",
+      "titoloOpera": "Papiro delle Miniere d'Oro",
+      "piano": "2",
+      "mappa_x": 78.5,
+      "mappa_y": 48
+    },
+    {
+      "operaId": "ME-005",
+      "titoloOpera": "Statua della dea Sekhmet",
+      "piano": "0",
+      "mappa_x": 42,
+      "mappa_y": 35
+    },
+    {
+      "operaId": "ME-006",
+      "titoloOpera": "Sarcofago di Butehamon",
+      "piano": "1",
+      "mappa_x": 62.5,
+      "mappa_y": 58.0
+    },
+    {
+      "operaId": "ME-007",
+      "titoloOpera": "Sfinge in Arenaria",
+      "piano": "0",
+      "mappa_x": 82.0,
+      "mappa_y": 30.5
+    },
+    {
+      "operaId": "ME-008",
+      "titoloOpera": "Stela di Gebelein",
+      "piano": "2",
+      "mappa_x": 28.4,
+      "mappa_y": 68.2
+    },
+    {
+      "operaId": "ME-009",
+      "titoloOpera": "Cappella di Maia",
+      "piano": "0",
+      "mappa_x": 73.5,
+      "mappa_y": 34.0
+    },
+    {
+      "operaId": "ME-010",
+      "titoloOpera": "Statua di Thutmosi III",
+      "piano": "1",
+      "mappa_x": 75.0,
+      "mappa_y": 38.5
+    }
+  ]
 }

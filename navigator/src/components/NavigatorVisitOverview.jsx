@@ -183,15 +183,22 @@ function NavigatorVisitOverview() {
               const isReached = index <= furthestIndex;
               const isFurthest = index === furthestIndex;
 
-              // Estraiamo in sicurezza il titolo e l'immagine recuperati
               const titoloOpera =
+                tappa.item_default?.titolo ||
                 opera.titolo ||
                 `Tappa dell'opera ${tappa.operaId || index + 1}`;
-              const urlImmagine = opera.url || "/img/placeholder.jpg";
+
+              // Controllo a cascata robusto su ogni possibile variante di nome del campo
+              const urlImmagine =
+                tappa.item_default?.immagine ||
+                tappa.item_default?.url ||
+                opera.immagine ||
+                opera.url ||
+                "/img/default_item_image.jpg"; // Fallback coerente con l'editor visita e item
+
               const stringaDurata = opera.durata_reale
                 ? `${opera.durata_reale}s`
                 : opera.lunghezza || "15s";
-
               return (
                 <Row
                   key={index}
