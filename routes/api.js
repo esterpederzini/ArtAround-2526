@@ -62,7 +62,7 @@ router.post("/visite/:id/adotta", requireAuth, ctrl.adottaVisita);
 router.get(
   "/utenti",
   requireAuth,
-  requireRole("autore", "admin"),
+  requireRole("autore", "admin", "visitatore"),
   ctrl.getUtenti,
 );
 router.post("/register", ctrl.registraUtente);
