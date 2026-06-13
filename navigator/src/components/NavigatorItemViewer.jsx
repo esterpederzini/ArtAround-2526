@@ -213,8 +213,14 @@ export default function NavigatorItemViewer() {
   }, [id, safeIndex]);
 
   // ---------- GESTIONE AUDIO / TTS ----------
+  // ---------- GESTIONE AUDIO / TTS (CON RESET DELLA BARRA) ----------
   useEffect(() => {
     const audio = audioRef.current;
+
+    // 🛠️ FIX: Reset immediato degli stati della barra temporale al cambio di opera
+    setCurrentTime(0);
+    setDuration(0);
+
     window.speechSynthesis.cancel();
     clearInterval(ttsIntervalRef.current);
 
@@ -234,6 +240,9 @@ export default function NavigatorItemViewer() {
     }
 
     if (audio.src) {
+      // Forza l'azzeramento della timeline anche sul motore audio nativo prima del play
+      audio.currentTime = 0;
+
       audio
         .play()
         .catch((e) => console.log("Autoplay blocked or stream interrupted", e));

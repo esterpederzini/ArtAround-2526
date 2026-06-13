@@ -13,6 +13,28 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css"
     />
     <link rel="stylesheet" href="css/style.css" />
+    <style>
+      /* Stili dedicati alla scrollabilità dei contenuti personali creati */
+      .aa-scrollable-personal-container {
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 4px;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--aa-border-soft, #e2e8f0);
+        border-radius: 8px;
+        background-color: #faf9f6;
+      }
+      .aa-scrollable-personal-container::-webkit-scrollbar {
+        width: 6px;
+      }
+      .aa-scrollable-personal-container::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .aa-scrollable-personal-container::-webkit-scrollbar-thumb {
+        background-color: var(--aa-slate, #a0aec0);
+        border-radius: 3px;
+      }
+    </style>
   </head>
   <body class="d-flex flex-column min-vh-100">
     <nav class="navbar navbar-expand-lg aa-navbar">
@@ -166,6 +188,32 @@
                     Arte Antica
                   </button>
                   <button class="aa-filter-btn" data-cat="altro">Altro</button>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="mb-3">
+                  <div class="aa-sidebar-title" style="font-size: 0.7rem">
+                    Stile / Periodo
+                  </div>
+                  <button class="aa-filter-btn active" data-stile="">
+                    Tutti
+                  </button>
+                  <button class="aa-filter-btn" data-stile="XIX Dinastia">
+                    XIX Dinastia
+                  </button>
+                  <button class="aa-filter-btn" data-stile="XVIII Dinastia">
+                    XVIII Dinastia
+                  </button>
+                  <button
+                    class="aa-filter-btn"
+                    data-stile="Regno di Ramesse II"
+                  >
+                    Regno di Ramesse II
+                  </button>
+                  <button class="aa-filter-btn" data-stile="Nuovo Regno">
+                    Nuovo Regno
+                  </button>
                 </div>
 
                 <div class="divider"></div>

@@ -31,7 +31,7 @@ const visitaSchema = new mongoose.Schema(
     tappe: [tappaSchema],
     descrizione: { type: String },
     prezzo: { type: Number, default: 0 },
-    pubblica: { type: Boolean, default: true },
+    pubblica: { type: Boolean, default: false },
     creatorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     licenza: {
       tipo: { type: String, default: "gratuito" },

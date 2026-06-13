@@ -443,6 +443,7 @@ function chiudiItemModal() {
   document.getElementById("itemModal").classList.add("d-none");
 }
 
+// ─── MODAL VISITA DETTAGLIO ────────────────────────────
 async function apriVisitaModal(id) {
   const modal = document.getElementById("visitaModal");
   modal.classList.remove("d-none");
@@ -461,41 +462,16 @@ async function apriVisitaModal(id) {
   document.getElementById("modalVisitaTitolo").textContent =
     v.titolo || v.title || "Visita";
 
-  // 🛠️ FIX LICENZA: Estrae la licenza dal primo item valido del percorso se manca nella visita
-  const primaTappaConLicenza = v.tappe?.find(
-    (t) =>
-      t.item_default &&
-      (t.item_default.licenza?.tipo || t.item_default.licenza),
-  );
-  const licenzaReale =
-    v.licenza?.tipo ||
-    v.licenza ||
-    primaTappaConLicenza?.item_default?.licenza?.tipo ||
-    primaTappaConLicenza?.item_default?.licenza ||
-    "–";
-
-  // 🛠️ FIX TAGS: Se la visita non ha tag propri, fa il merge dei tag dei singoli item delle tappe
-  let tagSet = new Set();
-  if (Array.isArray(v.tags)) {
-    v.tags.forEach((t) => tagSet.add(t));
-  } else if (v.tappe) {
-    v.tappe.forEach((t) => {
-      if (Array.isArray(t.item_default?.tags)) {
-        t.item_default.tags.forEach((tag) => tagSet.add(tag));
-      }
-    });
-  }
-  const arrayTags = Array.from(tagSet);
-
   // Costruisce la lista delle tappe del percorso
   let tappeHtml =
     '<em class="text-slate small">Nessuna tappa inserita nel percorso.</em>';
   if (v.tappe && v.tappe.length > 0) {
     tappeHtml = v.tappe
       .map((t) => {
+        // Il backend invia l'item "popolato" con titolo e operaId
         const infoItem = t.item_default || {};
         const nomeTappa = infoItem.titolo || "Tappa inesistente";
-        const idOpera = t.operaId || infoItem.operaId || "–";
+        const idOpera = infoItem.operaId || "";
         return `<div class="d-flex align-items-center gap-2 mb-2 p-2 rounded" style="background:var(--aa-cream)">
                 <span class="aa-badge aa-badge-len" style="background:white">${t.ordine}</span>
                 <div class="flex-grow-1" style="font-size:0.85rem">
@@ -507,21 +483,21 @@ async function apriVisitaModal(id) {
       .join("");
   }
 
-  // Costruisce il corpo del Modal mappando "v.duration" e "licenzaReale"
+  // Costruisce il corpo del Modal con tutti i dettagli strutturali
   document.getElementById("modalVisitaBody").innerHTML = `
     <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
       <span class="aa-badge aa-badge-len">🏛️ ${v.museo || "Nessun museo"}</span>
-      <span class="aa-badge aa-badge-len"><i class="bi bi-clock"></i> ${v.duration || v.durataTotaleStimata || "60 min"}</span>
+      <span class="aa-badge aa-badge-len"><i class="bi bi-clock"></i> ~${v.durataTotaleStimata || 60} min</span>
       ${badgeLinguaggio(v.livello_base)}
       ${badgePrezzo(v.prezzo)}
     </div>
     <p style="line-height:1.7">${v.descrizione || "Nessuna descrizione disponibile."}</p>
     <div class="divider"></div>
     <div class="row g-2 text-sm mb-3">
-      <div class="col-6"><span class="aa-label">Autore</span><div>${v.creatorId?.username || v.autore || "–"}</div></div>
+      <div class="col-6"><span class="aa-label">Autore</span><div>${v.creatorId?.username || "–"}</div></div>
       <div class="col-6"><span class="aa-label">Licenza</span><div>${v.licenza?.tipo || "–"}</div></div>
     </div>
-    ${arrayTags.length ? `<div class="mb-3">${arrayTags.map((t) => `<span class="aa-badge aa-badge-len me-1">${t}</span>`).join("")}</div>` : ""}
+    ${v.tags?.length ? `<div class="mb-3">${v.tags.map((t) => `<span class="aa-badge aa-badge-len me-1">${t}</span>`).join("")}</div>` : ""}
     
     <div class="aa-sidebar-title mt-4" style="font-size: 0.72rem"><i class="bi bi-geo-alt"></i> Percorso della visita</div>
     <div class="pe-2">
@@ -533,9 +509,11 @@ async function apriVisitaModal(id) {
   let footerHtml = ``;
   const u = getUtenteCorrente();
 
+  // Verifichiamo se l'utente corrente è il creatore della visita
   const idCreatoreVisita = v.creatorId?._id || v.creatorId;
   const isProprietarioVisita = u && idCreatoreVisita === u._id;
 
+  // Verifichiamo se l'utente corrente ha già adottato o acquistato questa visita in passato
   const giaAdottataVisita =
     u &&
     Array.isArray(v.logAdozioni) &&
@@ -544,15 +522,18 @@ async function apriVisitaModal(id) {
       return idAdottante === u._id;
     });
 
+  // Se l'utente è il proprietario o la visita è già nel suo account, blocchiamo i bottoni di acquisto
   if (isProprietarioVisita) {
     footerHtml = ``;
   } else if (giaAdottataVisita) {
-    footerHtml = `
+    footerHtml =
+      `
       <span class="text-success small me-auto align-self-center fw-semibold">
         <i class="bi bi-check-circle-fill"></i> Visita acquistata
       </span>
-    `;
+      ` + footerHtml;
   } else {
+    // Altrimenti, inseriamo i tasti per l'acquisizione
     const titoloVisitaEscaped = (v.titolo || v.title || "Visita")
       .replace(/'/g, "\\'")
       .replace(/"/g, "&quot;");
