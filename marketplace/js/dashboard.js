@@ -41,15 +41,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (u) {
     document.getElementById("tabMieiBtn")?.classList.remove("d-none");
 
-    if (["autore", "admin"].includes(u.ruolo)) {
-      document.getElementById("sidebarLog")?.classList.remove("d-none");
-
-      // Mostra il gruppo bottoni autore
+    // Mostra il gruppo bottoni delle azioni se l'utente è autore, admin O visitatore
+    if (["autore", "admin", "visitatore"].includes(u.ruolo)) {
       document.getElementById("authorActions")?.classList.remove("d-none");
 
+      // Mostra il bottone dei log e la sidebar solo ai creatori effettivi (autore/admin)
+      if (["autore", "admin"].includes(u.ruolo)) {
+        document.getElementById("sidebarLog")?.classList.remove("d-none");
+        document.getElementById("btnLogVendite")?.classList.remove("d-none");
+      } else {
+        document.getElementById("btnLogVendite")?.classList.add("d-none");
+      }
+
       // Sincronizza i bottoni di creazione basandoti sulla tab iniziale ("items")
-      document.getElementById("btnNuovoItem")?.classList.remove("d-none");
+      if (["autore", "admin"].includes(u.ruolo)) {
+        document.getElementById("btnNuovoItem")?.classList.remove("d-none");
+      } else {
+        document.getElementById("btnNuovoItem")?.classList.add("d-none");
+      }
+
+      // All'inizio siamo sulla tab "items", quindi il bottone visita è nascosto per tutti
       document.getElementById("btnNuovaVisita")?.classList.add("d-none");
+    }
+
+    // Sblocca il link "Editor Visita" nella navbar anche per il visitatore
+    if (["autore", "admin", "visitatore"].includes(u.ruolo)) {
+      document.getElementById("navEditorVisita")?.classList.remove("d-none");
     }
   }
 
@@ -143,16 +160,23 @@ function switchTab(tab, btnEl) {
   document.getElementById("tabMiei").classList.toggle("d-none", tab !== "miei");
 
   // Gestione pulita dei bottoni d'azione (Solo per Autori e Admin)
+  // Gestione pulita dei bottoni d'azione (Incluso il Visitatore per le visite)
   const btnNuovoItem = document.getElementById("btnNuovoItem");
   const btnNuovaVisita = document.getElementById("btnNuovaVisita");
   const u = getUtenteCorrente();
 
   if (btnNuovoItem && btnNuovaVisita) {
-    if (u && ["autore", "admin"].includes(u.ruolo)) {
+    if (u && ["autore", "admin", "visitatore"].includes(u.ruolo)) {
       if (tab === "items") {
-        btnNuovoItem.classList.remove("d-none");
+        // Solo autore e admin creano item
+        if (["autore", "admin"].includes(u.ruolo)) {
+          btnNuovoItem.classList.remove("d-none");
+        } else {
+          btnNuovoItem.classList.add("d-none");
+        }
         btnNuovaVisita.classList.add("d-none");
       } else if (tab === "visite") {
+        // Tutti (autore, admin e visitatore) possono creare visite
         btnNuovoItem.classList.add("d-none");
         btnNuovaVisita.classList.remove("d-none");
       } else {
@@ -931,21 +955,39 @@ async function caricaMieiContenuti() {
     // Sezione: Visite Acquistate
     if (mieVisiteAcquistate.length > 0) {
       htmlRisultato += `
-        <div class="aa-card">
-          <div class="aa-card-header" style="background: var(--aa-gold-pale);"><i class="bi bi-bag-heart"></i> Visite Adottate / Acquistate (${mieVisiteAcquistate.length})</div>
+        <div class="aa-card mb-4">
+          <div class="aa-card-header"><i class="bi bi-bookmark-star"></i> Le mie Visite Adottate (${mieVisiteAcquistate.length})</div>
           <div class="aa-card-body p-0" style="overflow-x:auto;">
             <table class="aa-table">
-              <thead><tr><th>Titolo Visita</th><th>Museo</th><th>Tappe</th><th>Azioni</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Percorso Museale</th>
+                  <th>Istituzione</th>
+                  <th>Tappe</th>
+                  <th class="d-none d-md-table-cell">Opzioni</th>
+                </tr>
+              </thead>
               <tbody>
                 ${mieVisiteAcquistate
                   .map((v) => {
                     const numTappe = v.tappe?.length || 0;
+                    const stringaStops = `${numTappe} ${numTappe === 1 ? "stop" : "stops"}`;
                     return `
-                        <tr>
+                        <tr class="aa-row-clickable-mobile" onclick="if(window.innerWidth < 768) apriVisitaModal('${v._id}')">
                           <td><strong>${v.titolo || v.title || "Senza titolo"}</strong></td>
                           <td><small>${v.museo}</small></td>
-                          <td><span class="aa-badge aa-badge-len">${numTappe} ${numTappe === 1 ? "tappa" : "tappe"}</span></td>
-                          <td><a href="/editor-visita?id=${v._id}" class="btn-aa-gold" style="font-size:0.75rem;padding:2px 10px">Personalizza</a></td>
+                          <td>
+                            <span class="aa-badge aa-badge-len d-none d-md-inline-flex">${stringaStops}</span>
+                            <span class="aa-badge aa-badge-len d-inline-flex d-md-none fw-bold" style="padding: 2px 8px">${numTappe}</span>
+                          </td>
+                          <td class="d-none d-md-table-cell">
+                            <button class="btn-aa-primary" style="font-size:0.75rem; padding:3px 10px; margin-right:5px;" onclick="apriVisitaModal('${v._id}')">
+                              Visualizza
+                            </button>
+                            <a href="/editor-visita?id=${v._id}" class="btn-aa-gold" style="font-size:0.75rem; padding:4px 10px; text-decoration:none;">
+                              Modifica
+                            </a>
+                          </td>
                         </tr>
                       `;
                   })

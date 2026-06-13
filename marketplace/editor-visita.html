@@ -120,16 +120,14 @@
               </div>
 
               <div class="row g-2">
-                <div class="col-6">
-                  <div class="aa-form-group">
-                    <label class="aa-label">Tags</label>
-                    <input
-                      type="text"
-                      id="visitaTags"
-                      class="aa-input"
-                      placeholder="egizio, scultura, torino"
-                    />
-                  </div>
+                <div class="col-6 solo-autore">
+                  <label class="aa-label" for="visitaTag">Tag</label>
+                  <input
+                    type="text"
+                    id="visitaTag"
+                    class="aa-input"
+                    placeholder="es. rinascimento, firenze, scultura (separati da virgola)"
+                  />
                 </div>
                 <div class="col-6">
                   <div class="aa-form-group">
@@ -160,13 +158,16 @@
                 />
               </div>
 
-              <div class="divider"></div>
-              <div class="aa-sidebar-title" style="font-size: 0.72rem">
+              <div class="divider solo-autore"></div>
+              <div
+                class="aa-sidebar-title solo-autore"
+                style="font-size: 0.72rem"
+              >
                 <i class="bi bi-shield-lock"></i> Pubblicazione & Licenza
               </div>
 
               <div class="row g-2">
-                <div class="col-6">
+                <div class="col-6 solo-autore">
                   <div class="aa-form-group">
                     <label class="aa-label">Tipo Licenza</label>
                     <select id="visitaLicenza" class="aa-select">
@@ -178,7 +179,7 @@
                     </select>
                   </div>
                 </div>
-                <div class="col-6">
+                <div class="col-6 solo-autore">
                   <div class="aa-form-group">
                     <label class="aa-label">Prezzo (€)</label>
                     <input
@@ -193,7 +194,7 @@
                 </div>
               </div>
 
-              <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="d-flex align-items-center gap-2 mb-3 solo-autore">
                 <input
                   type="checkbox"
                   id="visitaPubblica"

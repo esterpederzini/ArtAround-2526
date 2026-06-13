@@ -136,20 +136,37 @@ function renderCatalogo(filtro = "") {
   const container = document.getElementById("catalogoItems");
   if (!container) return;
 
+  // 1. Escludi gli item già presenti nel percorso corrente
   let items = tuttiItems.filter(
     (item) => !itemsNelPercorso.some((p) => p.itemId === item._id),
   );
 
+  // 2. APPLICA FILTRO RUOLO: Se visitatore, mostra solo gratis o acquistati
+  const u = getUtenteCorrente();
+  if (u && !["autore", "admin"].includes(u.ruolo)) {
+    const acquistati = u.itemsAcquistati || u.acquistati || [];
+
+    items = items.filter((item) => {
+      const prezzoItem = item.prezzo ? parseFloat(item.prezzo) : 0;
+      const isGratis = prezzoItem === 0;
+      const giaAcquistato = acquistati.includes(item._id);
+      return isGratis || giaAcquistato;
+    });
+  }
+
+  // 3. Applica il filtro di ricerca testuale (se presente)
   if (filtro) {
+    const query = filtro.toLowerCase().trim();
     items = items.filter(
       (i) =>
-        i.titolo.toLowerCase().includes(filtro) ||
-        (i.titoloOpera && i.titoloOpera.toLowerCase().includes(filtro)) ||
-        i.operaId.toLowerCase().includes(filtro) ||
-        (i.tags || []).some((t) => t.toLowerCase().includes(filtro)),
+        i.titolo.toLowerCase().includes(query) ||
+        (i.titoloOpera && i.titoloOpera.toLowerCase().includes(query)) ||
+        i.operaId.toLowerCase().includes(query) ||
+        (i.tags || []).some((t) => t.toLowerCase().includes(query)),
     );
   }
 
+  // 4. Render HTML dei risultati filtrati
   if (!items.length) {
     container.innerHTML =
       '<div class="aa-empty" style="padding:1rem"><p style="font-size:0.8rem">Nessun item disponibile.</p></div>';
@@ -397,18 +414,28 @@ function buildTappeFromPath(pathItems) {
   });
 }
 
-// ─── SALVA VISITA ─────────────────────────────────────
 async function salvaVisita() {
   const titolo = document.getElementById("visitaTitolo").value.trim();
   const museo = document.getElementById("visitaMuseo").value;
-  const autoreId = document.getElementById("visitaAutore").value;
+
+  // Modificato: Prende l'id dell'utente loggato corrente, così funziona per qualsiasi ruolo (visitatore incluso)
+  const uLoggato = getUtenteCorrente();
+  const autoreId = uLoggato
+    ? uLoggato._id
+    : document.getElementById("visitaAutore").value;
+
   const desc = document.getElementById("visitaDescrizione").value.trim();
   const default_image = "/img/default_item_image.jpg";
-  const tags = document
-    .getElementById("visitaTags")
-    .value.split(",")
-    .map((t) => t.trim())
-    .filter(Boolean);
+
+  // Modificato: Corretto l'ID da visitaTags a visitaTag per allinearsi all'HTML
+  const tagEl = document.getElementById("visitaTag");
+  const tags =
+    tagEl && tagEl.value
+      ? tagEl.value
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : [];
   const durata = Number(document.getElementById("visitaDurata").value) || 60;
   const licenza = document.getElementById("visitaLicenza").value;
   const prezzo = Number(document.getElementById("visitaPrezzo").value) || 0;
@@ -418,10 +445,7 @@ async function salvaVisita() {
     document.getElementById("visitaLivelloBase")?.value || "medio";
 
   if (!titolo || !museo || !autoreId)
-    return showToast(
-      "Compila i campi obbligatori (Titolo, Museo, Autore)",
-      "error",
-    );
+    return showToast("Compila i campi obbligatori (Titolo, Museo)", "error");
   if (!itemsNelPercorso.length)
     return showToast("Aggiungi almeno un item al percorso", "error");
 
@@ -479,7 +503,6 @@ async function salvaVisita() {
     }, 500);
   }
 }
-// ─── MODIFICA PROTETTA IN EDITOR-VISITA.JS PER GESTIRE IL CLONE ───
 async function caricaVisitaPerModifica(id) {
   const v = await apiFetch(`/api/visite/${id}`);
   if (!v) return;
@@ -495,14 +518,18 @@ async function caricaVisitaPerModifica(id) {
   if (isVeroProprietario) {
     // CASO A: È l'autore originale. Manteniamo l'ID per fare l'aggiornamento (PUT)
     document.getElementById("visitaId").value = v._id;
-    document.getElementById("visitaAutore").value = idCreatoreOriginale;
+    const campoAutore = document.getElementById("visitaAutore");
+    if (campoAutore) campoAutore.value = idCreatoreOriginale;
+
+    document.getElementById("visitaTitolo").value = v.titolo || v.title || "";
     document.getElementById("editorTitolo").textContent =
       `Modifica: ${v.titolo || v.title || "Visita"}`;
     showToast(`La tua visita è stata caricata per la modifica`, "info");
   } else {
-    // CASO B: È un altro autore che l'ha acquistata! FORZIAMO IL CLONE (POST)
+    // CASO B: È un visitatore (o un altro autore che l'ha acquistata)! FORZIAMO IL CLONE (POST)
     document.getElementById("visitaId").value = ""; // <-- CANCELLIAMO L'ID ORIGINARIO! Così farà una POST
-    document.getElementById("visitaAutore").value = u._id; // <-- L'autore diventa l'utente corrente loggato
+    const campoAutore = document.getElementById("visitaAutore");
+    if (campoAutore && u) campoAutore.value = u._id; // <-- L'autore diventa l'utente corrente loggato
 
     // Cambiamo il titolo aggiungendo un prefisso per far capire che è un clone personalizzato
     const nuovoTitolo = `Copia di ${v.titolo || v.title || "Visita"}`;
@@ -516,21 +543,29 @@ async function caricaVisitaPerModifica(id) {
     );
   }
 
-  // ---- Da qui in poi il tuo codice originale per popolare i campi rimane IDENTICO ----
+  // Popolamento dei campi di testo generali
   document.getElementById("visitaDescrizione").value = v.descrizione || "";
-  document.getElementById("visitaTags").value = (v.tags || []).join(", ");
+
+  // Modificato: Corretto l'ID da visitaTags a visitaTag per evitare il crash del client
+  const inputTag = document.getElementById("visitaTag");
+  if (inputTag) {
+    inputTag.value = (v.tags || []).join(", ");
+  }
+
   document.getElementById("visitaDurata").value = v.durataTotaleStimata || 60;
   document.getElementById("visitaImmagine").value = v.immagine || "";
+
   if (document.getElementById("visitaLivelloBase")) {
     document.getElementById("visitaLivelloBase").value =
       v.livello_base || "medio";
   }
+
   document.getElementById("visitaLicenza").value =
     v.licenza?.tipo || "gratuito";
   document.getElementById("visitaPrezzo").value = v.prezzo || 0;
   document.getElementById("visitaPubblica").checked = v.pubblica;
 
-  // Ricostruzione tappe...
+  // Ricostruzione delle tappe inserite nel percorso
   let rawTappe = Array.isArray(v.tappe) ? v.tappe : [];
   if (rawTappe.length === 0 && Array.isArray(v.items) && v.items.length > 0) {
     rawTappe = v.items.map((row) => ({
@@ -563,6 +598,7 @@ async function caricaVisitaPerModifica(id) {
     };
   });
 
+  // Ordina cronologicamente le tappe in base all'indice numerico di percorso
   itemsNelPercorso.sort(
     (a, b) => (Number(a.ordine) || 0) - (Number(b.ordine) || 0),
   );
@@ -570,10 +606,13 @@ async function caricaVisitaPerModifica(id) {
     row.ordine = idx + 1;
   });
 
+  // Aggiorna l'interfaccia grafica del percorso e del catalogo laterale
   renderPercorso();
   renderCatalogo(
     document.getElementById("cercaCatalogo")?.value.toLowerCase() || "",
   );
+
+  // Riporta la pagina in alto all'inizio del modulo per facilitare la compilazione
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -590,7 +629,11 @@ function resetEditor() {
   document.getElementById("visitaId").value = "";
   document.getElementById("visitaTitolo").value = "";
   document.getElementById("visitaDescrizione").value = "";
-  document.getElementById("visitaTags").value = "";
+
+  // Modificato: Corretto l'ID da visitaTags a visitaTag per evitare errori
+  const inputTag = document.getElementById("visitaTag");
+  if (inputTag) inputTag.value = "";
+
   document.getElementById("visitaDurata").value = 60;
   document.getElementById("visitaLicenza").value = "gratuito";
   document.getElementById("visitaPrezzo").value = 0;
@@ -605,7 +648,8 @@ function resetEditor() {
 
   const u = getUtenteCorrente();
   if (u) {
-    document.getElementById("visitaAutore").value = u._id;
+    const campoAutore = document.getElementById("visitaAutore");
+    if (campoAutore) campoAutore.value = u._id;
   }
 
   itemsNelPercorso = [];
@@ -619,28 +663,30 @@ function applicaRestrizioniVisitatore() {
   if (!u) return;
   if (["autore", "admin"].includes(u.ruolo)) return;
 
-  const campiDaBloccare = ["visitaPrezzo", "visitaLicenza", "visitaPubblica"];
-  campiDaBloccare.forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.disabled = true;
-      el.title = "Solo gli Autori possono modificare questo campo";
-      el.style.opacity = "0.7";
-      el.style.cursor = "not-allowed";
-    }
+  // Nasconde tutti i blocchi dell'interfaccia contrassegnati per autore
+  document.querySelectorAll(".solo-autore").forEach((elemento) => {
+    elemento.classList.add("d-none");
   });
 
+  // Forza i valori di default logici per un percorso personale
+  const prezzoEl = document.getElementById("visitaPrezzo");
+  if (prezzoEl) prezzoEl.value = 0;
+
+  const pubblicaEl = document.getElementById("visitaPubblica");
+  if (pubblicaEl) pubblicaEl.checked = false; // Forza non spuntato per sicurezza
+
+  // Aggiunge il badge informativo nell'header
   const header = document.querySelector(".aa-card-header");
-  if (header) {
+  if (header && !document.getElementById("badgeVisitatore")) {
     const badge = document.createElement("span");
+    badge.id = "badgeVisitatore";
     badge.className = "aa-badge aa-badge-lang-infantile ms-2";
     badge.style.fontSize = "0.7rem";
     badge.innerHTML =
-      '<i class="bi bi-info-circle"></i> Modalità Personalizzazione';
+      '<i class="bi bi-info-circle"></i> Modalità Personalizzazione (Uso Personale)';
     header.appendChild(badge);
   }
 }
-
 // Listener in tempo reale per catturare i cambiamenti di testo dentro le logiche logistiche
 document.addEventListener("input", (e) => {
   if (e.target.classList.contains("input-logistica-tappa")) {

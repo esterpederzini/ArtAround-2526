@@ -41,7 +41,7 @@ router.get("/visite/:id", ctrl.getVisitaById);
 router.post(
   "/visite",
   requireAuth,
-  requireRole("autore", "admin"),
+  requireRole("autore", "admin", "visitatore"),
   ctrl.creaVisita,
 );
 router.put(
