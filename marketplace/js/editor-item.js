@@ -6,53 +6,37 @@ let museoConfigurato = "";
 let mappaOpereLocali = {}; // Mappa per l'autocompilazione immediata client-side
 
 // ─── INIT ────────────────────────────────────────────
-// ─── INIT ────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
-  // Sincronizza lo stato visivo della navbar globale
   aggiornaUtenteUI();
 
   if (!richiedeAutore()) {
-    // 1. Applichiamo lo sfondo blu scuro strano direttamente al body
     document.body.style.backgroundColor = "#1e2640";
-
-    // 2. Nascondiamo la navbar globale
     const navbar = document.querySelector(".aa-navbar");
-    if (navbar) {
-      navbar.classList.add("d-none");
-    }
+    if (navbar) navbar.classList.add("d-none");
 
-    // 3. Intercettiamo il VERO container dell'HTML (mainContent)
     const container = document.getElementById("mainContent");
     if (container) {
-      // Rimuoviamo il d-none per farlo vedere e forziamo il 100% di larghezza
       container.classList.remove("d-none");
       container.style.maxWidth = "100%";
       container.style.width = "100%";
-
-      // Iniettiamo la struttura centrata a schermo intero (min-height: 85vh)
       container.innerHTML = `
         <div class="row justify-content-center align-items-center flex-grow-1" style="min-height: 85vh;">
           <div class="col-md-8 col-lg-6 text-center">
             <div style="font-size: 5rem; margin-bottom: 1rem;">🎨</div>
-            
             <h2 style="color: var(--aa-gold); font-family: var(--aa-font-serif); font-size: 2.5rem; font-weight: 600;">
               L'ispirazione ha bussato, ma serve il pass!
             </h2>
-            
             <p class="lead mt-3" style="color: #ffffff; font-weight: 400;">
               Attualmente stai esplorando ArtAround come <strong>Visitatore</strong>.
             </p>
-            
             <p class="mb-4" style="color: #cbd5e1; font-size: 0.95rem;">
               Solo gli utenti con il ruolo di <strong>Autore</strong> possono creare o modificare i singoli Contenuti (Item) del catalogo. 
               Effettua l'accesso con un account abilitato per sbloccare l'area di creazione.
             </p>
-            
             <div class="d-flex justify-content-center gap-3 mt-2">
               <a href="/dashboard" class="btn-aa-outline" style="color: #f2ede7; border-color: rgba(242, 237, 231, 0.4); background: rgba(255,255,255,0.05);">
                 <i class="bi bi-arrow-left"></i> Torna alla Dashboard
               </a>
-              
               <button class="btn-aa-primary" onclick="apriLogin()" style="background-color: var(--aa-gold); border-color: var(--aa-gold); color: var(--aa-ink); font-weight: 600;">
                 <i class="bi bi-person"></i> Accedi ora
               </button>
@@ -64,7 +48,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // Se l'utente è un autore valido, ripristiniamo lo sfondo crema e mostriamo l'HTML standard
   document.body.style.backgroundColor = "var(--aa-cream)";
   const containerNormale = document.getElementById("mainContent");
   if (containerNormale) {
@@ -81,7 +64,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await popolaSelectOpere();
 
-  // Sostituisci il vecchio ciclo dei listener con questo strutturato:
   [
     "titolo",
     "descrizione",
@@ -100,6 +82,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  // Listener per controllare i duplicati in tempo reale al cambio di linguaggio o lunghezza
+  ["linguaggio", "lunghezza"].forEach((id) => {
+    document
+      .getElementById(id)
+      ?.addEventListener("change", controllaIncrocioDuplicati);
+  });
+
   document.getElementById("descrizione")?.addEventListener("input", (e) => {
     const len = e.target.value.length;
     document.getElementById("charCount").textContent = len;
@@ -110,13 +99,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   document.getElementById("operaSelect")?.addEventListener("change", (e) => {
-    const valoreScelto = e.target.value;
-    gestisciCambioSelezioneOpera(valoreScelto);
+    gestisciCambioSelezioneOpera(e.target.value);
   });
 
   document.getElementById("immagineUrl")?.addEventListener(
     "input",
-    debounce((e) => {
+    debounce(() => {
       aggiornaPreview();
     }, 400),
   );
@@ -129,17 +117,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function inizializzaMuseoDaConfig() {
   try {
     const response = await fetch("/api/config");
-    if (!response.ok) {
-      console.warn("File config.json non raggiungibile via API.");
-      return;
-    }
+    if (!response.ok) return;
     const config = await response.json();
     if (config && config.museo) {
       museoConfigurato = config.museo;
       const inputMuseo = document.getElementById("museo");
-      if (inputMuseo) {
-        inputMuseo.value = museoConfigurato;
-      }
+      if (inputMuseo) inputMuseo.value = museoConfigurato;
     }
   } catch (error) {
     console.error("Errore nel caricamento del modulo config:", error);
@@ -188,10 +171,8 @@ async function gestisciCambioSelezioneOpera(valoreScelto) {
   const inputOperaIdNascosto = document.getElementById("operaId");
   const campiSchedaTecnica = ["artista", "stile", "periodo", "categoria"];
 
-  if (valoreScelto && valoreScelto !== "") {
-    if (inputOperaIdNascosto) {
-      inputOperaIdNascosto.value = valoreScelto;
-    }
+  if (valoreScelto) {
+    if (inputOperaIdNascosto) inputOperaIdNascosto.value = valoreScelto;
     badge.textContent = "Opera Catalogata";
     badge.className = "badge ms-2 bg-success text-white";
     badge.classList.remove("d-none");
@@ -215,6 +196,14 @@ async function gestisciCambioSelezioneOpera(valoreScelto) {
 
     disabilitaCampiOpere([...campiSchedaTecnica, "operaTitoloUfficiale"], true);
     document.getElementById("titolo").value = "";
+
+    // Richiedi tutte le varianti registrate per questa opera per popolare la cronologia laterale
+    const dataVarianti = await apiFetch(
+      `/api/items?operaId=${encodeURIComponent(valoreScelto)}&limite=100`,
+    );
+    if (dataVarianti && dataVarianti.items) {
+      renderElencoVarianti(dataVarianti.items);
+    }
   } else {
     if (inputOperaIdNascosto) inputOperaIdNascosto.value = "";
     document.getElementById("operaTitoloUfficiale").value = "";
@@ -230,13 +219,45 @@ async function gestisciCambioSelezioneOpera(valoreScelto) {
   aggiornaPreview();
 }
 
+// Controllo preventivo: se l'autore sta configurando una variante con livello e durata identici a una già esistente
+async function controllaIncrocioDuplicati() {
+  const operaId = document.getElementById("operaId").value;
+  const linguaggio = document.getElementById("linguaggio").value;
+  const lunghezza = document.getElementById("lunghezza").value;
+  const currentItemId = document.getElementById("itemId").value;
+
+  if (!operaId) return;
+
+  const data = await apiFetch(
+    `/api/items?operaId=${encodeURIComponent(operaId)}&linguaggio=${linguaggio}&lunghezza=${lunghezza}`,
+  );
+  const incontri = data?.items || [];
+
+  // Se esiste un record con gli stessi metadati ed ha un ID diverso da quello che stiamo modificando
+  const duplicatoReale = incontri.find((i) => i._id !== currentItemId);
+  const badge = document.getElementById("operaStatoBadge");
+
+  if (duplicatoReale) {
+    badge.textContent = "Attenzione: Variante Duplicata";
+    badge.className = "badge ms-2 bg-warning text-dark";
+    showToast(
+      "Esiste già una spiegazione con questo livello e durata. Salvando, aggiungerai un'alternativa.",
+      "info",
+    );
+  } else {
+    badge.textContent = currentItemId
+      ? "Modalità Modifica"
+      : "Opera Catalogata";
+    badge.className = "badge ms-2 bg-success text-white";
+  }
+}
+
 function disabilitaCampiOpere(listaCampi, bloccati) {
   listaCampi.forEach((id) => {
     const el = document.getElementById(id);
     if (el) {
       el.readOnly = bloccati;
       if (el.tagName === "SELECT") el.disabled = bloccati;
-
       el.style.backgroundColor = bloccati ? "var(--aa-cream)" : "";
       el.style.cursor = bloccati ? "not-allowed" : "";
     }
@@ -245,9 +266,11 @@ function disabilitaCampiOpere(listaCampi, bloccati) {
 
 function renderElencoVarianti(items) {
   const container = document.getElementById("variantiList");
-  const currentItemId = document.getElementById("itemId").value;
+  if (!container) return;
 
+  const currentItemId = document.getElementById("itemId").value;
   const filtrate = items.filter((i) => i._id !== currentItemId);
+
   if (!filtrate.length) {
     container.innerHTML =
       '<em class="text-slate small">Nessuna spiegazione alternativa registrata oltre a questa.</em>';
@@ -259,8 +282,8 @@ function renderElencoVarianti(items) {
       (v) => `
     <div class="d-flex align-items-center gap-2 mb-1 p-1 rounded" style="background:var(--aa-cream); font-size: 0.8rem">
       <div class="flex-grow-1 min-w-0">
-        <div class="text-truncate"><strong>Target:</strong> ${v.linguaggio}</div>
-        <div class="text-slate" style="font-size:0.7rem">${v.lunghezza} · Licenza: ${v.licenza?.tipo || "Libera"}</div>
+        <div class="text-truncate"><strong>Target:</strong> ${v.linguaggio} (${v.lunghezza})</div>
+        <div class="text-slate" style="font-size:0.7rem">Titolo: ${v.titolo} · Prezzo: €${v.prezzo || 0}</div>
       </div>
       <a href="/editor-item?id=${v._id}" class="btn-aa-outline" style="font-size:0.68rem;padding:2px 6px">✎ Modifica</a>
     </div>
@@ -269,7 +292,6 @@ function renderElencoVarianti(items) {
     .join("");
 }
 
-// ─── LIVE PREVIEW DELLE CARD ─────────────────────────
 // ─── LIVE PREVIEW DELLE CARD ─────────────────────────
 function aggiornaPreview() {
   const titolo = document.getElementById("titolo").value || "Titolo item";
@@ -297,11 +319,8 @@ function aggiornaPreview() {
     prevLangContainer.insertAdjacentHTML("afterbegin", htmlNuovoBadge);
 
     const badgeAppenaInserito = prevLangContainer.querySelector(".aa-badge");
-    if (badgeAppenaInserito) {
-      badgeAppenaInserito.id = "prevLang";
-    }
+    if (badgeAppenaInserito) badgeAppenaInserito.id = "prevLang";
   }
-  // ─────────────────────────────────────────────────────────────────────────────
 
   const prevPrice = document.getElementById("prevPrice");
   if (prevPrice) {
@@ -337,6 +356,7 @@ async function salvaItem() {
   const operaSelectEl = document.getElementById("operaSelect");
   const operaIdScelto = operaSelectEl?.value || "";
   const operaCatalogata = mappaOpereLocali[operaIdScelto] || {};
+
   const operaId = document.getElementById("operaId")?.value?.trim() || "";
   const museo = document.getElementById("museo")?.value?.trim() || "";
   const titolo = document.getElementById("titolo")?.value?.trim() || "";
@@ -347,8 +367,7 @@ async function salvaItem() {
   const categoria = document.getElementById("categoria")?.value || "pittura";
   const profondita =
     document.getElementById("profonditaContenuto")?.value || "standard";
-  const tagsRaw = document.getElementById("tags")?.value || "";
-  const tags = tagsRaw
+  const tags = (document.getElementById("tags")?.value || "")
     .split(",")
     .map((t) => t.trim())
     .filter(Boolean);
@@ -359,8 +378,6 @@ async function salvaItem() {
   const licenzaNote =
     document.getElementById("licenzaNote")?.value?.trim() || "";
   const prezzo = Number(document.getElementById("prezzo")?.value) || 0;
-
-  // Per il checkbox usiamo l'operatore ? e un fallback a true/false se l'elemento manca
   const pubblicato = document.getElementById("pubblicato")
     ? document.getElementById("pubblicato").checked
     : true;
@@ -390,21 +407,20 @@ async function salvaItem() {
   if (!autoreId)
     return showToast("Sessione autore non valida. Riesegui il login.", "error");
 
-  const percorsoFallback = "/img/default_item_image.jpg";
-  const linkImmagine = immagineUrl || percorsoFallback;
+  const linkImmagine = immagineUrl || "/img/default_item_image.jpg";
 
   const payload = {
-    operaId: operaId,
-    museo: museo,
-    titolo: titolo,
+    operaId,
+    museo,
+    titolo,
     descrizione: desc,
-    lunghezza: lunghezza,
-    linguaggio: linguaggio,
-    categoria: categoria,
+    lunghezza,
+    linguaggio,
+    categoria,
     profonditaContenuto: profondita,
-    tags: tags,
-    prezzo: prezzo,
-    pubblicato: pubblicato,
+    tags,
+    prezzo,
+    pubblicato,
     creatorId: autoreId,
     url: linkImmagine,
     immagine: linkImmagine,
@@ -418,19 +434,13 @@ async function salvaItem() {
     piano: operaCatalogata.piano || "0",
     mappa_x: Number(operaCatalogata.mappa_x) || 0,
     mappa_y: Number(operaCatalogata.mappa_y) || 0,
-
-    licenza: {
-      tipo: licenzaTipo,
-      note: licenzaNote,
-    },
+    licenza: { tipo: licenzaTipo, note: licenzaNote },
   };
 
   const metodo = id ? "PUT" : "POST";
   const url = id ? `/api/items/${id}` : "/api/items";
 
-  if (id) {
-    payload._id = id;
-  }
+  if (id) payload._id = id;
 
   const ok = await apiFetch(url, {
     method: metodo,
@@ -445,7 +455,6 @@ async function salvaItem() {
         : "Nuova variante traccia creata con successo!",
       "success",
     );
-
     setTimeout(() => {
       window.location.href = "/dashboard";
     }, 500);
@@ -459,6 +468,7 @@ async function caricaItemPerModifica(id) {
 
   document.getElementById("itemId").value = item._id;
   document.getElementById("operaId").value = item.operaId;
+
   const operaNativa = mappaOpereLocali[item.operaId];
   document.getElementById("operaTitoloUfficiale").value =
     item.titoloOpera || (operaNativa ? operaNativa.titolo : item.titolo) || "";
@@ -507,6 +517,14 @@ async function caricaItemPerModifica(id) {
   badge.className = "badge ms-2 bg-success text-white";
   badge.classList.remove("d-none");
 
+  // Richiedi le varianti alternative escludendo quella corrente
+  const dataVarianti = await apiFetch(
+    `/api/items?operaId=${encodeURIComponent(item.operaId)}&limite=100`,
+  );
+  if (dataVarianti && dataVarianti.items) {
+    renderElencoVarianti(dataVarianti.items);
+  }
+
   aggiornaPreview();
 }
 
@@ -551,8 +569,9 @@ function resetForm() {
   document.getElementById("formTitolo").textContent = " Nuovo Contenuto (Item)";
   document.getElementById("charCount").textContent = "0";
   document.getElementById("profonditaPreview").textContent = "–";
+  document.getElementById("variantiList").innerHTML =
+    '<em class="text-slate small">Seleziona un\'opera per esaminare le varianti...</em>';
 
-  // Ripristina l'elemento preventivo per evitare che si spacchi al prossimo input
   const prevLang = document.getElementById("prevLang");
   if (prevLang) {
     prevLang.textContent = "medio";

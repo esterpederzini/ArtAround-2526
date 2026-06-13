@@ -41,6 +41,18 @@ export default function NavigatorItemViewer() {
     "15s": "15s",
     "40s": "40s",
   });
+  const artworkTitle =
+    currentItem?.titoloOpera || currentItem?.titolo || "Untitled Artwork";
+
+  const artworkArtist =
+    currentItem?.artista ||
+    currentItem?.autore_visita ||
+    currentItem?.autore ||
+    "Unknown Artist";
+
+  const displayedDescription =
+    currentItem?.descrizione || "No description available.";
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -158,42 +170,81 @@ export default function NavigatorItemViewer() {
         if (!isMounted) return;
 
         // Gestisci sia il caso in care la risposta sia incapsulata in .data sia diretta
+        // ... dentro fetch(`/api/visite/${id}`) -> .then(async (json) => {
         const dataVisita = json.data || json;
 
         if (dataVisita && dataVisita.tappe) {
           setVisit(dataVisita);
-
-          // Estrai la tappa corrente in base all'indice dell'URL
           const tappaCorrente = dataVisita.tappe[safeIndex];
 
           if (tappaCorrente) {
-            // Prendi l'operaId (gestisce sia se è una stringa sia se è un oggetto)
-            const targetOperaId =
-              tappaCorrente.operaId?.operaId || tappaCorrente.operaId;
-
-            // Usa i valori di default salvati nella tappa, oppure i fallback generali
             const defaultLang = tappaCorrente.linguaggio_default || "medio";
             const defaultDur = tappaCorrente.lunghezza_default || "15s";
 
+            // 1. GESTIONE EDITOR: Se item_default è già un oggetto pre-popolato completo
+            if (
+              tappaCorrente.item_default &&
+              typeof tappaCorrente.item_default === "object"
+            ) {
+              setCurrentItem(tappaCorrente.item_default);
+              setLanguageLevel(
+                tappaCorrente.item_default.linguaggio || defaultLang,
+              );
+              setSelectedDuration(
+                tappaCorrente.item_default.lunghezza || defaultDur,
+              );
+              setLoading(false);
+              return; // Interrompe qui, abbiamo già tutto!
+            }
+
+            // 2. GESTIONE IBRIDA: Se item_default è solo una stringa ID, facciamo fetch diretta sull'Item univoco
+            if (
+              tappaCorrente.item_default &&
+              typeof tappaCorrente.item_default === "string"
+            ) {
+              try {
+                const resItem = await fetch(
+                  `/api/items/${tappaCorrente.item_default}`,
+                );
+                const itemEstratto = await resItem.json();
+                if (itemEstratto && isMounted) {
+                  setCurrentItem(itemEstratto);
+                  setLanguageLevel(itemEstratto.linguaggio || defaultLang);
+                  setSelectedDuration(itemEstratto.lunghezza || defaultDur);
+                  setLoading(false);
+                  return;
+                }
+              } catch (e) {
+                console.warn(
+                  "Errore fetch diretta item_default, tento fallback via operaId:",
+                  e,
+                );
+              }
+            }
+
+            // 3. FALLBACK JSON MANUALE: Vecchia logica tramite operaId stringa
+            const targetOperaId =
+              tappaCorrente.operaId?.operaId ||
+              tappaCorrente.operaId ||
+              tappaCorrente.item_default?.operaId;
+
             if (targetOperaId) {
               try {
-                // Interroga l'API degli items per ottenere i dettagli dell'opera specifica
                 const resItem = await fetch(
                   `/api/items?operaId=${targetOperaId}&linguaggio=${defaultLang}&lunghezza=${defaultDur}`,
                 );
                 const jsonItem = await resItem.json();
-
-                // Estrai l'array degli items dalla risposta dell'API
                 const arrayItems = jsonItem.data?.items || jsonItem.items || [];
 
                 if (arrayItems.length > 0 && isMounted) {
-                  setCurrentItem(arrayItems[0]); // Imposta l'opera corrente con tutti i dettagli
-                  setLanguageLevel(defaultLang);
-                  setSelectedDuration(defaultDur);
+                  const itemEstratto = arrayItems[0];
+                  setCurrentItem(itemEstratto);
+                  setLanguageLevel(itemEstratto.linguaggio || defaultLang);
+                  setSelectedDuration(itemEstratto.lunghezza || defaultDur);
                 }
               } catch (err) {
                 console.error(
-                  "Errore nel recupero dei dettagli dell'item:",
+                  "Errore nel recupero dei dettagli dell'item via query:",
                   err,
                 );
               }
@@ -201,6 +252,7 @@ export default function NavigatorItemViewer() {
           }
         }
         setLoading(false);
+        // ... fine dell'effetto
       })
       .catch((err) => {
         console.error("Errore nel recupero della visita:", err);
@@ -522,7 +574,11 @@ export default function NavigatorItemViewer() {
       <div className="scrollable-viewer-content">
         <section className="hero-image-container">
           <img
-            src={currentItem?.url || "/img/placeholder.jpg"}
+            src={
+              currentItem?.immagine ||
+              currentItem?.url ||
+              "/img/default_item_image.jpg"
+            }
             className="hero-image"
             alt=""
           />
@@ -531,9 +587,7 @@ export default function NavigatorItemViewer() {
             <p className="category-label">
               {currentItem?.categoria || "Opera"}
             </p>
-            <h1 className="hero-title">
-              {currentItem?.titolo || "Titolo assente"}
-            </h1>
+            <h1 className="hero-title">{artworkTitle}</h1>
             <div className="d-flex flex-wrap gap-2 mt-2">
               <button
                 className="btn-hero-minimal"
@@ -573,7 +627,7 @@ export default function NavigatorItemViewer() {
                       margin: 0,
                     }}
                   >
-                    {currentItem?.titolo || "Titolo assente"}
+                    {artworkTitle}
                   </h1>
                   <hr
                     style={{
@@ -646,12 +700,7 @@ export default function NavigatorItemViewer() {
                   </div>
 
                   <div className="description-quote mx-3 mt-4">
-                    <p className="m-0">
-                      "
-                      {currentItem?.descrizione ||
-                        "Nessuna descrizione disponibile."}
-                      "
-                    </p>
+                    <p className="m-0">"{displayedDescription}"</p>
                   </div>
                 </Card.Body>
               </Card>
@@ -1072,59 +1121,16 @@ export default function NavigatorItemViewer() {
               alt={`Piano ${selectedMapFloor}`}
               style={{ width: "100%", display: "block" }}
             />
-            {visit?.tappe?.map((tappa, idx) => {
-              const item = tappa.item_default;
-              if (!item || item.piano !== selectedMapFloor) return null;
-              const isCurrent = idx === safeIndex;
-              return (
-                <div
-                  key={idx}
-                  title={item.titolo || `Tappa ${idx + 1}`}
-                  onClick={() => {
-                    setShowMapModal(false);
-                    changeItem(idx);
-                  }}
-                  style={{
-                    position: "absolute",
-                    left: `${item.mappa_x}%`,
-                    top: `${item.mappa_y}%`,
-                    transform: "translate(-50%, -50%)",
-                    cursor: "pointer",
-                    zIndex: isCurrent ? 10 : 5,
-                  }}
-                >
-                  {isCurrent ? (
-                    <div className="map-marker-ping" />
-                  ) : (
-                    <div
-                      style={{
-                        width: 22,
-                        height: 22,
-                        borderRadius: "50%",
-                        background: "#e18f37",
-                        border: "2px solid white",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: 10,
-                        color: "white",
-                        fontWeight: "bold",
-                        boxShadow: "0 1px 4px rgba(0,0,0,0.4)",
-                      }}
-                    >
-                      {idx + 1}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+            // ─── MODIFICA ANCHE LA LISTA TESTUALE SOTTO LA MAPPA: ─────────
+            {visit?.tappe?.map((tappe, idx) => {
+              const targetId = tappe.operaId?.operaId || tappe.operaId;
+              const operaConfig =
+                museumConfig?.opere?.find((o) => o.operaId === targetId) || {};
 
-          <div className="px-3 py-2" style={{ background: "#1a1a1a" }}>
-            {visit?.tappe?.map((tappa, idx) => {
-              const item = tappa.item_default;
-              if (!item || item.piano !== selectedMapFloor) return null;
+              if (!operaConfig || operaConfig.piano !== selectedMapFloor)
+                return null;
               const isCurrent = idx === safeIndex;
+
               return (
                 <div
                   key={idx}
@@ -1158,7 +1164,61 @@ export default function NavigatorItemViewer() {
                       color: isCurrent ? "#e18f37" : "white",
                     }}
                   >
-                    {item.titolo || `Tappa ${idx + 1}`}
+                    {operaConfig.titoloOpera || `Tappa ${idx + 1}`}
+                  </span>
+                  {isCurrent && (
+                    <i
+                      className="bi bi-geo-alt-fill ms-auto"
+                      style={{ color: "#e18f37", fontSize: "0.75rem" }}
+                    ></i>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="px-3 py-2" style={{ background: "#1a1a1a" }}>
+            {visit?.tappe?.map((tappa, idx) => {
+              // Estrae l'item (funziona sia se è l'oggetto popolato sia se è stato inserito nel client)
+              const item = tappa.item_default;
+              if (!item || String(item.piano) !== String(selectedMapFloor))
+                return null;
+
+              const isCurrent = idx === safeIndex;
+              return (
+                <div
+                  key={idx}
+                  className="d-flex align-items-center gap-2 py-1"
+                  style={{ cursor: "pointer", opacity: isCurrent ? 1 : 0.6 }}
+                  onClick={() => {
+                    setShowMapModal(false);
+                    changeItem(idx); // Naviga direttamente alla tappa selezionata sulla mappa
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: "50%",
+                      background: isCurrent ? "#e18f37" : "#555",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 10,
+                      color: "white",
+                      fontWeight: "bold",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {idx + 1}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "0.8rem",
+                      color: isCurrent ? "#e18f37" : "white",
+                    }}
+                  >
+                    {item.titoloOpera || item.titolo || `Tappa ${idx + 1}`}
                   </span>
                   {isCurrent && (
                     <i
