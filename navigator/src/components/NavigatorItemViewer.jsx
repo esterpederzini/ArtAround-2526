@@ -67,7 +67,6 @@ export default function NavigatorItemViewer() {
     setLogisticsMsg(msg);
     const audio = new Audio(`/api/tts?text=${encodeURIComponent(msg)}`);
     audio.play().catch(() => {
-      // Fallback al browser TTS se l'API non risponde
       const utterance = new SpeechSynthesisUtterance(msg);
       utterance.lang = "it-IT";
       window.speechSynthesis.speak(utterance);
@@ -138,12 +137,13 @@ export default function NavigatorItemViewer() {
     if (currentItem?.piano) setSelectedMapFloor(currentItem.piano);
   }, [currentItem]);
 
-  // ---------- FETCH INIZIALE ----------
+  // ---------- FETCH INIZIALE CORRETTA ----------
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
     setIsPlaying(false);
 
+    // Recupera la configurazione del museo
     fetch("/api/config")
       .then((res) => res.json())
       .then((data) => {
@@ -151,46 +151,70 @@ export default function NavigatorItemViewer() {
       })
       .catch(() => {});
 
+    // Recupera la visita corrente
     fetch(`/api/visite/${id}`)
       .then((res) => res.json())
-      .then((json) => {
+      .then(async (json) => {
         if (!isMounted) return;
-        if (json.successo && json.data) {
-          setVisit(json.data);
-          const defaultItem = json.data.tappe?.[safeIndex]?.item_default;
-          if (defaultItem) {
-            setCurrentItem(defaultItem);
-            setLanguageLevel(defaultItem.linguaggio || "medio");
-            setSelectedDuration(defaultItem.lunghezza || "15s");
+
+        // Gestisci sia il caso in care la risposta sia incapsulata in .data sia diretta
+        const dataVisita = json.data || json;
+
+        if (dataVisita && dataVisita.tappe) {
+          setVisit(dataVisita);
+
+          // Estrai la tappa corrente in base all'indice dell'URL
+          const tappaCorrente = dataVisita.tappe[safeIndex];
+
+          if (tappaCorrente) {
+            // Prendi l'operaId (gestisce sia se è una stringa sia se è un oggetto)
+            const targetOperaId =
+              tappaCorrente.operaId?.operaId || tappaCorrente.operaId;
+
+            // Usa i valori di default salvati nella tappa, oppure i fallback generali
+            const defaultLang = tappaCorrente.linguaggio_default || "medio";
+            const defaultDur = tappaCorrente.lunghezza_default || "15s";
+
+            if (targetOperaId) {
+              try {
+                // Interroga l'API degli items per ottenere i dettagli dell'opera specifica
+                const resItem = await fetch(
+                  `/api/items?operaId=${targetOperaId}&linguaggio=${defaultLang}&lunghezza=${defaultDur}`,
+                );
+                const jsonItem = await resItem.json();
+
+                // Estrai l'array degli items dalla risposta dell'API
+                const arrayItems = jsonItem.data?.items || jsonItem.items || [];
+
+                if (arrayItems.length > 0 && isMounted) {
+                  setCurrentItem(arrayItems[0]); // Imposta l'opera corrente con tutti i dettagli
+                  setLanguageLevel(defaultLang);
+                  setSelectedDuration(defaultDur);
+                }
+              } catch (err) {
+                console.error(
+                  "Errore nel recupero dei dettagli dell'item:",
+                  err,
+                );
+              }
+            }
           }
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        console.error("Errore nel recupero della visita:", err);
+        if (isMounted) setLoading(false);
+      });
 
     return () => {
       isMounted = false;
     };
   }, [id, safeIndex]);
 
-  // ---------- CLEANUP AUDIO ----------
-  useEffect(() => {
-    return () => {
-      window.speechSynthesis.cancel();
-      if (ttsIntervalRef.current) clearInterval(ttsIntervalRef.current);
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-      }
-    };
-  }, []);
-
-  // ---------- GESTIONE AUDIO / INTEGRAZIONE GENERAZIONE MP3 DAL BACKEND ----------
-  // ---------- GESTIONE AUDIO / FALLBACK TRA FILE STATICO E BACKEND TTS ----------
+  // ---------- GESTIONE AUDIO / TTS ----------
   useEffect(() => {
     const audio = audioRef.current;
-
-    // Fermiamo e puliamo i vecchi flussi ad ogni cambio opera o stato
     window.speechSynthesis.cancel();
     clearInterval(ttsIntervalRef.current);
 
@@ -199,21 +223,13 @@ export default function NavigatorItemViewer() {
       return;
     }
 
-    // CONTROLLO DI SICUREZZA:
-    // Se l'item ha già un suo file audio pre-registrato (es. memorizzato in currentItem.audio o currentItem.audioUrl) lo usiamo direttamente.
     const item_audio = currentItem?.audio || currentItem?.audioUrl;
 
     if (item_audio) {
-      console.log(
-        "[AUDIO LOG] Uso il file audio statico pre-esistente:",
-        item_audio,
-      );
+      console.log("[AUDIO LOG] Uso il file audio statico:", item_audio);
       audio.src = item_audio;
     } else if (currentItem?.descrizione) {
-      // Altrimenti, facciamo il fallback dinamico sulla rotta Express che genera l'MP3 al volo
-      console.log(
-        "[AUDIO LOG] Nessun file audio statico trovato. Genero via EdgeTTS dal testo.",
-      );
+      console.log("[AUDIO LOG] Genero via EdgeTTS dal testo.");
       audio.src = `/api/tts?text=${encodeURIComponent(currentItem.descrizione)}`;
     }
 
@@ -222,7 +238,6 @@ export default function NavigatorItemViewer() {
         .play()
         .catch((e) => console.log("Autoplay blocked or stream interrupted", e));
 
-      // Sincronizzazione perfetta dei metadati e del tempo di riproduzione reale dell'MP3
       const upMeta = () => setDuration(audio.duration);
       const upTime = () => setCurrentTime(audio.currentTime);
       const onEnd = () => {
@@ -252,23 +267,16 @@ export default function NavigatorItemViewer() {
   };
 
   const updateContent = async (newLevel, newDuration) => {
-    // 1. Recuperiamo l'operaId dall'item attualmente visualizzato
     const operaId = currentItem?.operaId;
 
-    // ─── CONSOLE LOG DI DEBUG ───────────────────────────────────────────
     console.log("[DEBUG NAVIGATOR] Richiesta cambio variante in corso:", {
       operaId_rilevato: operaId,
       nuovo_livello_richiesto: newLevel,
       nuova_durata_richiesta: newDuration,
-      url_generato: `/api/items?operaId=${operaId}&linguaggio=${newLevel}&lunghezza=${newDuration}`,
-      stato_currentItem_attuale: currentItem,
     });
-    // ────────────────────────────────────────────────────────────────────
 
     if (!operaId) {
-      console.error(
-        "[DEBUG NAVIGATOR] Errore: impossibile procedere, operaId è undefined o nullo.",
-      );
+      console.error("[DEBUG NAVIGATOR] Errore: operaId è undefined o nullo.");
       setLogisticsMsg(
         "Errore: impossibile recuperare l'identificativo dell'opera.",
       );
@@ -285,30 +293,16 @@ export default function NavigatorItemViewer() {
       );
       const json = await res.json();
 
-      console.log("[DEBUG NAVIGATOR] Risposta ricevuta dal backend:", json);
+      // Mappatura robusta per gestire sia risposte avvolte in json.data.items che json.items diretti
+      const arrayItems = json.data?.items || json.items || [];
 
-      // CORRETTO: Controlliamo che l'array items esista e abbia almeno un elemento
-      if (
-        json.successo &&
-        json.data &&
-        json.data.items &&
-        json.data.items.length > 0
-      ) {
-        // Prendiamo il primo elemento dell'array [0] che è il nostro item corretto!
-        const nuovoItemTrovato = json.data.items[0];
-
+      if (arrayItems.length > 0) {
+        const nuovoItemTrovato = arrayItems[0];
         setCurrentItem(nuovoItemTrovato);
         setLanguageLevel(newLevel);
         setSelectedDuration(newDuration);
-
-        console.log(
-          "[DEBUG NAVIGATOR] Stato aggiornato con il nuovo item:",
-          nuovoItemTrovato,
-        );
       } else {
-        console.warn(
-          "[DEBUG NAVIGATOR] Nessuna variante trovata nell'array items per i parametri passati.",
-        );
+        console.warn("[DEBUG NAVIGATOR] Nessuna variante trovata.");
         setLogisticsMsg(
           "Variante audio non trovata per questo livello/lunghezza.",
         );
@@ -337,7 +331,7 @@ export default function NavigatorItemViewer() {
     recognition.onresult = (event) => {
       const raw = event.results[0][0].transcript.toLowerCase();
       const cmd = raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      console.log("Comando vocale (normalizzato):", cmd);
+      console.log("Comando vocale:", cmd);
 
       const cfg = museumConfigRef.current;
       const item = currentItemRef.current;
@@ -421,7 +415,7 @@ export default function NavigatorItemViewer() {
         cmd.includes("chi e lartista")
       ) {
         handleLogisticsRef.current(
-          `L'autore è ${item?.artista || "sconosciuto"}`,
+          `L'autore è ${item?.artista || item?.autore_visita || "sconosciuto"}`,
         );
       }
       if (cmd.includes("qual e lo stile")) {
@@ -442,7 +436,7 @@ export default function NavigatorItemViewer() {
       if (
         cmd.includes("aiuto") ||
         cmd.includes("comandi") ||
-        cmd.includes("cosa posso dire")
+        cmd.includes("cosa posso say")
       ) {
         setShowHelpModal(true);
       }
@@ -451,8 +445,6 @@ export default function NavigatorItemViewer() {
     recognition.onend = () => {
       setIsListening(false);
     };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatTime = (seconds) => {
@@ -489,50 +481,32 @@ export default function NavigatorItemViewer() {
   }
 
   const getLogisticsDirections = () => {
-    // 1. If the author wrote custom directions in the editor, use them
-    const manualLogistics = visit?.tappe?.[safeIndex]?.logistica;
-    if (manualLogistics && manualLogistics.trim() !== "") {
-      return manualLogistics;
+    if (!visit || !visit.tappe) return "Nessuna indicazione disponibile.";
+
+    // Se siamo all'ultima tappa, mostra le indicazioni della tappa corrente (o un messaggio di fine)
+    if (safeIndex >= visit.tappe.length - 1) {
+      return (
+        visit.tappe[safeIndex]?.logistica || "Sei arrivato a destinazione."
+      );
     }
 
-    // 2. If it's the last stop, the tour is finished
-    const totalStops = visit?.tappe?.length || 1;
-    if (safeIndex === totalStops - 1) {
-      return "You have reached the last stop of the tour! Follow the museum signs to reach the main exit or the bookshop.";
-    }
-
-    // 3. AUTOMATIC FALLBACK: Compare current item location with the next item location
-    const currentRoom = currentItem?.sala || `Room ${safeIndex + 1}`;
-    const currentFloor = currentItem?.piano;
-
-    // Retrieve the next stop's item data (handling both populated objects or raw fallback)
-    const nextStopData = visit?.tappe?.[safeIndex + 1]?.item_default;
-    const nextRoom = nextStopData?.sala || `Room ${safeIndex + 2}`;
-    const nextFloor = nextStopData?.piano;
-
-    // Case A: Different floors
-    if (currentFloor && nextFloor && currentFloor !== nextFloor) {
-      return `Exit ${currentRoom} and take the stairs or elevator to ${nextFloor}. The next artwork is located in ${nextRoom}.`;
-    }
-
-    // Case B: Different rooms on the same floor
-    if (currentRoom !== nextRoom) {
-      return `Leave ${currentRoom} behind and enter ${nextRoom} to find the next artwork.`;
-    }
-
-    // Case C: Same room
-    return `The next artwork is also located here in ${currentRoom}. Look for the adjacent display panel.`;
+    // Altrimenti, mostra le indicazioni logistiche scritte nella tappa SUCCESSIVA
+    return (
+      visit.tappe[safeIndex + 1]?.logistica ||
+      "Procedi verso la prossima tappa."
+    );
   };
 
   return (
     <div className="navigator-viewer-layout">
-      {/* HEADER — FIX 1: removed marketplace shop icon, back arrow only */}
       <div className="top-nav-viewer">
         <button className="top-nav-btn" onClick={() => setShowExitModal(true)}>
           <i className="bi bi-chevron-left"></i>
         </button>
         <div className="top-nav-center">
-          <span className="top-nav-title">{visit?.titolo || "Visita"}</span>
+          <span className="top-nav-title">
+            {visit?.titolo || visit?.title || "Visita"}
+          </span>
         </div>
       </div>
 
@@ -624,7 +598,6 @@ export default function NavigatorItemViewer() {
                           Livello di analisi
                         </p>
 
-                        {/* CONFIGURAZIONE SU UN'UNICA RIGA ORIZZONTALE (xs={4}) */}
                         <Row className="g-2 mb-4 text-nowrap">
                           {["infantile", "medio", "avanzato"].map((l) => (
                             <Col xs={4} key={l}>
@@ -764,14 +737,12 @@ export default function NavigatorItemViewer() {
         </button>
       </div>
 
-      {/* ===== MODALS ===== */}
-
       {/* SCHEDA TECNICA */}
       <Modal
         show={showDetailsModal}
         onHide={() => setShowDetailsModal(false)}
         centered
-        dialogClassName="museum-modal" /* Forziamo l'aggancio del CSS personalizzato */
+        dialogClassName="museum-modal"
       >
         <Modal.Header closeButton className="bg-transparent">
           <Modal.Title className="text-uppercase d-flex align-items-center">
@@ -784,7 +755,11 @@ export default function NavigatorItemViewer() {
               <strong>Titolo:</strong> {currentItem?.titolo || "N/A"}
             </p>
             <p>
-              <strong>Artista:</strong> {currentItem?.artista || "Ignoto"}
+              <strong>Artista:</strong>{" "}
+              {currentItem?.artista ||
+                currentItem?.autore_visita ||
+                currentItem?.autore ||
+                "Ignoto"}
             </p>
             {currentItem?.stile && (
               <p>
@@ -795,8 +770,8 @@ export default function NavigatorItemViewer() {
               <strong>Posizione:</strong> Piano {currentItem?.piano || "0"}
             </p>
             <p>
-              <strong>Creato da:</strong>{" "}
-              {currentItem?.artista || "Sconosciuto"}
+              <strong>Licenza:</strong>{" "}
+              {currentItem?.licenza?.tipo || currentItem?.licenza || "–"}
             </p>
             {currentItem?.categoria && (
               <p>
@@ -914,7 +889,7 @@ export default function NavigatorItemViewer() {
                 className="btn-museum-outline flex-fill"
                 onClick={() => {
                   handleLogistics(
-                    `L'autore è ${currentItem?.artista || "sconosciuto"}`,
+                    `L'autore è ${currentItem?.artista || currentItem?.autore_visita || "sconosciuto"}`,
                   );
                   setShowAccessMenu(false);
                 }}
@@ -1024,7 +999,7 @@ export default function NavigatorItemViewer() {
         </Modal.Body>
       </Modal>
 
-      {/* MODAL DI CONFERMA USCITA */}
+      {/* CONFIRMA USCITA */}
       <Modal
         show={showExitModal}
         onHide={() => setShowExitModal(false)}
@@ -1043,7 +1018,7 @@ export default function NavigatorItemViewer() {
           <div className="museum-modal-actions-overview">
             <button
               className="btn-overview-confirm"
-              onClick={() => navigate(`/visit/${id}`)} // Sostituisci con la tua funzione di uscita se diversa
+              onClick={() => navigate(`/visit/${id}`)}
             >
               Esci dalla guida
             </button>
@@ -1258,10 +1233,10 @@ export default function NavigatorItemViewer() {
             <i className="bi bi-stars"></i>
           </div>
           <h5 className="museum-modal-title-overview">Visita completata</h5>
-          <p className="museum-modal-text-overview">
+          <p className="museum-modal-content-overview">
             Hai concluso{" "}
             <strong style={{ color: "#e18f37" }}>
-              {visit?.titolo || "questa visita"}
+              {visit?.titolo || visit?.title || "questa visita"}
             </strong>
             . Grazie per aver esplorato con noi.
           </p>

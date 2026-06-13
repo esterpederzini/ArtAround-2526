@@ -17,6 +17,7 @@ function NavigatorVisitOverview() {
   const navigate = useNavigate();
 
   const [visit, setVisit] = useState(null);
+  const [allItems, setAllItems] = useState([]); // Database di ripiego client-side per proteggere i testi
   const [loading, setLoading] = useState(true);
   const [showExitModal, setShowExitModal] = useState(false);
 
@@ -32,10 +33,24 @@ function NavigatorVisitOverview() {
   }, [id]);
 
   useEffect(() => {
+    let isMounted = true;
     setLoading(true);
+
+    // Scarichiamo prima il catalogo degli item per avere un fallback sicuro sui testi delle opere
+    fetch("/api/items?limite=200")
+      .then((res) => res.json())
+      .then((itemsJson) => {
+        if (isMounted && itemsJson.successo && itemsJson.data?.items) {
+          setAllItems(itemsJson.data.items);
+        }
+      })
+      .catch((err) => console.error("Errore recupero catalogo fallback:", err));
+
+    // Carichiamo la visita corrente
     fetch(`/api/visite/${id}`)
       .then((res) => res.json())
       .then((json) => {
+        if (!isMounted) return;
         if (json.successo && json.data) {
           setVisit(json.data);
         }
@@ -43,8 +58,12 @@ function NavigatorVisitOverview() {
       })
       .catch((err) => {
         console.error("Errore fetch dal DB:", err);
-        setLoading(false);
+        if (isMounted) setLoading(false);
       });
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   const handleShow = () => setShowExitModal(true);
@@ -77,7 +96,7 @@ function NavigatorVisitOverview() {
   }
 
   if (!visit) {
-    return <div className="text-white p-5">Visita non trovata.</div>;
+    return <div className="text-white p-5">Visita non trovato.</div>;
   }
 
   return (
@@ -109,7 +128,6 @@ function NavigatorVisitOverview() {
       </Navbar>
 
       <Container fluid className="full-container px-4">
-        {/* AGGIUNTO: Wrapper centrale per limitare la larghezza su PC */}
         <div className="content-wrapper">
           <div className="itinerary-header mt-4 mb-3">
             <h3 className="text-white fw-bold">
@@ -142,9 +160,37 @@ function NavigatorVisitOverview() {
 
           {visit.tappe &&
             visit.tappe.map((tappa, index) => {
-              const opera = tappa.item_default || {};
+              // 🏛️ STRATEGIA DI RECOVERY DIFENSIVA SUI METADATI DELLE OPERE
+              // Se item_default è un oggetto popolato lo usiamo, altrimenti cerchiamo per operaId nel catalogo globale
+              let opera = {};
+              if (
+                tappa.item_default &&
+                typeof tappa.item_default === "object"
+              ) {
+                opera = tappa.item_default;
+              } else {
+                const matchCatalogo = allItems.find(
+                  (item) =>
+                    item.operaId === tappa.operaId &&
+                    item.linguaggio === (tappa.linguaggio_default || "medio"),
+                );
+                opera =
+                  matchCatalogo ||
+                  allItems.find((item) => item.operaId === tappa.operaId) ||
+                  {};
+              }
+
               const isReached = index <= furthestIndex;
               const isFurthest = index === furthestIndex;
+
+              // Estraiamo in sicurezza il titolo e l'immagine recuperati
+              const titoloOpera =
+                opera.titolo ||
+                `Tappa dell'opera ${tappa.operaId || index + 1}`;
+              const urlImmagine = opera.url || "/img/placeholder.jpg";
+              const stringaDurata = opera.durata_reale
+                ? `${opera.durata_reale}s`
+                : opera.lunghezza || "15s";
 
               return (
                 <Row
@@ -182,22 +228,18 @@ function NavigatorVisitOverview() {
                       <Row className="g-0 align-items-center">
                         <Col xs={4} sm={3} md={2} className="p-2">
                           <Card.Img
-                            src={opera.url || "/img/placeholder.jpg"}
+                            src={urlImmagine}
                             className="img-list-new"
                           />
                         </Col>
                         <Col xs={8} sm={9} md={10}>
                           <Card.Body className="py-2 px-3">
                             <Card.Title className="opera-title">
-                              {opera.titolo}
+                              {titoloOpera}
                             </Card.Title>
                             <div className="audio-info mt-2">
                               <i className="bi bi-headphones me-2"></i>
-                              <span>
-                                {opera.durata_reale
-                                  ? `${opera.durata_reale}s`
-                                  : opera.lunghezza}
-                              </span>
+                              <span>{stringaDurata}</span>
                             </div>
                           </Card.Body>
                         </Col>
