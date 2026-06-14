@@ -40,7 +40,7 @@ const itemSchema = new mongoose.Schema(
     url: { type: String, default: null },
     lunghezza: {
       type: String,
-      enum: ["3s", "15s", "1m", "4m", "3m", "5m", "10m"],
+      enum: ["3s", "15s", "40s", "1m"],
       required: true,
     },
     linguaggio: {

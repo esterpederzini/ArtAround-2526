@@ -15,7 +15,7 @@ const Item = require("../models/Item"); // o come si chiama il file dell'Item
 const Visit = require("../models/Visita"); // o Visita.js
 const User = require("../models/User");
 
-let dbname = "artaround";
+let dbname = "site252620";
 
 const getUri = (credentials) => {
   if (process.env.MONGO_URL) return process.env.MONGO_URL;
@@ -35,7 +35,7 @@ exports.create = async (credentials) => {
     debug.push("✅ Connesso al DB");
 
     // Usiamo process.cwd() per trovare il file nella root del progetto Docker
-    let seedPath = path.join(process.cwd(), "seed_data.json");
+    let seedPath = path.join(__dirname, "..", "seed_data.json");
     debug.push(`Lettura file: ${seedPath}`);
 
     let doc = await fs.readFile(seedPath, "utf8");
@@ -78,6 +78,7 @@ exports.create = async (credentials) => {
         title: v.title || v.titolo,
         image: v.image || v.immagine,
         museo: v.museo,
+	pubblica: v.pubblica ?? false,
         livello_base: v.livello_base || v.difficolta_target,
         info_generale: v.info_generale || v.descrizione_logistica,
         stops: v.stops || (v.tappe ? v.tappe.length : 0),
