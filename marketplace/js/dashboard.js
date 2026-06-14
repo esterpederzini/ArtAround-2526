@@ -927,7 +927,7 @@ async function caricaMieiContenuti() {
     if (mieVisiteCreate.length > 0) {
       htmlRisultato += `
         <div class="aa-card mb-4">
-          <div class="aa-card-header"><i class="bi bi-map"></i> Le mie Visite Create (${mieVisiteCreate.length})</div>
+          <div class="aa-card-header"><i class="bi bi-map"></i>Visite Create (${mieVisiteCreate.length})</div>
           <div class="aa-card-body p-0" style="overflow-x:auto;">
             <table class="aa-table">
               <thead><tr><th>Titolo Visita</th><th>Museo</th><th>Tappe</th><th>Azioni</th></tr></thead>
@@ -956,7 +956,7 @@ async function caricaMieiContenuti() {
     if (mieVisiteAcquistate.length > 0) {
       htmlRisultato += `
         <div class="aa-card mb-4">
-          <div class="aa-card-header"><i class="bi bi-bookmark-star"></i> Le mie Visite Adottate (${mieVisiteAcquistate.length})</div>
+          <div class="aa-card-header"><i class="bi bi-bookmark-star"></i>Visite Acquistate (${mieVisiteAcquistate.length})</div>
           <div class="aa-card-body p-0" style="overflow-x:auto;">
             <table class="aa-table">
               <thead>
@@ -1023,7 +1023,7 @@ async function caricaMieiContenuti() {
     if (mieVisiteCreate.length > 0) {
       htmlVisitatore += `
         <div class="aa-card mb-4">
-          <div class="aa-card-header" style="background: var(--aa-primary-pale);"><i class="bi bi-map"></i> Le mie Visite Create (${mieVisiteCreate.length})</div>
+          <div class="aa-card-header" style="background: var(--aa-primary-pale);"><i class="bi bi-map"></i>Visite Create (${mieVisiteCreate.length})</div>
           <div class="aa-card-body p-0" style="overflow-x:auto;">
             <table class="aa-table">
               <thead><tr><th>Titolo Visita</th><th>Museo</th><th>Tappe</th><th>Azioni</th></tr></thead>
@@ -1054,7 +1054,7 @@ async function caricaMieiContenuti() {
     if (mieVisiteAcquistate.length > 0) {
       htmlVisitatore += `
         <div class="aa-card mb-4">
-          <div class="aa-card-header"><i class="bi bi-bookmark-star"></i> Le mie Visite Adottate (${mieVisiteAcquistate.length})</div>
+          <div class="aa-card-header"><i class="bi bi-bookmark-star"></i> Visite Acquistate (${mieVisiteAcquistate.length})</div>
           <div class="aa-card-body p-0" style="overflow-x:auto;">
             <table class="aa-table">
               <thead>
@@ -1098,7 +1098,7 @@ async function caricaMieiContenuti() {
     if (mieiItemsAcquistati.length > 0) {
       htmlVisitatore += `
         <div class="aa-card">
-          <div class="aa-card-header"><i class="bi bi-file-earmark-music"></i> I miei Contenuti Audio Singoli (${mieiItemsAcquistati.length})</div>
+          <div class="aa-card-header"><i class="bi bi-file-earmark-music"></i> Item Acquistati (${mieiItemsAcquistati.length})</div>
           <div class="aa-card-body p-0" style="overflow-x:auto;">
             <table class="aa-table">
               <thead>

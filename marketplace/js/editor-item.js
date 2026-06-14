@@ -134,14 +134,15 @@ async function popolaSelectOpere() {
   const select = document.getElementById("operaSelect");
   if (!select) return;
 
+  // Interroga l'API del backend filtrando per il museo configurato (carica anche i non pubblicati per sicurezza)
   const data = await apiFetch(
-    `/api/items?museo=${encodeURIComponent(museoConfigurato)}&limite=300`,
+    `/api/items?museo=${encodeURIComponent(museoConfigurato)}&limite=300&pubblicato=tutti`,
   );
   select.innerHTML = "";
 
   const optDefault = document.createElement("option");
   optDefault.value = "";
-  optDefault.textContent = "-- Scegli un'opera ufficiale --";
+  optDefault.textContent = "-- Scegli un'opera presente nel database --";
   select.appendChild(optDefault);
 
   if (!data || !data.items || data.items.length === 0) {
@@ -149,6 +150,7 @@ async function popolaSelectOpere() {
     return;
   }
 
+  // Raggruppiamo gli item per operaId così da avere un'unica voce nella tendina per opera
   mappaOpereLocali = {};
   data.items.forEach((item) => {
     if (item.operaId && !mappaOpereLocali[item.operaId]) {
@@ -156,11 +158,13 @@ async function popolaSelectOpere() {
     }
   });
 
+  // Genera le opzioni nel menu a tendina
   Object.keys(mappaOpereLocali).forEach((operaId) => {
     const opera = mappaOpereLocali[operaId];
     const opt = document.createElement("option");
     opt.value = operaId;
-    opt.textContent = opera.titoloOpera || opera.titolo || "Opera senza titolo";
+    // Mostra il titolo ufficiale dell'opera ereditato dal seed
+    opt.textContent = `${opera.titoloOpera || opera.titolo || "Opera senza titolo"} [${operaId}]`;
     select.appendChild(opt);
   });
 }
@@ -177,8 +181,10 @@ async function gestisciCambioSelezioneOpera(valoreScelto) {
     badge.className = "badge ms-2 bg-success text-white";
     badge.classList.remove("d-none");
 
+    // Questo è l'item principale recuperato da MongoDB
     const operaSelezionata = mappaOpereLocali[valoreScelto];
 
+    // Compila i campi di testo storici
     document.getElementById("operaTitoloUfficiale").value =
       operaSelezionata.titoloOpera || operaSelezionata.titolo || "";
     document.getElementById("artista").value =
@@ -194,6 +200,14 @@ async function gestisciCambioSelezioneOpera(valoreScelto) {
       document.getElementById("immagineUrl").value = operaSelezionata.immagine;
     }
 
+    // 🛠️ CRITICO: Memorizza i dati fisici della mappa ereditati dal seed dell'item principale
+    // In questo modo, quando salverai l'item secondario, manterrà le stesse esatte coordinate!
+    window.operaSelezionataMappa = {
+      piano: operaSelezionata.piano || "0",
+      mappa_x: Number(operaSelezionata.mappa_x) || 0,
+      mappa_y: Number(operaSelezionata.mappa_y) || 0,
+    };
+
     disabilitaCampiOpere([...campiSchedaTecnica, "operaTitoloUfficiale"], true);
     document.getElementById("titolo").value = "";
 
@@ -208,6 +222,7 @@ async function gestisciCambioSelezioneOpera(valoreScelto) {
     if (inputOperaIdNascosto) inputOperaIdNascosto.value = "";
     document.getElementById("operaTitoloUfficiale").value = "";
     badge.classList.add("d-none");
+    window.operaSelezionataMappa = null; // Resetta la mappa volatile
     disabilitaCampiOpere(
       [...campiSchedaTecnica, "operaTitoloUfficiale"],
       false,
@@ -409,6 +424,8 @@ async function salvaItem() {
 
   const linkImmagine = immagineUrl || "/img/default_item_image.jpg";
 
+  const mappaEreditata = window.operaSelezionataMappa || {};
+
   const payload = {
     operaId,
     museo,
@@ -431,9 +448,12 @@ async function salvaItem() {
     titoloOpera: titoloOpera || titolo,
     autore_visita: utenteCorrente?.username || "Autore",
     autore: utenteCorrente?.username || "Autore",
-    piano: operaCatalogata.piano || "0",
-    mappa_x: Number(operaCatalogata.mappa_x) || 0,
-    mappa_y: Number(operaCatalogata.mappa_y) || 0,
+
+    // 🛠️ FIX: Prende i dati fisici immutabili dall'item principale del seed!
+    piano: mappaEreditata.piano || "0",
+    mappa_x: mappaEreditata.mappa_x !== undefined ? mappaEreditata.mappa_x : 0,
+    mappa_y: mappaEreditata.mappa_y !== undefined ? mappaEreditata.mappa_y : 0,
+
     licenza: { tipo: licenzaTipo, note: licenzaNote },
   };
 

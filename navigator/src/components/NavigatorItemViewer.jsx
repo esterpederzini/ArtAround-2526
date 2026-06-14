@@ -59,6 +59,7 @@ export default function NavigatorItemViewer() {
 
   const audioRef = useRef(new Audio());
   const ttsIntervalRef = useRef(null);
+  const logisticsAudioRef = useRef(null);
 
   const [showMapModal, setShowMapModal] = useState(false);
   const [selectedMapFloor, setSelectedMapFloor] = useState("0");
@@ -75,12 +76,23 @@ export default function NavigatorItemViewer() {
   // ---------- LOGISTICS ----------
   const handleLogistics = (msg) => {
     if (!msg) return;
+
+    if (logisticsAudioRef.current) {
+      logisticsAudioRef.current.pause();
+      logisticsAudioRef.current = null;
+    }
+    window.speechSynthesis.cancel();
+
     setLogisticsMsg(msg);
     const audio = new Audio(`/api/tts?text=${encodeURIComponent(msg)}`);
+    logisticsAudioRef.current = audio;
     audio.play().catch(() => {
       const utterance = new SpeechSynthesisUtterance(msg);
       utterance.lang = "it-IT";
       window.speechSynthesis.speak(utterance);
+    });
+    audio.addEventListener("ended", () => {
+      logisticsAudioRef.current = null;
     });
     setTimeout(() => setLogisticsMsg(""), 5000);
   };
@@ -505,6 +517,11 @@ export default function NavigatorItemViewer() {
       setIsListening(false);
     } else {
       setIsPlaying(false);
+      if (logisticsAudioRef.current) {
+        logisticsAudioRef.current.pause();
+        logisticsAudioRef.current = null;
+      }
+      window.speechSynthesis.cancel();
       try {
         recognitionRef.current?.start();
         setIsListening(true);
@@ -761,7 +778,22 @@ export default function NavigatorItemViewer() {
 
       {/* BOTTOM NAV */}
       <div className="bottom-nav-viewer">
-        <button className="nav-item" onClick={() => setShowMapModal(true)}>
+        <button
+          className="nav-item"
+          onClick={() => {
+            const configArtwork =
+              museumConfig?.posizione_opere?.find(
+                (o) => String(o.operaId) === String(currentItem?.operaId),
+              ) || {};
+            const realFloor =
+              currentItem?.piano !== undefined
+                ? String(currentItem.piano)
+                : configArtwork.piano || "0";
+
+            setSelectedMapFloor(realFloor);
+            setShowMapModal(true);
+          }}
+        >
           <i className="bi bi-map"></i>
         </button>
         <div className="nav-item central">
@@ -1073,6 +1105,7 @@ export default function NavigatorItemViewer() {
       </Modal>
 
       {/* MAPPA */}
+      {/* MAPPA */}
       <Modal
         show={showMapModal}
         onHide={() => setShowMapModal(false)}
@@ -1103,48 +1136,60 @@ export default function NavigatorItemViewer() {
               alt={`Piano ${selectedMapFloor}`}
               style={{ width: "100%", display: "block" }}
             />
-            {(() => {
-              const tappaCorrente = visit?.tappe?.[safeIndex];
-              const item = tappaCorrente?.item_default;
-              const targetOperaId =
-                tappaCorrente?.operaId?.operaId ||
-                tappaCorrente?.operaId ||
-                item?.operaId;
-              const operaConfig =
-                museumConfig?.posizione_opere?.find(
-                  (o) => String(o.operaId) === String(targetOperaId),
-                ) || {};
-              const mapX = item?.mappa_x ?? operaConfig.mappa_x;
-              const mapY = item?.mappa_y ?? operaConfig.mappa_y;
-              const floor =
-                item?.piano !== undefined
-                  ? String(item.piano)
-                  : operaConfig.piano || "0";
+            {currentItem &&
+              (() => {
+                const tappaCorrente = visit?.tappe?.[safeIndex];
+                const item = tappaCorrente?.item_default;
+                const targetOperaId =
+                  tappaCorrente?.operaId?.operaId ||
+                  tappaCorrente?.operaId ||
+                  item?.operaId;
 
-              if (
-                mapX === undefined ||
-                mapY === undefined ||
-                floor !== selectedMapFloor
-              )
-                return null;
+                const configArtwork =
+                  museumConfig?.posizione_opere?.find(
+                    (o) => String(o.operaId) === String(targetOperaId),
+                  ) || {};
 
-              return (
-                <div
-                  style={{
-                    position: "absolute",
-                    left: `${mapX}%`,
-                    top: `${mapY}%`,
-                    width: "18px",
-                    height: "18px",
-                    backgroundColor: "red",
-                    borderRadius: "50%",
-                    border: "2px solid white",
-                    transform: "translate(-50%, -50%)",
-                    boxShadow: "0 0 8px #e18f37",
-                  }}
-                />
-              );
-            })()}
+                const floor =
+                  item?.piano !== undefined
+                    ? String(item.piano)
+                    : configArtwork.piano || "0";
+
+                const mapX =
+                  item?.mappa_x !== undefined
+                    ? item.mappa_x
+                    : configArtwork.mappa_x;
+                const mapY =
+                  item?.mappa_y !== undefined
+                    ? item.mappa_y
+                    : configArtwork.mappa_y;
+
+                // Il pallino compare SOLO se il piano calcolato coincide con quello del selettore
+                if (
+                  mapX === undefined ||
+                  mapY === undefined ||
+                  String(floor) !== String(selectedMapFloor)
+                )
+                  return null;
+
+                return (
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: `${mapX}%`,
+                      top: `${mapY}%`,
+                      width: "18px",
+                      height: "18px",
+                      backgroundColor: "red",
+                      borderRadius: "50%",
+                      border: "2px solid white",
+                      transform: "translate(-50%, -50%)",
+                      boxShadow: "0 0 8px #e18f37",
+                      zIndex: 10,
+                    }}
+                  />
+                );
+              })()}
           </div>
 
           <div className="px-3 py-2" style={{ background: "#1a1a1a" }}>
@@ -1152,23 +1197,28 @@ export default function NavigatorItemViewer() {
               const item = tappa.item_default;
               const targetOperaId =
                 tappa.operaId?.operaId || tappa.operaId || item?.operaId;
+
               const operaConfig =
                 museumConfig?.posizione_opere?.find(
                   (o) => String(o.operaId) === String(targetOperaId),
                 ) || {};
+
               const currentFloor =
                 item?.piano !== undefined
                   ? String(item.piano)
                   : operaConfig.piano || "0";
+
               const currentTitle =
                 item?.titoloOpera ||
                 item?.titolo ||
                 operaConfig.titoloOpera ||
                 `Tappa ${idx + 1}`;
 
-              if (currentFloor !== String(selectedMapFloor)) return null;
+              if (String(currentFloor) !== String(selectedMapFloor))
+                return null;
 
               const isCurrent = idx === safeIndex;
+
               return (
                 <div
                   key={idx}
