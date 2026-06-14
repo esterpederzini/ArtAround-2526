@@ -1,8 +1,3 @@
-/* ═══════════════════════════════════════════════════
-   dashboard.js – Logica Dashboard ArtAround
-   ═══════════════════════════════════════════════════ */
-
-// ─── STATO GLOBALE ───────────────────────────────────
 const stato = {
   tabCorrente: "items",
   filtri: {
@@ -17,16 +12,13 @@ const stato = {
   limite: 12,
 };
 
-// ─── INIT ────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
-  // Carica configurazione museo
   const config = await caricaConfigMuseo();
   if (!config) {
     showToast("Configurazione museo non trovata", "error");
     return;
   }
 
-  // Leggi parametri URL
   const params = new URLSearchParams(window.location.search);
   if (params.get("museo")) stato.filtri.museo = params.get("museo");
 
@@ -35,17 +27,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   caricaVisiteTab();
 
   aggiornaUtenteUI();
-  // Attiva sidebar log e permessi di creazione
   const u = getUtenteCorrente();
 
   if (u) {
     document.getElementById("tabMieiBtn")?.classList.remove("d-none");
 
-    // Mostra il gruppo bottoni delle azioni se l'utente è autore, admin O visitatore
     if (["autore", "admin", "visitatore"].includes(u.ruolo)) {
       document.getElementById("authorActions")?.classList.remove("d-none");
 
-      // Mostra il bottone dei log e la sidebar solo ai creatori effettivi (autore/admin)
       if (["autore", "admin"].includes(u.ruolo)) {
         document.getElementById("sidebarLog")?.classList.remove("d-none");
         document.getElementById("btnLogVendite")?.classList.remove("d-none");
@@ -53,24 +42,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("btnLogVendite")?.classList.add("d-none");
       }
 
-      // Sincronizza i bottoni di creazione basandoti sulla tab iniziale ("items")
       if (["autore", "admin"].includes(u.ruolo)) {
         document.getElementById("btnNuovoItem")?.classList.remove("d-none");
       } else {
         document.getElementById("btnNuovoItem")?.classList.add("d-none");
       }
 
-      // All'inizio siamo sulla tab "items", quindi il bottone visita è nascosto per tutti
       document.getElementById("btnNuovaVisita")?.classList.add("d-none");
     }
 
-    // Sblocca il link "Editor Visita" nella navbar anche per il visitatore
     if (["autore", "admin", "visitatore"].includes(u.ruolo)) {
       document.getElementById("navEditorVisita")?.classList.remove("d-none");
     }
   }
 
-  // Filtri sidebar – click handler
   configuraBtnFiltri("[data-museo]", (v) => {
     stato.filtri.museo = v;
     stato.paginaItems = 1;
@@ -92,7 +77,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     caricaItems();
   });
 
-  // Ricerca testuale con debounce
   document.getElementById("campoCerca")?.addEventListener(
     "input",
     debounce((e) => {
@@ -102,14 +86,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 350),
   );
 
-  // Cambio limite
   document.getElementById("selectLimit")?.addEventListener("change", (e) => {
     stato.limite = Number(e.target.value);
     stato.paginaItems = 1;
     caricaItems();
   });
 
-  // Seleziona filtro museo se arrivato dalla home
   if (stato.filtri.museo) {
     setTimeout(() => {
       const btn = document.querySelector(
@@ -143,8 +125,6 @@ function configuraBtnFiltri(selector, callback) {
     });
   });
 }
-
-// ─── TABS ────────────────────────────────────────────
 function switchTab(tab, btnEl) {
   stato.tabCorrente = tab;
   document
@@ -159,8 +139,6 @@ function switchTab(tab, btnEl) {
     .classList.toggle("d-none", tab !== "visite");
   document.getElementById("tabMiei").classList.toggle("d-none", tab !== "miei");
 
-  // Gestione pulita dei bottoni d'azione (Solo per Autori e Admin)
-  // Gestione pulita dei bottoni d'azione (Incluso il Visitatore per le visite)
   const btnNuovoItem = document.getElementById("btnNuovoItem");
   const btnNuovaVisita = document.getElementById("btnNuovaVisita");
   const u = getUtenteCorrente();
@@ -168,7 +146,6 @@ function switchTab(tab, btnEl) {
   if (btnNuovoItem && btnNuovaVisita) {
     if (u && ["autore", "admin", "visitatore"].includes(u.ruolo)) {
       if (tab === "items") {
-        // Solo autore e admin creano item
         if (["autore", "admin"].includes(u.ruolo)) {
           btnNuovoItem.classList.remove("d-none");
         } else {
@@ -176,7 +153,6 @@ function switchTab(tab, btnEl) {
         }
         btnNuovaVisita.classList.add("d-none");
       } else if (tab === "visite") {
-        // Tutti (autore, admin e visitatore) possono creare visite
         btnNuovoItem.classList.add("d-none");
         btnNuovaVisita.classList.remove("d-none");
       } else {
@@ -193,7 +169,6 @@ function switchTab(tab, btnEl) {
   if (tab === "miei") caricaMieiContenuti();
 }
 
-// ─── CARICA MUSEI (FILTRO) ───────────────────────────
 async function caricaMuseiFiltro() {
   const config = await caricaConfigMuseo();
   if (!config) return;
@@ -201,10 +176,8 @@ async function caricaMuseiFiltro() {
   const container = document.getElementById("filtroMusei");
   if (!container) return;
 
-  // Svuota il contenuto esistente
   container.innerHTML = "";
 
-  // Aggiungi un bottone per il museo corrente dalla configurazione
   const btn = document.createElement("button");
   btn.className = "aa-filter-btn active";
   btn.dataset.museo = config.museo;
@@ -225,17 +198,14 @@ async function caricaMuseiFiltro() {
   container.appendChild(btn);
 }
 
-// ─── CARICA CONFIGURAZIONE MUSEO ─────────────────────
 async function caricaConfigMuseo() {
   try {
-    // Chiediamo i dati al server tramite la rotta API
     const response = await fetch("/api/config");
 
     if (!response.ok) {
       throw new Error("Configurazione non trovata sul server");
     }
 
-    // Il server ci risponde inviando il file JSON, lo convertiamo in oggetto JS
     const config = await response.json();
     return config;
   } catch (error) {
@@ -244,7 +214,6 @@ async function caricaConfigMuseo() {
   }
 }
 
-// ─── CARICA ITEMS ────────────────────────────────────
 async function caricaItems(pagina = stato.paginaItems) {
   stato.paginaItems = pagina;
   const grid = document.getElementById("itemsGrid");
@@ -325,11 +294,10 @@ async function apriItemModal(id) {
   modal.classList.remove("d-none");
   document.getElementById("modalItemTitolo").textContent = "Caricamento…";
 
-  // Spinner di caricamento coerente con lo stile
   document.getElementById("modalItemBody").innerHTML =
     '<div class="text-center py-4"><div class="aa-spinner"></div></div>';
   document.getElementById("modalItemFooter").innerHTML = "";
-  document.getElementById("modalItemFooter").classList.remove("d-none"); // Assicuriamoci che sia visibile
+  document.getElementById("modalItemFooter").classList.remove("d-none");
 
   const item = await apiFetch(`/api/items/${id}`);
   if (!item) {
@@ -339,14 +307,12 @@ async function apriItemModal(id) {
 
   document.getElementById("modalItemTitolo").textContent = item.titolo;
 
-  // 🛡️ Gestione Fallback Immagine (se manca, usa il placeholder di style.css)
   const mediaHTML = item.url
     ? `<img src="${item.url}" class="img-fluid rounded border border-soft w-100" style="max-height: 250px; object-fit: cover;" alt="">`
     : `<div class="aa-item-placeholder rounded border border-soft d-flex align-items-center justify-content-center" style="height: 180px;">
          <i class="bi bi-image" style="font-size: 2.5rem; color: var(--aa-tortora);"></i>
        </div>`;
 
-  // Integrazione dei tuoi metadati nella griglia a due colonne
   document.getElementById("modalItemBody").innerHTML = `
     <div class="row g-3">
       <div class="col-md-5">
@@ -398,15 +364,12 @@ async function apriItemModal(id) {
     </div>
   `;
 
-  // --- LOGICA FOOTER DINAMICA CON CONTROLLI DI PROPRIETÀ E ACQUISTO PRECEDENTE ---
   let footerHtml = ``;
   const u = getUtenteCorrente();
 
-  // Verifichiamo se l'utente corrente è il creatore dell'item
   const idCreatoreItem = item.creatorId?._id || item.creatorId;
   const isProprietarioItem = u && idCreatoreItem === u._id;
 
-  // Verifichiamo se l'utente corrente ha già acquistato o adottato questo item in passato
   const giaAcquistatoItem =
     u &&
     Array.isArray(item.logVendite) &&
@@ -415,7 +378,6 @@ async function apriItemModal(id) {
       return idAcquirente === u._id;
     });
 
-  // Se l'utente è il proprietario o lo ha già acquistato, mostriamo un badge informativo invece dei pulsanti
   if (isProprietarioItem) {
     footerHtml = ``;
   } else if (giaAcquistatoItem) {
@@ -425,7 +387,6 @@ async function apriItemModal(id) {
       </span>
     `;
   } else {
-    // Se non è proprietario e non l'ha mai comprato, mostriamo i pulsanti d'azione standard
     const titoloItemEscaped = (item.titolo || "Item")
       .replace(/'/g, "\\'")
       .replace(/"/g, "&quot;");
@@ -467,7 +428,6 @@ function chiudiItemModal() {
   document.getElementById("itemModal").classList.add("d-none");
 }
 
-// ─── MODAL VISITA DETTAGLIO ────────────────────────────
 async function apriVisitaModal(id) {
   const modal = document.getElementById("visitaModal");
   modal.classList.remove("d-none");
@@ -476,7 +436,6 @@ async function apriVisitaModal(id) {
     '<div class="text-center py-4"><div class="aa-spinner"></div></div>';
   document.getElementById("modalVisitaFooter").innerHTML = "";
 
-  // Scarica i dettagli completi della visita dal server
   const v = await apiFetch(`/api/visite/${id}`);
   if (!v) {
     modal.classList.add("d-none");
@@ -486,13 +445,11 @@ async function apriVisitaModal(id) {
   document.getElementById("modalVisitaTitolo").textContent =
     v.titolo || v.title || "Visita";
 
-  // Costruisce la lista delle tappe del percorso
   let tappeHtml =
     '<em class="text-slate small">Nessuna tappa inserita nel percorso.</em>';
   if (v.tappe && v.tappe.length > 0) {
     tappeHtml = v.tappe
       .map((t) => {
-        // Il backend invia l'item "popolato" con titolo e operaId
         const infoItem = t.item_default || {};
         const nomeTappa = infoItem.titolo || "Tappa inesistente";
         const idOpera = infoItem.operaId || "";
@@ -507,7 +464,6 @@ async function apriVisitaModal(id) {
       .join("");
   }
 
-  // Costruisce il corpo del Modal con tutti i dettagli strutturali
   document.getElementById("modalVisitaBody").innerHTML = `
     <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
       <span class="aa-badge aa-badge-len">🏛️ ${v.museo || "Nessun museo"}</span>
@@ -529,15 +485,12 @@ async function apriVisitaModal(id) {
     </div>
   `;
 
-  // --- LOGICA FOOTER DINAMICA CON CONTROLLI DI PROPRIETÀ E ADOZIONE PRECEDENTE ---
   let footerHtml = ``;
   const u = getUtenteCorrente();
 
-  // Verifichiamo se l'utente corrente è il creatore della visita
   const idCreatoreVisita = v.creatorId?._id || v.creatorId;
   const isProprietarioVisita = u && idCreatoreVisita === u._id;
 
-  // Verifichiamo se l'utente corrente ha già adottato o acquistato questa visita in passato
   const giaAdottataVisita =
     u &&
     Array.isArray(v.logAdozioni) &&
@@ -546,7 +499,6 @@ async function apriVisitaModal(id) {
       return idAdottante === u._id;
     });
 
-  // Se l'utente è il proprietario o la visita è già nel suo account, blocchiamo i bottoni di acquisto
   if (isProprietarioVisita) {
     footerHtml = ``;
   } else if (giaAdottataVisita) {
@@ -557,7 +509,6 @@ async function apriVisitaModal(id) {
       </span>
       ` + footerHtml;
   } else {
-    // Altrimenti, inseriamo i tasti per l'acquisizione
     const titoloVisitaEscaped = (v.titolo || v.title || "Visita")
       .replace(/'/g, "\\'")
       .replace(/"/g, "&quot;");
@@ -587,17 +538,19 @@ function chiudiVisitaModal() {
   document.getElementById("visitaModal").classList.add("d-none");
 }
 
-// ─── TAB VISITE ──────────────────────────────────────
 async function caricaVisiteTab(pagina = stato.paginaVisite) {
   stato.paginaVisite = pagina;
   const grid = document.getElementById("visiteGrid");
   grid.innerHTML =
     '<div class="col-12 text-center py-5"><div class="aa-spinner"></div></div>';
 
+  const u = getUtenteCorrente();
+
   const qs = new URLSearchParams({
     pagina,
     limite: stato.limite,
     ...(stato.filtri.museo && { museo: stato.filtri.museo }),
+    ...(u && { includiPrivateCreatorId: u._id }),
   });
 
   const data = await apiFetch(`/api/visite?${qs}`);
@@ -607,20 +560,16 @@ async function caricaVisiteTab(pagina = stato.paginaVisite) {
     return;
   }
 
-  // Filtra le visite in base al ruolo dell'utente:
-  // - Visita pubblica (gratis o a pagamento): visibile a tutti
-  // - Visita privata: visibile solo al suo creatore
-  const u = getUtenteCorrente();
   const visiteFiltrate = data.visite.filter((v) => {
-    if (v.pubblica !== false) return true; // pubblica: sempre visibile
-    if (!u) return false; // privata + non loggato: nascosta
+    if (v.pubblica !== false) return true;
+    if (!u) return false;
     const idCreatore = v.creatorId?._id || v.creatorId;
-    return idCreatore === u._id; // privata: visibile solo all'autore
+    return String(idCreatore) === String(u._id);
   });
 
   if (!visiteFiltrate.length) {
     grid.innerHTML =
-      '<div class="col-12"><div class="aa-empty"><div class="aa-empty-icon">🗺️</div><h5>Nessuna visita disponibile</h5><p>Crea la prima visita dall\'Editor.</p><a href="/editor-visita" class="btn-aa-primary mt-2">Crea Visita</a></div></div>';
+      '<div class="col-12"><div class="aa-empty"><div class="aa-empty-icon">🗺️</div><h5>Nessuna visita disponibile</h5><p>Nessuna visita corrispondente ai criteri.</p></div></div>';
     return;
   }
 
@@ -680,7 +629,6 @@ async function adottaVisita(visitaId) {
   if (ok) showToast("Visita adottata e salvata nel tuo profilo!", "success");
 }
 
-// ─── SALVATAGGIO REALE NEL DB: VISITE (CON BLOCCO AUTO-ACQUISTO) ───
 async function eseguiAcquistoDnAdozioneVisita(visitaId, titolo, prezzo) {
   const u = getUtenteCorrente();
   if (!u) {
@@ -693,8 +641,6 @@ async function eseguiAcquistoDnAdozioneVisita(visitaId, titolo, prezzo) {
   }
 
   try {
-    // 🛡️ CONTROLLO DI SICUREZZA LATO CLIENT
-    // Richiediamo i dettagli della visita per verificare l'identità del creatore
     const visita = await apiFetch(`/api/visite/${visitaId}`);
     const idCreatore = visita?.creatorId?._id || visita?.creatorId;
 
@@ -730,7 +676,6 @@ async function eseguiAcquistoDnAdozioneVisita(visitaId, titolo, prezzo) {
   }
 }
 
-// ─── SALVATAGGIO REALE NEL DB: ITEM (CON BLOCCO AUTO-ACQUISTO) ───
 async function eseguiAcquistoDnAdozioneItem(itemId, titolo, prezzo) {
   const u = getUtenteCorrente();
   if (!u) {
@@ -743,8 +688,6 @@ async function eseguiAcquistoDnAdozioneItem(itemId, titolo, prezzo) {
   }
 
   try {
-    // 🛡️ CONTROLLO DI SICUREZZA LATO CLIENT
-    // Richiediamo i dettagli dell'item per verificare al volo l'identità del creatore
     const item = await apiFetch(`/api/items/${itemId}`);
     const idCreatore = item?.creatorId?._id || item?.creatorId;
 
@@ -785,8 +728,6 @@ async function eseguiAcquistoDnAdozioneItem(itemId, titolo, prezzo) {
   }
 }
 
-// ─── AGGIORNAMENTO TAB "I MIEI CONTENUTI" (CON ITEM ACQUISTATI) ───
-// ─── AGGIORNAMENTO TAB "I MIEI CONTENUTI" (CON ITEM ACQUISTATI) ───
 async function caricaMieiContenuti() {
   const u = getUtenteCorrente();
   const container = document.getElementById("mieiContenuti");
@@ -805,19 +746,16 @@ async function caricaMieiContenuti() {
   container.innerHTML =
     '<div class="text-center py-4"><div class="aa-spinner"></div></div>';
 
-  // Scarichiamo i dati in parallelo dal server
   const [dataItems, dataVisiteCreate, dataVisiteAdottate] = await Promise.all([
     apiFetch(`/api/items?pubblicato=tutti&limite=100`),
     apiFetch(`/api/visite?pubblica=tutti&creatorId=${u._id}&limite=100`),
     apiFetch(`/api/visite?soloMie=true&limite=100`),
   ]);
 
-  // 1. ITEMS CREATI DA ME
   const mieiItemsCreati = dataItems?.items
     ? dataItems.items.filter((i) => (i.creatorId?._id || i.creatorId) === u._id)
     : [];
 
-  // 2. ITEMS ACQUISTATI/ADOTTATI DA ALTRI (cerchiamo se il nostro ID è nei logVendite)
   const mieiItemsAcquistati = dataItems?.items
     ? dataItems.items.filter((i) => {
         const nonMio = (i.creatorId?._id || i.creatorId) !== u._id;
@@ -828,10 +766,8 @@ async function caricaMieiContenuti() {
       })
     : [];
 
-  // 3. VISITE CREATE DA ME
   const mieVisiteCreate = dataVisiteCreate?.visite || [];
 
-  // 4. VISITE ACQUISTATE/ADOTTATE DA ALTRI
   const mieVisiteAcquistate = dataVisiteAdottate?.visite
     ? dataVisiteAdottate.visite.filter((v) => {
         const nonMia = v.creatorId?._id !== u._id && v.creatorId !== u._id;
@@ -844,7 +780,6 @@ async function caricaMieiContenuti() {
       })
     : [];
 
-  // --- CASO 1: AUTORE / ADMIN ---
   if (["autore", "admin"].includes(u.ruolo)) {
     if (
       !mieiItemsCreati.length &&
@@ -863,7 +798,6 @@ async function caricaMieiContenuti() {
 
     let htmlRisultato = "";
 
-    // Sezione: Item Creati
     if (mieiItemsCreati.length > 0) {
       htmlRisultato += `
         <div class="aa-card mb-4">
@@ -892,7 +826,6 @@ async function caricaMieiContenuti() {
       `;
     }
 
-    // 🛠️ SEZIONE CORRETTA: Item Acquistati / Adottati per Autori con BOTTONE VISUALIZZA
     if (mieiItemsAcquistati.length > 0) {
       htmlRisultato += `
         <div class="aa-card mb-4">
@@ -923,7 +856,6 @@ async function caricaMieiContenuti() {
       `;
     }
 
-    // Sezione: Visite Create
     if (mieVisiteCreate.length > 0) {
       htmlRisultato += `
         <div class="aa-card mb-4">
@@ -952,7 +884,6 @@ async function caricaMieiContenuti() {
       `;
     }
 
-    // Sezione: Visite Acquistate
     if (mieVisiteAcquistate.length > 0) {
       htmlRisultato += `
         <div class="aa-card mb-4">
@@ -1001,8 +932,6 @@ async function caricaMieiContenuti() {
 
     container.innerHTML = htmlRisultato;
   } else {
-    // --- CASO 2: VISITATORE SEMPLICE ---
-    // 1. MODIFICA: Controlliamo se ha creato visite, oltre ad averle acquistate
     if (
       !mieVisiteAcquistate.length &&
       !mieiItemsAcquistati.length &&
@@ -1019,7 +948,6 @@ async function caricaMieiContenuti() {
 
     let htmlVisitatore = "";
 
-    // 2. AGGIUNTA: Mostra le visite create dal visitatore stesso
     if (mieVisiteCreate.length > 0) {
       htmlVisitatore += `
         <div class="aa-card mb-4">
@@ -1050,7 +978,6 @@ async function caricaMieiContenuti() {
       `;
     }
 
-    // Sezione: Visite Adottate da altri (lasciala così com'era prima)
     if (mieVisiteAcquistate.length > 0) {
       htmlVisitatore += `
         <div class="aa-card mb-4">
@@ -1094,7 +1021,6 @@ async function caricaMieiContenuti() {
       `;
     }
 
-    // Sezione: Contenuti Audio Singoli (lasciala così com'era prima)
     if (mieiItemsAcquistati.length > 0) {
       htmlVisitatore += `
         <div class="aa-card">
@@ -1146,7 +1072,6 @@ async function eliminaItem(itemId) {
   }
 }
 
-// ─── LOG VENDITE CON RECOVERY DEGLI USERNAME DA ID STRINGA ───
 async function apriLogModal() {
   document.getElementById("logModal").classList.remove("d-none");
   const body = document.getElementById("logBody");
@@ -1160,14 +1085,12 @@ async function apriLogModal() {
     return;
   }
 
-  // 🛠️ SCARICHIAMO ANCHE LA LISTA UTENTI IN PARALLELO
   const [dataItems, dataVisite, dataUtenti] = await Promise.all([
     apiFetch("/api/items?pubblicato=tutti&limite=500"),
     apiFetch(`/api/visite?pubblica=tutti&creatorId=${u._id}&limite=500`),
-    apiFetch("/api/utenti"), // Recupera l'elenco di tutti gli account del sistema
+    apiFetch("/api/utenti"),
   ]);
 
-  // Creiamo una mappa rapida ID -> Username per convertire al volo le stringhe orfane
   const mappaUtenti = {};
   if (dataUtenti && Array.isArray(dataUtenti)) {
     dataUtenti.forEach((user) => {
@@ -1178,7 +1101,6 @@ async function apriLogModal() {
   let rows = "";
   let totaleGuadagnato = 0;
 
-  // 1. FILTRAGGIO LOG VENDITE - ITEM DELL'AUTORE
   if (dataItems && dataItems.items) {
     dataItems.items.forEach((item) => {
       const idCreatore = item.creatorId?._id || item.creatorId;
@@ -1193,7 +1115,6 @@ async function apriLogModal() {
             const importo = Number(log.prezzo || 0);
             totaleGuadagnato += importo;
 
-            // Recupero nome: prima prova dal populate nativo, poi dalla mappa, infine fallback anonimo
             const nomeAcquirente =
               idAcquirenteObj?.username ||
               mappaUtenti[idAcquirenteStr] ||
@@ -1215,7 +1136,6 @@ async function apriLogModal() {
     });
   }
 
-  // 2. FILTRAGGIO LOG VENDITE - VISITE DELL'AUTORE
   if (dataVisite && dataVisite.visite) {
     dataVisite.visite.forEach((visita) => {
       if (Array.isArray(visita.logAdozioni)) {
@@ -1229,8 +1149,6 @@ async function apriLogModal() {
             const importo = Number(visita.prezzo || 0);
             totaleGuadagnato += importo;
 
-            // 🛠️ RISOLUZIONE MANUALE DELLO USERNAME
-            // Se Mongoose restituisce solo la stringa dell'ID, la cerchiamo dentro la mappa utenti
             const nomeAcquirente =
               idAdottanteObj?.username ||
               mappaUtenti[idAdottanteStr] ||
@@ -1252,7 +1170,6 @@ async function apriLogModal() {
     });
   }
 
-  // RENDER FINALE
   if (!rows) {
     body.innerHTML =
       '<div class="aa-empty"><div class="aa-empty-icon">📊</div><h5>Nessun movimento</h5><p>I tuoi contenuti non sono ancora stati acquistati o adottati da altri utenti.</p></div>';
@@ -1289,7 +1206,6 @@ async function apriLogModal() {
   `;
 }
 
-// ─── RESET FILTRI ────────────────────────────────────
 function resetFiltri() {
   stato.filtri = {
     museo: "",
@@ -1301,7 +1217,6 @@ function resetFiltri() {
   stato.paginaItems = 1;
   document.getElementById("campoCerca").value = "";
   document.querySelectorAll(".aa-filter-btn").forEach((btn, _, arr) => {
-    // Riattiva solo il primo bottone di ogni gruppo
     const gruppo = btn.parentElement;
     const primo = gruppo.querySelector(".aa-filter-btn");
     btn.classList.toggle("active", btn === primo);
@@ -1309,7 +1224,6 @@ function resetFiltri() {
   caricaItems();
 }
 
-// Gestisce l'animazione della freccia dei filtri su mobile
 function ruotaFrecciaFiltri() {
   const freccia = document.getElementById("frecciaFiltri");
   if (!freccia) return;
@@ -1321,5 +1235,5 @@ function ruotaFrecciaFiltri() {
     } else {
       freccia.style.transform = "rotate(0deg)";
     }
-  }, 150); // Piccolo ritardo per dare il tempo a Bootstrap di assegnare le classi CSS di transizione
+  }, 150);
 }

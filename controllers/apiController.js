@@ -7,14 +7,10 @@ const mm = require("music-metadata");
 const path = require("path");
 const fs = require("fs");
 
-// ─── UTILITY ────────────────────────────────────────────────
 const risposta = (res, status, data, messaggio = "") => {
   res.status(status).json({ successo: status < 400, messaggio, data });
 };
 
-/**
- * Prepara il payload della visita per Mongo: merge `items` → `tappe`, arricchisce operaId.
- */
 async function buildTappeFromEditorItems(items) {
   if (!Array.isArray(items) || items.length === 0) return null;
   const sorted = [...items].sort(
@@ -75,7 +71,6 @@ async function normalizeVisitPayloadForStorage(body) {
   return out;
 }
 
-// ─── MUSEI ──────────────────────────────────────────────────
 exports.getMusei = async (req, res) => {
   try {
     const musei = await Item.distinct("museo");
@@ -85,7 +80,6 @@ exports.getMusei = async (req, res) => {
   }
 };
 
-// ─── ITEMS ──────────────────────────────────────────────────
 exports.getItems = async (req, res) => {
   try {
     const {
@@ -173,20 +167,15 @@ exports.creaItem = async (req, res) => {
       );
     }
 
-    // 1. Cloniamo il body della richiesta
     const datiNuovoItem = { ...req.body };
 
-    // 2. PROTEZIONE CRUCIALE: Rimuoviamo eventuali stringhe id inviate dal front-end
-    // Se è una creazione, MongoDB DEVE generare un ObjectId pulito da zero
     delete datiNuovoItem._id;
     delete datiNuovoItem.id;
 
-    // 3. Arricchiamo con i dati dell'autore loggato
     datiNuovoItem.creatorId = creatorId;
-    datiNuovoItem.autore = utente.username; // Per retrocompatibilità con i campi dell'app
-    datiNuovoItem.autore_visita = utente.username; // Allineato al tuo schema Mongoose
+    datiNuovoItem.autore = utente.username;
+    datiNuovoItem.autore_visita = utente.username;
 
-    // 4. Salviamo nel database
     const item = await Item.create(datiNuovoItem);
 
     risposta(res, 201, item, "Item creato con successo");
@@ -235,16 +224,13 @@ exports.pubblicaItem = async (req, res) => {
 
 exports.acquistaItem = async (req, res) => {
   try {
-    const acquirenteId = req.auth?.sub; // ID dell'utente loggato
+    const acquirenteId = req.auth?.sub;
     const itemId = req.params.id;
 
-    // 1. Recuperiamo l'item solo per sapere il prezzo e capire se è acquisto o adozione
     const item = await Item.findById(itemId);
     if (!item) return risposta(res, 404, null, "Item non trovato");
 
     const tipoTransazione = item.prezzo > 0 ? "acquisto" : "adozione";
-
-    // 2. Prepariamo il blocco del log da inserire
     const nuovoLog = {
       acquirenteId,
       prezzo: item.prezzo || 0,
@@ -252,15 +238,12 @@ exports.acquistaItem = async (req, res) => {
       dataAcquisto: new Date(),
     };
 
-    // 3. AGGIORNAMENTO ATOMICO: Spingiamo il log direttamente nel DB senza usare .save()
-    // runValidators: false impedisce a Mongoose di controllare gli enum di lunghezza/linguaggio
     const itemAggiornato = await Item.findByIdAndUpdate(
       itemId,
       { $push: { logVendite: nuovoLog } },
       { new: true, runValidators: false },
     );
 
-    // 4. Salviamo l'item anche nel profilo dell'utente
     await User.findByIdAndUpdate(acquirenteId, {
       $push: {
         acquistiEffettuati: { itemId: item._id, prezzo: item.prezzo || 0 },
@@ -273,17 +256,15 @@ exports.acquistaItem = async (req, res) => {
   }
 };
 
-// ─── VISITE (CORRETTA CON POPULATE LOG ADOZIONI) ───────────
 exports.getVisite = async (req, res) => {
   try {
     const { museo, creatorId, soloMie, pagina = 1, limite = 12 } = req.query;
-    const utenteId = req.auth?.sub; // Preso dal token JWT
+    const utenteId = req.auth?.sub;
 
     const filtro = {};
     if (museo) filtro.museo = museo;
     if (creatorId) filtro.creatorId = creatorId;
 
-    // LOGICA FILTRAGGIO NAVIGATOR: se richiesto, mostriamo solo le visite adottate dall'utente
     if (soloMie === "true" && utenteId) {
       const utente = await User.findById(utenteId).select("visiteSalvate");
       if (utente) {
@@ -299,8 +280,6 @@ exports.getVisite = async (req, res) => {
           path: "tappe.item_default",
           select: "titolo operaId lunghezza linguaggio url autore audioUrl",
         })
-        /* ─── 🛠️ MODIFICA DI SICUREZZA INSERITA QUI ─── */
-        /* Diciamo a Mongoose di andare a prendere l'oggetto User per ogni adozione, estraendo solo lo username */
         .populate({
           path: "logAdozioni.adottanteId",
           select: "username",
@@ -325,7 +304,6 @@ exports.getVisite = async (req, res) => {
 
 exports.getVisitaById = async (req, res) => {
   try {
-    // 1. Recupero della visita dal database con il populate standard
     const visita = await Visita.findOne({
       $or: [{ _id: req.params.id }, { id: req.params.id }],
     })
@@ -339,20 +317,15 @@ exports.getVisitaById = async (req, res) => {
 
     if (!visita) return risposta(res, 404, null, "Visita non trovata");
 
-    // Trasformiamo in oggetto JS semplice per poter aggiungere e manipolare i campi
     const visitaObj = visita.toObject();
 
-    // 2. Controllo e popolamento dinamico delle tappe vecchie/mock senza item_default
     if (visitaObj.tappe && Array.isArray(visitaObj.tappe)) {
       for (let tappa of visitaObj.tappe) {
-        // Se item_default è null/undefined ma abbiamo un operaId (il vecchio formato stringa "ME-XXX")
         if (!tappa.item_default && tappa.operaId) {
-          // Definiamo i criteri di ricerca basandoci sulla tappa o sui default della visita
           const linguaggioCercato =
             tappa.linguaggio_default || visitaObj.livello_base || "medio";
           const lunghezzaCercata = tappa.lunghezza_default || "15s";
 
-          // Cerchiamo l'item corrispondente nel database delle opere
           const itemTrovato = await Item.findOne({
             operaId: tappa.operaId,
             linguaggio: linguaggioCercato,
@@ -364,10 +337,8 @@ exports.getVisitaById = async (req, res) => {
             .lean();
 
           if (itemTrovato) {
-            // Iniettiamo l'item trovato direttamente nella tappa
             tappa.item_default = itemTrovato;
           } else {
-            // Fallback d'emergenza: se non c'è quella combinazione esatta, prendiamo la prima variante dell'opera
             const fallbackItem = await Item.findOne({
               operaId: tappa.operaId,
             }).lean();
@@ -377,13 +348,11 @@ exports.getVisitaById = async (req, res) => {
           }
         }
 
-        // 3. Calcolo della durata reale (funziona sia per i nativi che per i dinamici appena recuperati!)
         if (!tappa.item_default || !tappa.item_default.audioUrl) continue;
 
         try {
           const audioFileName = tappa.item_default.audioUrl.split("/").pop();
 
-          // Costruiamo il percorso assoluto
           const audioFilePath = path.join(
             process.cwd(),
             "navigator",
