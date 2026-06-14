@@ -1105,7 +1105,6 @@ export default function NavigatorItemViewer() {
       </Modal>
 
       {/* MAPPA */}
-      {/* MAPPA */}
       <Modal
         show={showMapModal}
         onHide={() => setShowMapModal(false)}
@@ -1138,37 +1137,18 @@ export default function NavigatorItemViewer() {
             />
             {currentItem &&
               (() => {
-                const tappaCorrente = visit?.tappe?.[safeIndex];
-                const item = tappaCorrente?.item_default;
-                const targetOperaId =
-                  tappaCorrente?.operaId?.operaId ||
-                  tappaCorrente?.operaId ||
-                  item?.operaId;
+                // Il pallino rosso usa sempre l'item corrente visualizzato a schermo caricate dal server
+                const currentFloor =
+                  currentItem?.piano !== undefined
+                    ? String(currentItem.piano)
+                    : "0";
+                const mapX = currentItem?.mappa_x;
+                const mapY = currentItem?.mappa_y;
 
-                const configArtwork =
-                  museumConfig?.posizione_opere?.find(
-                    (o) => String(o.operaId) === String(targetOperaId),
-                  ) || {};
-
-                const floor =
-                  item?.piano !== undefined
-                    ? String(item.piano)
-                    : configArtwork.piano || "0";
-
-                const mapX =
-                  item?.mappa_x !== undefined
-                    ? item.mappa_x
-                    : configArtwork.mappa_x;
-                const mapY =
-                  item?.mappa_y !== undefined
-                    ? item.mappa_y
-                    : configArtwork.mappa_y;
-
-                // Il pallino compare SOLO se il piano calcolato coincide con quello del selettore
                 if (
                   mapX === undefined ||
                   mapY === undefined ||
-                  String(floor) !== String(selectedMapFloor)
+                  String(currentFloor) !== String(selectedMapFloor)
                 )
                   return null;
 
@@ -1194,30 +1174,39 @@ export default function NavigatorItemViewer() {
 
           <div className="px-3 py-2" style={{ background: "#1a1a1a" }}>
             {visit?.tappe?.map((tappa, idx) => {
-              const item = tappa.item_default;
-              const targetOperaId =
-                tappa.operaId?.operaId || tappa.operaId || item?.operaId;
+              const dbItem = tappa.item_default;
 
-              const operaConfig =
+              // 1. Identifica l'operaId in modo ibrido (da stringa manuale o da oggetto DB)
+              const rowOperaId =
+                tappa.operaId?.operaId || tappa.operaId || dbItem?.operaId;
+
+              // 2. Cerca comunque nel file di configurazione per i percorsi pre-popolati
+              const configArtwork =
                 museumConfig?.posizione_opere?.find(
-                  (o) => String(o.operaId) === String(targetOperaId),
+                  (o) => String(o.operaId) === String(rowOperaId),
                 ) || {};
 
-              const currentFloor =
-                item?.piano !== undefined
-                  ? String(item.piano)
-                  : operaConfig.piano || "0";
+              // 3. Estrazione Sicura del Piano: priorità al DB, fallback sul config se è un JSON manuale
+              const rowFloor =
+                dbItem?.piano !== undefined
+                  ? String(dbItem.piano)
+                  : configArtwork.piano || "0";
 
-              const currentTitle =
-                item?.titoloOpera ||
-                item?.titolo ||
-                operaConfig.titoloOpera ||
+              // 4. Estrazione Sicura del Titolo: priorità al DB, altrimenti usa l'anagrafica ufficiale
+              const rowTitle =
+                dbItem?.titoloOpera ||
+                dbItem?.titolo ||
+                configArtwork.titoloOpera ||
                 `Tappa ${idx + 1}`;
 
-              if (String(currentFloor) !== String(selectedMapFloor))
-                return null;
+              // Filtra l'elenco testuale in base al piano della mappa selezionato
+              if (String(rowFloor) !== String(selectedMapFloor)) return null;
 
-              const isCurrent = idx === safeIndex;
+              // L'evidenziazione gialla si attiva se l'operaId coincide con l'item attivo nel Navigator
+              const isCurrent =
+                currentItem &&
+                rowOperaId &&
+                String(rowOperaId) === String(currentItem.operaId);
 
               return (
                 <div
@@ -1252,7 +1241,7 @@ export default function NavigatorItemViewer() {
                       color: isCurrent ? "#e18f37" : "white",
                     }}
                   >
-                    {currentTitle}
+                    {rowTitle}
                   </span>
                   {isCurrent && (
                     <i
