@@ -156,7 +156,10 @@ export default function NavigatorItemViewer() {
   };
 
   useEffect(() => {
-    if (currentItem?.piano) setSelectedMapFloor(currentItem.piano);
+    if (currentItem?.piano)
+      setSelectedMapFloor(
+        currentItem.piano !== undefined ? String(currentItem.piano) : "0",
+      );
   }, [currentItem]);
 
   // ---------- FETCH INIZIALE ----------

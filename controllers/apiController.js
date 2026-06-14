@@ -325,7 +325,7 @@ exports.getVisite = async (req, res) => {
 
 exports.getVisitaById = async (req, res) => {
   try {
-    // 1. Recupero della visita dal database [cite: 420]
+    // 1. Recupero della visita dal database con il populate standard
     const visita = await Visita.findOne({
       $or: [{ _id: req.params.id }, { id: req.params.id }],
     })
@@ -339,20 +339,51 @@ exports.getVisitaById = async (req, res) => {
 
     if (!visita) return risposta(res, 404, null, "Visita non trovata");
 
-    // Trasformiamo in oggetto JS semplice per poter aggiungere campi [cite: 263, 264]
+    // Trasformiamo in oggetto JS semplice per poter aggiungere e manipolare i campi
     const visitaObj = visita.toObject();
 
-    // 2. Ciclo sulle tappe per calcolare la durata reale [cite: 266]
+    // 2. Controllo e popolamento dinamico delle tappe vecchie/mock senza item_default
     if (visitaObj.tappe && Array.isArray(visitaObj.tappe)) {
       for (let tappa of visitaObj.tappe) {
-        // Controllo di sicurezza: se l'item_default o l'audioUrl mancano, salta alla prossima tappa
+        // Se item_default è null/undefined ma abbiamo un operaId (il vecchio formato stringa "ME-XXX")
+        if (!tappa.item_default && tappa.operaId) {
+          // Definiamo i criteri di ricerca basandoci sulla tappa o sui default della visita
+          const linguaggioCercato =
+            tappa.linguaggio_default || visitaObj.livello_base || "medio";
+          const lunghezzaCercata = tappa.lunghezza_default || "15s";
+
+          // Cerchiamo l'item corrispondente nel database delle opere
+          const itemTrovato = await Item.findOne({
+            operaId: tappa.operaId,
+            linguaggio: linguaggioCercato,
+            lunghezza: lunghezzaCercata,
+          })
+            .select(
+              "titolo operaId lunghezza linguaggio url descrizione autore categoria prezzo licenza audioUrl periodo stile mappa_x mappa_y piano",
+            )
+            .lean();
+
+          if (itemTrovato) {
+            // Iniettiamo l'item trovato direttamente nella tappa
+            tappa.item_default = itemTrovato;
+          } else {
+            // Fallback d'emergenza: se non c'è quella combinazione esatta, prendiamo la prima variante dell'opera
+            const fallbackItem = await Item.findOne({
+              operaId: tappa.operaId,
+            }).lean();
+            if (fallbackItem) {
+              tappa.item_default = fallbackItem;
+            }
+          }
+        }
+
+        // 3. Calcolo della durata reale (funziona sia per i nativi che per i dinamici appena recuperati!)
         if (!tappa.item_default || !tappa.item_default.audioUrl) continue;
 
         try {
           const audioFileName = tappa.item_default.audioUrl.split("/").pop();
 
-          // Costruiamo il percorso assoluto [cite: 239]
-          // NOTA: 'navigator/public/audio' è dove risiedono i file sorgente [cite: 239]
+          // Costruiamo il percorso assoluto
           const audioFilePath = path.join(
             process.cwd(),
             "navigator",
@@ -369,7 +400,6 @@ exports.getVisitaById = async (req, res) => {
           }
         } catch (audioErr) {
           console.error("Errore lettura metadati audio:", audioErr.message);
-          // Non blocchiamo l'intera risposta se un singolo file audio ha problemi
         }
       }
     }

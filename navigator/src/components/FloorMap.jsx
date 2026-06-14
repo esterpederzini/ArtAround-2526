@@ -10,37 +10,21 @@ export default function FloorMap({ config, currentItem }) {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-    // Stampa in console i valori da copiare nel Database
-    console.log(`Coordinate per ${currentItem?.titolo || "opera"}:`);
-    console.log(`mappa_x: ${x.toFixed(2)}, mappa_y: ${y.toFixed(2)}`);
-
-    // Opzionale: un alert per vederlo subito sul telefono
-    alert(`X: ${x.toFixed(2)}%, Y: ${y.toFixed(2)}%`);
   };
 
-  const configArtwork =
-    config?.posizione_opere?.find(
-      (o) => String(o.operaId) === String(currentItem?.operaId),
-    ) || {};
-
   const currentFloor =
-    currentItem?.piano !== undefined
-      ? String(currentItem.piano)
-      : configArtwork.piano || "0";
+    currentItem?.piano !== undefined ? String(currentItem.piano) : "0";
   const urlMappa = config?.mappe?.[currentFloor];
-  const mapX =
-    currentItem?.mappa_x !== undefined
-      ? currentItem.mappa_x
-      : configArtwork.mappa_x;
-  const mapY =
-    currentItem?.mappa_y !== undefined
-      ? currentItem.mappa_y
-      : configArtwork.mappa_y;
+
+  const mapX = currentItem?.mappa_x;
+  const mapY = currentItem?.mappa_y;
 
   return (
-    <div className="bg-dark min-vh-100 text-white">
-      <div className="p-3">
+    <div
+      className="floor-map-component text-white p-3"
+      style={{ backgroundColor: "#1a1a1a", borderRadius: "8px" }}
+    >
+      <div className="d-flex align-items-center justify-content-between mb-3">
         <Button variant="outline-light" onClick={() => navigate(-1)}>
           Indietro
         </Button>
@@ -83,11 +67,6 @@ export default function FloorMap({ config, currentItem }) {
             }}
           />
         )}
-      </div>
-
-      <div className="p-3 small opacity-75">
-        <i className="bi bi-info-circle me-2"></i>
-        Clicca sulla mappa per ottenere le coordinate X e Y da inserire nel DB.
       </div>
     </div>
   );
