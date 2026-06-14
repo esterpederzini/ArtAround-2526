@@ -63,7 +63,6 @@ export default function NavigatorItemViewer() {
   const [showMapModal, setShowMapModal] = useState(false);
   const [selectedMapFloor, setSelectedMapFloor] = useState("0");
 
-  // ---------- FURTHEST INDEX TRACKING ----------
   useEffect(() => {
     if (!id) return;
     const key = `artaround_furthest_${id}`;
@@ -86,7 +85,6 @@ export default function NavigatorItemViewer() {
     setTimeout(() => setLogisticsMsg(""), 5000);
   };
 
-  // ---------- REFS ----------
   const languageLevelRef = useRef(languageLevel);
   const selectedDurationRef = useRef(selectedDuration);
   const currentItemRef = useRef(currentItem);
@@ -149,7 +147,7 @@ export default function NavigatorItemViewer() {
     if (currentItem?.piano) setSelectedMapFloor(currentItem.piano);
   }, [currentItem]);
 
-  // ---------- FETCH INIZIALE CORRETTA ----------
+  // ---------- FETCH INIZIALE ----------
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
@@ -169,8 +167,6 @@ export default function NavigatorItemViewer() {
       .then(async (json) => {
         if (!isMounted) return;
 
-        // Gestisci sia il caso in care la risposta sia incapsulata in .data sia diretta
-        // ... dentro fetch(`/api/visite/${id}`) -> .then(async (json) => {
         const dataVisita = json.data || json;
 
         if (dataVisita && dataVisita.tappe) {
@@ -181,7 +177,6 @@ export default function NavigatorItemViewer() {
             const defaultLang = tappaCorrente.linguaggio_default || "medio";
             const defaultDur = tappaCorrente.lunghezza_default || "15s";
 
-            // 1. GESTIONE EDITOR: Se item_default è già un oggetto pre-popolato completo
             if (
               tappaCorrente.item_default &&
               typeof tappaCorrente.item_default === "object"
@@ -194,10 +189,8 @@ export default function NavigatorItemViewer() {
                 tappaCorrente.item_default.lunghezza || defaultDur,
               );
               setLoading(false);
-              return; // Interrompe qui, abbiamo già tutto!
+              return;
             }
-
-            // 2. GESTIONE IBRIDA: Se item_default è solo una stringa ID, facciamo fetch diretta sull'Item univoco
             if (
               tappaCorrente.item_default &&
               typeof tappaCorrente.item_default === "string"
@@ -221,8 +214,6 @@ export default function NavigatorItemViewer() {
                 );
               }
             }
-
-            // 3. FALLBACK JSON MANUALE: Vecchia logica tramite operaId stringa
             const targetOperaId =
               tappaCorrente.operaId?.operaId ||
               tappaCorrente.operaId ||
@@ -252,7 +243,6 @@ export default function NavigatorItemViewer() {
           }
         }
         setLoading(false);
-        // ... fine dell'effetto
       })
       .catch((err) => {
         console.error("Errore nel recupero della visita:", err);
@@ -265,11 +255,8 @@ export default function NavigatorItemViewer() {
   }, [id, safeIndex]);
 
   // ---------- GESTIONE AUDIO / TTS ----------
-  // ---------- GESTIONE AUDIO / TTS (CON RESET DELLA BARRA) ----------
   useEffect(() => {
     const audio = audioRef.current;
-
-    // 🛠️ FIX: Reset immediato degli stati della barra temporale al cambio di opera
     setCurrentTime(0);
     setDuration(0);
 
@@ -292,7 +279,6 @@ export default function NavigatorItemViewer() {
     }
 
     if (audio.src) {
-      // Forza l'azzeramento della timeline anche sul motore audio nativo prima del play
       audio.currentTime = 0;
 
       audio
@@ -353,8 +339,6 @@ export default function NavigatorItemViewer() {
         `/api/items?operaId=${operaId}&linguaggio=${newLevel}&lunghezza=${newDuration}`,
       );
       const json = await res.json();
-
-      // Mappatura robusta per gestire sia risposte avvolte in json.data.items che json.items diretti
       const arrayItems = json.data?.items || json.items || [];
 
       if (arrayItems.length > 0) {
@@ -544,14 +528,12 @@ export default function NavigatorItemViewer() {
   const getLogisticsDirections = () => {
     if (!visit || !visit.tappe) return "Nessuna indicazione disponibile.";
 
-    // Se siamo all'ultima tappa, mostra le indicazioni della tappa corrente (o un messaggio di fine)
     if (safeIndex >= visit.tappe.length - 1) {
       return (
         visit.tappe[safeIndex]?.logistica || "Sei arrivato a destinazione."
       );
     }
 
-    // Altrimenti, mostra le indicazioni logistiche scritte nella tappa SUCCESSIVA
     return (
       visit.tappe[safeIndex + 1]?.logistica ||
       "Procedi verso la prossima tappa."
@@ -1121,16 +1103,72 @@ export default function NavigatorItemViewer() {
               alt={`Piano ${selectedMapFloor}`}
               style={{ width: "100%", display: "block" }}
             />
-            // ─── MODIFICA ANCHE LA LISTA TESTUALE SOTTO LA MAPPA: ─────────
-            {visit?.tappe?.map((tappe, idx) => {
-              const targetId = tappe.operaId?.operaId || tappe.operaId;
+            {(() => {
+              const tappaCorrente = visit?.tappe?.[safeIndex];
+              const item = tappaCorrente?.item_default;
+              const targetOperaId =
+                tappaCorrente?.operaId?.operaId ||
+                tappaCorrente?.operaId ||
+                item?.operaId;
               const operaConfig =
-                museumConfig?.opere?.find((o) => o.operaId === targetId) || {};
+                museumConfig?.posizione_opere?.find(
+                  (o) => String(o.operaId) === String(targetOperaId),
+                ) || {};
+              const mapX = item?.mappa_x ?? operaConfig.mappa_x;
+              const mapY = item?.mappa_y ?? operaConfig.mappa_y;
+              const floor =
+                item?.piano !== undefined
+                  ? String(item.piano)
+                  : operaConfig.piano || "0";
 
-              if (!operaConfig || operaConfig.piano !== selectedMapFloor)
+              if (
+                mapX === undefined ||
+                mapY === undefined ||
+                floor !== selectedMapFloor
+              )
                 return null;
-              const isCurrent = idx === safeIndex;
 
+              return (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: `${mapX}%`,
+                    top: `${mapY}%`,
+                    width: "18px",
+                    height: "18px",
+                    backgroundColor: "red",
+                    borderRadius: "50%",
+                    border: "2px solid white",
+                    transform: "translate(-50%, -50%)",
+                    boxShadow: "0 0 8px #e18f37",
+                  }}
+                />
+              );
+            })()}
+          </div>
+
+          <div className="px-3 py-2" style={{ background: "#1a1a1a" }}>
+            {visit?.tappe?.map((tappa, idx) => {
+              const item = tappa.item_default;
+              const targetOperaId =
+                tappa.operaId?.operaId || tappa.operaId || item?.operaId;
+              const operaConfig =
+                museumConfig?.posizione_opere?.find(
+                  (o) => String(o.operaId) === String(targetOperaId),
+                ) || {};
+              const currentFloor =
+                item?.piano !== undefined
+                  ? String(item.piano)
+                  : operaConfig.piano || "0";
+              const currentTitle =
+                item?.titoloOpera ||
+                item?.titolo ||
+                operaConfig.titoloOpera ||
+                `Tappa ${idx + 1}`;
+
+              if (currentFloor !== String(selectedMapFloor)) return null;
+
+              const isCurrent = idx === safeIndex;
               return (
                 <div
                   key={idx}
@@ -1164,61 +1202,7 @@ export default function NavigatorItemViewer() {
                       color: isCurrent ? "#e18f37" : "white",
                     }}
                   >
-                    {operaConfig.titoloOpera || `Tappa ${idx + 1}`}
-                  </span>
-                  {isCurrent && (
-                    <i
-                      className="bi bi-geo-alt-fill ms-auto"
-                      style={{ color: "#e18f37", fontSize: "0.75rem" }}
-                    ></i>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="px-3 py-2" style={{ background: "#1a1a1a" }}>
-            {visit?.tappe?.map((tappa, idx) => {
-              // Estrae l'item (funziona sia se è l'oggetto popolato sia se è stato inserito nel client)
-              const item = tappa.item_default;
-              if (!item || String(item.piano) !== String(selectedMapFloor))
-                return null;
-
-              const isCurrent = idx === safeIndex;
-              return (
-                <div
-                  key={idx}
-                  className="d-flex align-items-center gap-2 py-1"
-                  style={{ cursor: "pointer", opacity: isCurrent ? 1 : 0.6 }}
-                  onClick={() => {
-                    setShowMapModal(false);
-                    changeItem(idx); // Naviga direttamente alla tappa selezionata sulla mappa
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 18,
-                      height: 18,
-                      borderRadius: "50%",
-                      background: isCurrent ? "#e18f37" : "#555",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 10,
-                      color: "white",
-                      fontWeight: "bold",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {idx + 1}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "0.8rem",
-                      color: isCurrent ? "#e18f37" : "white",
-                    }}
-                  >
-                    {item.titoloOpera || item.titolo || `Tappa ${idx + 1}`}
+                    {currentTitle}
                   </span>
                   {isCurrent && (
                     <i
@@ -1289,7 +1273,6 @@ export default function NavigatorItemViewer() {
         </Modal.Body>
       </Modal>
 
-      {/* FINE VISITA */}
       <Modal
         show={showEndModal}
         onHide={() => setShowEndModal(false)}
@@ -1312,7 +1295,17 @@ export default function NavigatorItemViewer() {
           <div className="museum-modal-actions-overview">
             <button
               className="btn-overview-confirm"
-              onClick={() => navigate("/")}
+              onClick={() => {
+                if (audioRef.current) {
+                  audioRef.current.pause();
+                  audioRef.current.currentTime = 0;
+                }
+                if (window.speechSynthesis) {
+                  window.speechSynthesis.cancel();
+                }
+                setIsPlaying(false);
+                navigate(`/visit/${id}`);
+              }}
             >
               <i className="bi bi-house me-2"></i>Torna alla home
             </button>
