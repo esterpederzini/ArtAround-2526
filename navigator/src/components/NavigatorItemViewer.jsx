@@ -264,95 +264,96 @@ export default function NavigatorItemViewer() {
     };
   }, [id, safeIndex]);
 
-  // ---------- GESTIONE AUDIO / TTS ----------
-  // ---------- GESTIONE AUDIO / TTS ----------
   useEffect(() => {
     const audio = audioRef.current;
+    audio.pause();
+    audio.src = "";
     setCurrentTime(0);
     setDuration(0);
-
     window.speechSynthesis.cancel();
     clearInterval(ttsIntervalRef.current);
 
-    if (!isPlaying) {
-      audio.pause();
-      return;
+    const item_audio = currentItem?.audio || currentItem?.audioUrl;
+    if (item_audio) {
+      console.log("[AUDIO LOG] Carico nuova sorgente statica:", item_audio);
+      audio.src = item_audio;
+      audio.load();
     }
 
+    const upMeta = () => setDuration(audio.duration);
+    const upTime = () => setCurrentTime(audio.currentTime);
+    const onEnd = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+
+    audio.addEventListener("loadedmetadata", upMeta);
+    audio.addEventListener("timeupdate", upTime);
+    audio.addEventListener("ended", onEnd);
+
+    return () => {
+      audio.removeEventListener("loadedmetadata", upMeta);
+      audio.removeEventListener("timeupdate", upTime);
+      audio.removeEventListener("ended", onEnd);
+    };
+  }, [currentItem]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
     const item_audio = currentItem?.audio || currentItem?.audioUrl;
 
     if (item_audio) {
-      // 1. Se l'opera ha una traccia registrata, usa l'elemento Audio classico
-      console.log("[AUDIO LOG] Uso il file audio statico:", item_audio);
-      audio.src = item_audio;
-      audio.currentTime = 0;
-
-      audio
-        .play()
-        .catch((e) => console.log("Autoplay blocked or stream interrupted", e));
-
-      const upMeta = () => setDuration(audio.duration);
-      const upTime = () => setCurrentTime(audio.currentTime);
-      const onEnd = () => {
-        setIsPlaying(false);
-        setCurrentTime(0);
-      };
-
-      audio.addEventListener("loadedmetadata", upMeta);
-      audio.addEventListener("timeupdate", upTime);
-      audio.addEventListener("ended", onEnd);
-
-      return () => {
-        audio.removeEventListener("loadedmetadata", upMeta);
-        audio.removeEventListener("timeupdate", upTime);
-        audio.removeEventListener("ended", onEnd);
-      };
+      if (isPlaying) {
+        audio.play().catch((e) => console.log("Autoplay bloccato", e));
+      } else {
+        audio.pause();
+      }
     } else if (currentItem?.descrizione) {
-      // 2. FALLBACK TOTALE SUL TELEFONO: Se l'audio va generato, usa window.speechSynthesis
-      console.log(
-        "[AUDIO LOG] Genero via SpeechSynthesis nativa del dispositivo.",
-      );
+      if (isPlaying) {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        } else {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(
+            currentItem.descrizione,
+          );
+          utterance.lang = "it-IT";
 
-      // Resettiamo l'audio HTML5 per evitare sovrapposizioni
-      audio.pause();
-      audio.src = "";
+          const parole = currentItem.descrizione.split(/\s+/).length;
+          const durataStimata = (parole / 130) * 60;
+          setDuration(durataStimata);
 
-      const utterance = new SpeechSynthesisUtterance(currentItem.descrizione);
-      utterance.lang = "it-IT";
+          let tempoTrascorso = currentTime;
+          ttsIntervalRef.current = setInterval(() => {
+            if (
+              window.speechSynthesis.speaking &&
+              !window.speechSynthesis.paused
+            ) {
+              tempoTrascorso += 0.2;
+              setCurrentTime(Math.min(tempoTrascorso, durataStimata));
+            }
+          }, 200);
 
-      // Simulazione avanzamento barra di riproduzione per il testo sintetizzato
-      const parole = currentItem.descrizione.split(/\s+/).length;
-      const durataStimata = (parole / 130) * 60; // Stima media di 130 parole al minuto per la sintesi vocale
-      setDuration(durataStimata);
+          utterance.onend = () => {
+            setIsPlaying(false);
+            setCurrentTime(0);
+            clearInterval(ttsIntervalRef.current);
+          };
 
-      let tempoTrascorso = 0;
-      ttsIntervalRef.current = setInterval(() => {
-        if (window.speechSynthesis.speaking) {
-          tempoTrascorso += 0.2;
-          setCurrentTime(Math.min(tempoTrascorso, durataStimata));
+          window.speechSynthesis.speak(utterance);
         }
-      }, 200);
-
-      utterance.onend = () => {
-        setIsPlaying(false);
-        setCurrentTime(0);
-        clearInterval(ttsIntervalRef.current);
-      };
-
-      utterance.onerror = (e) => {
-        console.error("Errore sintesi vocale del browser:", e);
-        setIsPlaying(false);
-        clearInterval(ttsIntervalRef.current);
-      };
-
-      window.speechSynthesis.speak(utterance);
-
-      return () => {
-        clearInterval(ttsIntervalRef.current);
-        window.speechSynthesis.cancel();
-      };
+      } else {
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.pause();
+        }
+      }
     }
-  }, [currentItem, isPlaying]);
+
+    return () => {
+      clearInterval(ttsIntervalRef.current);
+    };
+  }, [isPlaying]);
+
   // ---------- NAVIGAZIONE ----------
   const changeItem = (newIndex) => {
     const v = visitRef.current;
