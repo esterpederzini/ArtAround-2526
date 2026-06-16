@@ -60,48 +60,51 @@ app.get("/api/config", (req, res) => {
   }
 });
 
-const say = require("say");
+const googleTTS = require("google-tts-api"); // Al posto di const say = require("say");
+const crypto = require("crypto");
 
-const crypto = require("crypto"); // Modulo nativo di Node, non serve installarlo
-
-// Assicuriamoci che la cartella per i file temporanei esista all'avvio del server
 const ttsCacheDir = path.join(__dirname, "tts_cache");
 if (!fs.existsSync(ttsCacheDir)) {
   fs.mkdirSync(ttsCacheDir);
 }
 
-// Nuova Rotta TTS ottimizzata per Mobile
-app.get("/api/tts", (req, res) => {
+app.get("/api/tts", async (req, res) => {
   const text = req.query.text;
   if (!text) return res.status(400).send("Missing text parameter");
 
-  // 1. Generiamo un nome file univoco basato sul testo (MD5 hash)
+  // 1. Generiamo un nome file univoco (.mp3 invece di .wav, molto più digeribile dai telefoni)
   const hash = crypto.createHash("md5").update(text).digest("hex");
-  const fileName = `tts_${hash}.wav`;
+  const fileName = `tts_${hash}.mp3`;
   const cachedFilePath = path.join(ttsCacheDir, fileName);
 
-  // 2. Se l'audio di questo testo è già stato generato in precedenza, servilo subito!
+  // 2. Se esiste già nella cache, invialo subito
   if (fs.existsSync(cachedFilePath)) {
     console.log(`[TTS] Servito dalla cache: ${fileName}`);
-    return res.sendFile(cachedFilePath); // Express gestisce nativamente il Partial Content (206) su file persistenti
+    return res.sendFile(cachedFilePath);
   }
 
-  // 3. Se non esiste, lo generiamo con say
-  console.log(
-    `[TTS] Generazione nuovo file audio per: "${text.substring(0, 20)}..."`,
-  );
+  try {
+    console.log(`[TTS] Generazione nuovo file audio MP3 tramite Web API...`);
 
-  // Lasciamo null per usare la voce di default, oppure forza una voce se sai che c'è
-  say.export(text, null, 1.0, cachedFilePath, (err) => {
-    if (err) {
-      console.error("Errore Say TTS:", err);
-      return res.status(500).send("Errore generazione audio");
-    }
+    // 3. Ottieni l'URL del file audio convertito in base64 o scaricalo direttamente
+    // google-tts-api supporta testi fino a 200 caratteri per singola chiamata standard
+    const base64Audio = await googleTTS.getAudioBase64(text, {
+      lang: "it",
+      slow: false,
+      host: "https://translate.google.com",
+      timeout: 10000,
+    });
 
-    // 4. Inviamo il file SENZA cancellarlo subito.
-    // Ora lo smartphone può fare tutte le richieste Range che vuole.
-    res.sendFile(cachedFilePath);
-  });
+    // 4. Salva il buffer base64 come file MP3 sul server
+    const buffer = Buffer.from(base64Audio, "base64");
+    fs.writeFileSync(cachedFilePath, buffer);
+
+    // 5. Invia il file statico al client
+    return res.sendFile(cachedFilePath);
+  } catch (err) {
+    console.error("Errore generazione TTS alternativo:", err);
+    return res.status(500).send("Errore generazione audio su server");
+  }
 });
 
 app.get("/db/create", async function (req, res) {
