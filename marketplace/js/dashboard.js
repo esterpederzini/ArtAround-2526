@@ -336,7 +336,7 @@ async function apriItemModal(id) {
           <div class="row g-2">
             <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Opera ID</span><div class="fw-semibold text-charcoal">${item.operaId || "–"}</div></div>
             <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Museo</span><div class="fw-semibold text-charcoal">${item.museo || "–"}</div></div>
-            <div class="col-6"><span class="aa-label">Autore</span><div>${v.creatorId?.username || "–"}</div></div>
+            <div class="col-6"><span class="aa-label">Autore</span><div>${item.creatorId?.username || item.autore_visita || "–"}</div></div>
             <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Licenza</span><div class="text-slate fw-semibold">${item.licenza?.tipo || item.licenza || "–"}</div></div>
           </div>
         </div>
@@ -368,7 +368,11 @@ async function apriItemModal(id) {
   const u = getUtenteCorrente();
 
   const idCreatoreItem = item.creatorId?._id || item.creatorId;
-  const isProprietarioItem = u && idCreatoreItem === u._id;
+  const isProprietarioItem =
+    u &&
+    ((idCreatoreItem && String(idCreatoreItem) === String(u._id)) ||
+      (item.autore_visita &&
+        String(item.autore_visita) === String(u.username)));
 
   const giaAcquistatoItem =
     u &&
@@ -488,8 +492,12 @@ async function apriVisitaModal(id) {
   let footerHtml = ``;
   const u = getUtenteCorrente();
 
+  // Controllo paternità inclusivo (sia per ID Mongoose sia per stringa username del seed)
   const idCreatoreVisita = v.creatorId?._id || v.creatorId;
-  const isProprietarioVisita = u && idCreatoreVisita === u._id;
+  const isProprietarioVisita =
+    u &&
+    ((idCreatoreVisita && String(idCreatoreVisita) === String(u._id)) ||
+      (v.autore && String(v.autore) === String(u.username)));
 
   const giaAdottataVisita =
     u &&
@@ -499,15 +507,20 @@ async function apriVisitaModal(id) {
       return idAdottante === u._id;
     });
 
+  // GESTIONE DELLE AZIONI NEL FOOTER
   if (isProprietarioVisita) {
-    footerHtml = ``;
+    // Se la visita è tua, mostriamo un badge informativo ed evitiamo l'acquisto
+    footerHtml = `
+      <span class="text-taupe small me-auto align-self-center fw-semibold">
+        <i class="bi bi-person-check-fill"></i> Questo percorso è stato creato da te
+      </span>
+    `;
   } else if (giaAdottataVisita) {
-    footerHtml =
-      `
+    footerHtml = `
       <span class="text-success small me-auto align-self-center fw-semibold">
         <i class="bi bi-check-circle-fill"></i> Visita acquistata
       </span>
-      ` + footerHtml;
+    `;
   } else {
     const titoloVisitaEscaped = (v.titolo || v.title || "Visita")
       .replace(/'/g, "\\'")
