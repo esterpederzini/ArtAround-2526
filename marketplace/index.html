@@ -41,6 +41,14 @@
             <li class="nav-item d-none id-autore-nav">
               <a class="nav-link" href="/editor-item">Editor Item</a>
             </li>
+            <li class="nav-item d-none" id="navLinkNavigator">
+              <a
+                class="nav-link"
+                href="/navigator/"
+                style="color: var(--aa-gold); fw-bold"
+                >Navigator</a
+              >
+            </li>
           </ul>
           <div class="d-flex align-items-center gap-2">
             <span id="utenteInfo" class="text-white-50 small"></span>
@@ -363,16 +371,13 @@
             document.getElementById("heroNomeMuseo").textContent = config.museo;
           }
 
-          // ─── 🛠️ LOGICA BLINDATA DI CONTROLLO PULSANTE "CREA VISITA" ───
           const u = getUtenteCorrente();
           const btnCreaVisita = document.getElementById("btnHeroCreaVisita");
 
           if (btnCreaVisita) {
-            // Il pulsante viene mostrato ESCLUSIVAMENTE se l'utente è registrato come autore o admin
-            if (u && (u.ruolo === "autore" || u.ruolo === "admin")) {
+            if (u && ["autore", "admin", "visitatore"].includes(u.ruolo)) {
               btnCreaVisita.classList.remove("d-none");
             } else {
-              // Forza il mantenimento del blocco nascosto per visitatori e anonimi
               btnCreaVisita.classList.add("d-none");
             }
           }
@@ -429,7 +434,7 @@
           .map(
             (v) => `
           <div class="col-md-4">
-            <div class="aa-visita-card d-flex flex-column h-100" style="cursor:pointer" onclick="window.location='/dashboard?tab=visite'">
+            <div class="aa-visita-card d-flex flex-column h-100" style="cursor:pointer" onclick="window.location='/dashboard?tab=visite&visitaId=${v._id}'">
               <div class="vcard-header">
                 <h5>${v.titolo || v.title || "Visita senza nome"}</h5>
                 <small style="opacity:0.65">${v.museo}</small>

@@ -11,27 +11,22 @@ async function apiFetch(url, opzioni = {}) {
 
     const risposta = await fetch(url, { ...opzioni, headers });
 
-    // ─── GESTIONE SCADENZA SESSIONE (401) ───────────────
     if (risposta.status === 401) {
       showToast("Sessione scaduta. Verrai reindirizzato al login...", "error");
-
-      // Rimuoviamo i dati della sessione obsoleta
       localStorage.removeItem("aa_token");
       localStorage.removeItem("aa_utente");
-      localStorage.removeItem("user_session"); // per sicurezza e retrocompatibilità
+      localStorage.removeItem("user_session");
 
       if (typeof aggiornaUiNavbar === "function") {
         aggiornaUiNavbar();
       }
 
-      // Aspettiamo un secondo per dare il tempo all'utente di leggere il messaggio e poi reindirizziamo
       setTimeout(() => {
         window.location.href = "/";
       }, 1500);
 
       return null;
     }
-    // ────────────────────────────────────────────────────
 
     const json = await risposta.json();
     if (!risposta.ok || !json.successo) {
@@ -47,23 +42,16 @@ async function apiFetch(url, opzioni = {}) {
 }
 
 // LOGIN
-// ─── COMPONENTE AUTH UNIVERSALE (utils.js) ───────────────────────────
-
-// ─── FUNZIONE APRI LOGIN UNIVERSALE ED INATTACCABILE ───
 function apriLogin() {
   const modal = document.getElementById("loginModal");
   if (!modal) return;
 
-  // 1. Mostriamo il contenitore del modal rimuovendo il d-none globale
   modal.classList.remove("d-none");
 
-  // 2. 🛡️ FIX SELETTORI LOCALI: Evita conflitti di ID duplicati tra index e dashboard
-  // Invece di usare document.getElementById, cerchiamo i blocchi "figli" dentro il modal attivo
   const loginSec = modal.querySelector("#authLoginSection");
   const registerSec = modal.querySelector("#authRegisterSection");
 
   if (loginSec && registerSec) {
-    // Forza lo stato iniziale standard: mostra la form di Login, nascondi la Registrazione
     loginSec.classList.remove("d-none");
     registerSec.classList.add("d-none");
   }
@@ -100,7 +88,6 @@ async function eseguiLogin() {
   }
 }
 
-// Funzione per scambiare la vista tra Login e Registrazione all'interno del Modal
 function toggleAuthModal(modalita) {
   const loginSec = document.getElementById("authLoginSection");
   const registerSec = document.getElementById("authRegisterSection");
@@ -114,15 +101,12 @@ function toggleAuthModal(modalita) {
   }
 }
 
-// Esponiamo esplicitamente la funzione a livello globale per gli onclick dell'HTML
 window.toggleAuthModal = toggleAuthModal;
-// Funzione per inviare i dati di registrazione a MongoDB con ruolo dinamico
 async function eseguiRegistrazione() {
   const username = document.getElementById("regUsername")?.value.trim();
   const email = document.getElementById("regEmail")?.value.trim();
   const password = document.getElementById("regPassword")?.value;
 
-  // 🛠️ ESTRAZIONE DEL RUOLO DAL RADIO BUTTON SELEZIONATO
   const elementoRuoloSelezionato = document.querySelector(
     'input[name="regRuolo"]:checked',
   );
@@ -130,7 +114,6 @@ async function eseguiRegistrazione() {
     ? elementoRuoloSelezionato.value
     : "visitatore";
 
-  // Validazioni formali lato client coerenti con i vincoli del modello Mongoose
   if (!username || !email || !password) {
     showToast(
       "Tutti i campi contrassegnati da asterisco sono obbligatori",
@@ -147,11 +130,10 @@ async function eseguiRegistrazione() {
     return;
   }
 
-  // Inoltro della chiamata inserendo il campo 'ruolo' nel corpo JSON
   const data = await apiFetch("/api/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, email, password, ruolo }), // <-- Cambiato qui!
+    body: JSON.stringify({ username, email, password, ruolo }),
   });
 
   if (data) {
@@ -160,14 +142,12 @@ async function eseguiRegistrazione() {
       "success",
     );
 
-    // Automatizziamo il login immediato salvando la sessione
     localStorage.setItem("aa_utente", JSON.stringify(data.user || data));
     localStorage.setItem("aa_token", data.token);
 
     chiudiLogin();
     aggiornaUtenteUI();
 
-    // Ricarica subito la pagina per sincronizzare le viste autore della dashboard
     window.location.reload();
   }
 }
@@ -187,10 +167,12 @@ function aggiornaUtenteUI() {
   const btnLogin = document.getElementById("btnLogin");
   const btnLogout = document.getElementById("btnLogout");
 
+  document.getElementById("navLinkNavigator")?.classList.remove("d-none");
+
   if (u) {
     if (info) info.textContent = `${u.username}`;
-    btnLogin?.classList.add("d-none"); // Nasconde Accedi se loggato
-    btnLogout?.classList.remove("d-none"); // Mostra Esci se loggato
+    btnLogin?.classList.add("d-none");
+    btnLogout?.classList.remove("d-none");
 
     if (["autore", "admin"].includes(u.ruolo)) {
       document
@@ -203,8 +185,9 @@ function aggiornaUtenteUI() {
     }
   } else {
     if (info) info.textContent = "";
-    btnLogin?.classList.remove("d-none"); // MOSTRA Accedi se NON loggato
-    btnLogout?.classList.add("d-none"); // Nasconde Esci se NON loggato
+    btnLogin?.classList.remove("d-none");
+    btnLogout?.classList.add("d-none");
+
     document
       .querySelectorAll(".id-autore-nav")
       .forEach((el) => el.classList.add("d-none"));
@@ -234,7 +217,6 @@ function showToast(messaggio, tipo = "info", durata = 3500) {
 function getAuthToken() {
   try {
     const token = localStorage.getItem("aa_token");
-    // 🛡️ SICUREZZA: Se il token è nullo, non definito o contiene stringhe spurie, restituisce null
     if (!token || token === "undefined" || token === "null") {
       return null;
     }
@@ -245,12 +227,11 @@ function getAuthToken() {
 }
 
 function isTokenScaduto(token) {
-  // Se il token manca o non è una stringa valida, non considerarlo scaduto (l'utente è semplicemente anonimo)
   if (!token || token === "undefined" || token === "null") return false;
 
   try {
     const parti = token.split(".");
-    if (parti.length < 3) return true; // Struttura JWT non valida, consideralo corrotto
+    if (parti.length < 3) return true;
 
     const base64Url = parti[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -259,14 +240,13 @@ function isTokenScaduto(token) {
     const adesso = Math.floor(Date.now() / 1000);
     return payload.exp < adesso;
   } catch (e) {
-    return true; // Se il token è corrotto, consideralo scaduto per sicurezza
+    return true;
   }
 }
 
 function getUtenteCorrente() {
   try {
     const token = getAuthToken();
-    // Se c'è un token ma è scaduto, pulisci tutto SUBITO prima che il resto della pagina si carichi
     if (token && isTokenScaduto(token)) {
       console.warn("Rilevato token scaduto all'avvio. Svuoto la sessione.");
       localStorage.removeItem("aa_token");
@@ -296,19 +276,18 @@ function badgeLinguaggio(linguaggio) {
   let bgClass = "";
   const tagLabel = linguaggio.charAt(0).toUpperCase() + linguaggio.slice(1);
 
-  // Mappiamo i tipi di linguaggio sui background definiti nel foglio style.css
   switch (linguaggio.toLowerCase()) {
     case "infantile":
     case "elementare":
-      bgClass = "aa-badge-lang-elementare"; // Verde pastello
+      bgClass = "aa-badge-lang-elementare";
       break;
     case "medio":
     case "intermedio":
-      bgClass = "aa-badge-lang-intermedio"; // Azzurro pastello
+      bgClass = "aa-badge-lang-intermedio";
       break;
     case "avanzato":
     case "specialistico":
-      bgClass = "aa-badge-lang-avanzato"; // Arancione/Giallo pastello
+      bgClass = "aa-badge-lang-avanzato";
       break;
     default:
       bgClass = "bg-secondary text-white";
@@ -328,7 +307,6 @@ function badgePrezzo(prezzo) {
   return `<span class="aa-price">€ ${Number(prezzo).toFixed(2)}</span>`;
 }
 
-// ─── PAGINATOR ──────────────────────────────────────
 function renderPaginazione(
   containerId,
   paginaCorrente,
@@ -382,11 +360,10 @@ function debounce(fn, delay = 300) {
 // ─── CONFIGURAZIONE MUSEO ────────────────────────────
 let configMuseo = null;
 
-// utils.js — funzione caricaConfigMuseo aggiornata
 async function caricaConfigMuseo() {
   try {
     const configPaths = [
-      "/api/config", // ← aggiungi questo per primo
+      "/api/config",
       "/config.json",
       "/marketplace/config.json",
       "../config.json",
@@ -421,7 +398,6 @@ function getConfigMuseo() {
 function applicaTemaMuseo() {
   if (!configMuseo) return;
 
-  // Applica colori del museo
   if (configMuseo.colori) {
     document.documentElement.style.setProperty(
       "--aa-museum-primary",
@@ -433,12 +409,10 @@ function applicaTemaMuseo() {
     );
   }
 
-  // Aggiorna titolo della pagina
   const museoNome = configMuseo.museo || "Museo";
   document.title = `ArtAround – ${museoNome}`;
 }
 
-// ─── UI UTENTE NAVBAR ────────────────────────────────
 function aggiornaUiNavbar() {
   const utenteInfo = document.getElementById("utenteInfo");
   if (utenteInfo) {
@@ -447,6 +421,5 @@ function aggiornaUiNavbar() {
   }
 }
 
-// La eseguiamo comunque all'avvio
 aggiornaUtenteUI();
 aggiornaUiNavbar();

@@ -105,6 +105,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }, 500);
   }
+
+  const tabParam = params.get("tab");
+  const visitaIdParam = params.get("visitaId");
+
+  if (tabParam === "visite") {
+    const btnVisiteTab = document.querySelector('.aa-tab[onclick*="visite"]');
+    if (btnVisiteTab) {
+      switchTab("visite", btnVisiteTab);
+    } else {
+      caricaVisiteTab();
+    }
+    if (visitaIdParam) {
+      setTimeout(() => {
+        apriVisitaModal(visitaIdParam);
+      }, 300);
+    }
+  }
 });
 
 function configuraBtnFiltri(selector, callback) {
