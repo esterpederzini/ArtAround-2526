@@ -383,6 +383,13 @@ async function apriItemModal(id) {
 
   let footerHtml = ``;
   const u = getUtenteCorrente();
+  const footerElement = document.getElementById("modalItemFooter");
+
+  if (!u) {
+    footerElement.innerHTML = "";
+    footerElement.classList.add("d-none");
+    return;
+  }
 
   const idCreatoreItem = item.creatorId?._id || item.creatorId;
   const isProprietarioItem =
@@ -400,7 +407,11 @@ async function apriItemModal(id) {
     });
 
   if (isProprietarioItem) {
-    footerHtml = ``;
+    footerHtml = `
+      <span class="text-taupe small me-auto align-self-center fw-semibold">
+        <i class="bi bi-person-check-fill"></i> Questo contenuto è stato creato da te
+      </span>
+    `;
   } else if (giaAcquistatoItem) {
     footerHtml = `
       <span class="text-success small me-auto align-self-center fw-semibold">
@@ -428,7 +439,9 @@ async function apriItemModal(id) {
     }
   }
 
-  document.getElementById("modalItemFooter").innerHTML = footerHtml;
+  footerElement.innerHTML = footerHtml;
+  footerElement.classList.remove("d-none");
+  e;
 }
 
 async function acquistaItem(itemId) {
@@ -485,6 +498,7 @@ async function apriVisitaModal(id) {
       .join("");
   }
 
+  // 🌟 AGGIORNATO: Inserito v.autore come paracadute per mostrare sempre il creatore
   document.getElementById("modalVisitaBody").innerHTML = `
     <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
       <span class="aa-badge aa-badge-len">🏛️ ${v.museo || "Nessun museo"}</span>
@@ -495,7 +509,7 @@ async function apriVisitaModal(id) {
     <p style="line-height:1.7">${v.descrizione || "Nessuna descrizione disponibile."}</p>
     <div class="divider"></div>
     <div class="row g-2 text-sm mb-3">
-      <div class="col-6"><span class="aa-label">Autore</span><div>${v.creatorId?.username || "–"}</div></div>
+      <div class="col-6"><span class="aa-label">Autore</span><div>${v.creatorId?.username || v.autore || "–"}</div></div>
       <div class="col-6"><span class="aa-label">Licenza</span><div>${v.licenza?.tipo || "–"}</div></div>
     </div>
     ${v.tags?.length ? `<div class="mb-3">${v.tags.map((t) => `<span class="aa-badge aa-badge-len me-1">${t}</span>`).join("")}</div>` : ""}
@@ -508,8 +522,14 @@ async function apriVisitaModal(id) {
 
   let footerHtml = ``;
   const u = getUtenteCorrente();
+  const footerElement = document.getElementById("modalVisitaFooter");
 
-  // Controllo paternità inclusivo (sia per ID Mongoose sia per stringa username del seed)
+  if (!u) {
+    footerElement.innerHTML = "";
+    footerElement.classList.add("d-none");
+    return;
+  }
+
   const idCreatoreVisita = v.creatorId?._id || v.creatorId;
   const isProprietarioVisita =
     u &&
@@ -524,9 +544,7 @@ async function apriVisitaModal(id) {
       return idAdottante === u._id;
     });
 
-  // GESTIONE DELLE AZIONI NEL FOOTER
   if (isProprietarioVisita) {
-    // Se la visita è tua, mostriamo un badge informativo ed evitiamo l'acquisto
     footerHtml = `
       <span class="text-taupe small me-auto align-self-center fw-semibold">
         <i class="bi bi-person-check-fill"></i> Questo percorso è stato creato da te
@@ -559,7 +577,6 @@ async function apriVisitaModal(id) {
     }
   }
 
-  const footerElement = document.getElementById("modalVisitaFooter");
   footerElement.innerHTML = footerHtml;
   footerElement.classList.remove("d-none");
 }
