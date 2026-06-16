@@ -325,10 +325,13 @@ export default function NavigatorItemViewer() {
         audio.pause();
       }
     } else if (currentItem?.descrizione) {
+      // GESTIONE SINTESI VOCALE CON RESUME SICURO
       if (isPlaying) {
-        if (window.speechSynthesis.speaking && window.speechSynthesis.paused) {
+        // Se la sintesi sta parlando (anche se congelata in pausa), forziamo il resume senza fidarci di .paused
+        if (window.speechSynthesis.speaking) {
           window.speechSynthesis.resume();
-        } else if (!window.speechSynthesis.speaking) {
+        } else {
+          // Se era ferma del tutto (nuova opera o finita), la creiamo da zero
           window.speechSynthesis.cancel();
           const utterance = new SpeechSynthesisUtterance(
             currentItem.descrizione,
@@ -348,12 +351,10 @@ export default function NavigatorItemViewer() {
           window.speechSynthesis.speak(utterance);
         }
 
+        // Timer di avanzamento della barra
         clearInterval(ttsIntervalRef.current);
         ttsIntervalRef.current = setInterval(() => {
-          if (
-            window.speechSynthesis.speaking &&
-            !window.speechSynthesis.paused
-          ) {
+          if (window.speechSynthesis.speaking) {
             setCurrentTime((prevTime) => {
               const parole = currentItem.descrizione.split(/\s+/).length;
               const durataStimata = (parole / 130) * 60;
@@ -362,8 +363,9 @@ export default function NavigatorItemViewer() {
           }
         }, 200);
       } else {
+        // STATO PAUSA: Fermiamo il timer e congeliamo la lettura nativa
         clearInterval(ttsIntervalRef.current);
-        if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+        if (window.speechSynthesis.speaking) {
           window.speechSynthesis.pause();
         }
       }
