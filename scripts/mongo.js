@@ -63,13 +63,21 @@ exports.create = async (credentials) => {
     }
 
     if (fullData.visits) {
-      // 🌟 TRASFORMIAMO IL .map IN UN Promise.all ASINCRONO
       let visitsToInsert = await Promise.all(
         fullData.visits.map(async (v) => {
-          // Per ogni tappa del JSON, cerchiamo l'ID dell'item corrispondente già inserito nel DB
+          // 👤 ASSOCIAZIONE AUTOMATICA AUTORE/CREATORID
+          // Prendiamo lo username dal JSON (può essere sotto v.creatorId o v.autore)
+          const usernameAutore = v.creatorId || v.autore || "museo";
+
+          // Cerchiamo l'utente appena inserito nel database per prenderne il vero ID
+          const utenteTrovato = await User.findOne({
+            username: usernameAutore,
+          }).lean();
+          const veroCreatorId = utenteTrovato ? utenteTrovato._id : null;
+
+          // 🖼️ ASSOCIAZIONE AUTOMATICA ITEM DELLE TAPPE
           const tappeArricchite = await Promise.all(
             (v.tappe || []).map(async (t) => {
-              // Cerchiamo l'item nel database usando il codice opera e il linguaggio della visita
               const itemTrovato = await Item.findOne({
                 operaId: t.operaId,
                 linguaggio: v.livello_base || "medio",
@@ -78,17 +86,13 @@ exports.create = async (credentials) => {
               return {
                 ordine: t.ordine,
                 logistica: t.logistica || t.indicazione_per_raggiungerlo,
-                operaId: t.operaId, // Ci assicuriamo che salvi anche il codice piatto
-                // 🌟 ECCO IL TRUCCO: Se trova l'item nel DB ci mette il suo _id, altrimenti lascia quello che c'era
-                item_default: itemTrovato
-                  ? itemTrovato._id
-                  : t.item_default || t.item_deafult || t.item_id_principale,
+                operaId: t.operaId,
+                item_default: itemTrovato ? itemTrovato._id : null,
                 varianti_difficolta: t.varianti_difficolta || {},
               };
             }),
           );
 
-          // Restituiamo l'oggetto della visita con le tappe arricchite degli ID reali
           return {
             id: v.id,
             title: v.title || v.titolo,
@@ -99,13 +103,18 @@ exports.create = async (credentials) => {
             info_generale: v.info_generale || v.descrizione_logistica,
             stops: v.stops || tappeArricchite.length,
             duration: v.duration || "60 min",
-            tappe: tappeArricchite, // 👈 Assegniamo l'array con i veri ID di MongoDB!
+            tappe: tappeArricchite,
+            // 🌟 Sincronizziamo i campi per evitare incoerenze con il modello
+            creatorId: veroCreatorId, // Sarà un vero ObjectId di Mongoose!
+            autore: usernameAutore, // Manteniamo la stringa come paracadute per il frontend
           };
         }),
       );
 
       await Visit.insertMany(visitsToInsert);
-      debug.push(`🗺️ Inserite ${visitsToInsert.length} visite`);
+      debug.push(
+        `🗺️ Inserite ${visitsToInsert.length} visite con relazioni e autori perfetti`,
+      );
     }
 
     return {

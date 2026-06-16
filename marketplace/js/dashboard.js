@@ -336,7 +336,7 @@ async function apriItemModal(id) {
           <div class="row g-2">
             <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Opera ID</span><div class="fw-semibold text-charcoal">${item.operaId || "–"}</div></div>
             <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Museo</span><div class="fw-semibold text-charcoal">${item.museo || "–"}</div></div>
-            <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Autore</span><div class="text-taupe fw-semibold">${item.creatorId?.username || item.autore || item.autore_visita || "–"}</div></div>
+            <div class="col-6"><span class="aa-label">Autore</span><div>${v.creatorId?.username || "–"}</div></div>
             <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Licenza</span><div class="text-slate fw-semibold">${item.licenza?.tipo || item.licenza || "–"}</div></div>
           </div>
         </div>
@@ -564,7 +564,10 @@ async function caricaVisiteTab(pagina = stato.paginaVisite) {
     if (v.pubblica !== false) return true;
     if (!u) return false;
     const idCreatore = v.creatorId?._id || v.creatorId;
-    return String(idCreatore) === String(u._id);
+    const isAutorePerId = idCreatore && String(idCreatore) === String(u._id);
+    const isAutorePerStringa =
+      v.autore && String(v.autore) === String(u.username);
+    return isAutorePerId || isAutorePerStringa;
   });
 
   if (!visiteFiltrate.length) {
