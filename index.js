@@ -18,7 +18,9 @@ const mongoCredentials = {
 };
 
 const isGocker =
-  process.env.USER === "site252620" || process.cwd().includes("site252620");
+  process.env.USER === "site252620" ||
+  process.cwd().includes("site252620") ||
+  process.cwd().includes("webapp");
 
 let mongoURI;
 
@@ -60,7 +62,7 @@ app.get("/api/config", (req, res) => {
   }
 });
 
-const googleTTS = require("google-tts-api"); // Al posto di const say = require("say");
+const googleTTS = require("google-tts-api");
 const crypto = require("crypto");
 
 const ttsCacheDir = path.join(__dirname, "tts_cache");
@@ -72,12 +74,10 @@ app.get("/api/tts", async (req, res) => {
   const text = req.query.text;
   if (!text) return res.status(400).send("Missing text parameter");
 
-  // 1. Generiamo un nome file univoco (.mp3 invece di .wav, molto più digeribile dai telefoni)
   const hash = crypto.createHash("md5").update(text).digest("hex");
   const fileName = `tts_${hash}.mp3`;
   const cachedFilePath = path.join(ttsCacheDir, fileName);
 
-  // 2. Se esiste già nella cache, invialo subito
   if (fs.existsSync(cachedFilePath)) {
     console.log(`[TTS] Servito dalla cache: ${fileName}`);
     return res.sendFile(cachedFilePath);
@@ -85,9 +85,6 @@ app.get("/api/tts", async (req, res) => {
 
   try {
     console.log(`[TTS] Generazione nuovo file audio MP3 tramite Web API...`);
-
-    // 3. Ottieni l'URL del file audio convertito in base64 o scaricalo direttamente
-    // google-tts-api supporta testi fino a 200 caratteri per singola chiamata standard
     const base64Audio = await googleTTS.getAudioBase64(text, {
       lang: "it",
       slow: false,
@@ -95,11 +92,9 @@ app.get("/api/tts", async (req, res) => {
       timeout: 10000,
     });
 
-    // 4. Salva il buffer base64 come file MP3 sul server
     const buffer = Buffer.from(base64Audio, "base64");
     fs.writeFileSync(cachedFilePath, buffer);
 
-    // 5. Invia il file statico al client
     return res.sendFile(cachedFilePath);
   } catch (err) {
     console.error("Errore generazione TTS alternativo:", err);
@@ -111,7 +106,6 @@ app.get("/db/create", async function (req, res) {
   res.send(await mymongo.create(mongoCredentials));
 });
 
-// 2. MOBILE APP (navigator/dist)
 const navigatorDistPath = path.join(__dirname, "navigator", "dist");
 const navigatorSourcePath = path.join(__dirname, "navigator");
 
@@ -139,8 +133,6 @@ app.get(/^\/navigator(?:\/.*)?$/, (req, res) => {
   return res.status(404).send("Mobile app non trovata: build mancante.");
 });
 
-// 3. MARKETPLACE (Radice del sito)
-// AGGIUNTO: 'extensions' permette di navigare su /gallery invece di /gallery.html
 app.use(
   "/",
   express.static(path.join(__dirname, "marketplace"), {
@@ -148,12 +140,10 @@ app.use(
   }),
 );
 
-// Fallback per la home del marketplace se non trova index.html automaticamente
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "marketplace", "index.html"));
 });
 
-// 4. GESTIONE ERRORE 404 (Se nessuna delle precedenti funziona)
 app.use((req, res) => {
   res
     .status(404)
@@ -162,7 +152,6 @@ app.use((req, res) => {
     );
 });
 
-// 5. AVVIO SERVER
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`🚀 Server in ascolto su http://localhost:${PORT}`);

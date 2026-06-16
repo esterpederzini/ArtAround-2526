@@ -84,16 +84,11 @@ export default function NavigatorItemViewer() {
     window.speechSynthesis.cancel();
 
     setLogisticsMsg(msg);
-    const audio = new Audio(`/api/tts?text=${encodeURIComponent(msg)}`);
-    logisticsAudioRef.current = audio;
-    audio.play().catch(() => {
-      const utterance = new SpeechSynthesisUtterance(msg);
-      utterance.lang = "it-IT";
-      window.speechSynthesis.speak(utterance);
-    });
-    audio.addEventListener("ended", () => {
-      logisticsAudioRef.current = null;
-    });
+
+    const utterance = new SpeechSynthesisUtterance(msg);
+    utterance.lang = "it-IT";
+    window.speechSynthesis.speak(utterance);
+
     setTimeout(() => setLogisticsMsg(""), 5000);
   };
 
@@ -270,6 +265,7 @@ export default function NavigatorItemViewer() {
   }, [id, safeIndex]);
 
   // ---------- GESTIONE AUDIO / TTS ----------
+  // ---------- GESTIONE AUDIO / TTS ----------
   useEffect(() => {
     const audio = audioRef.current;
     setCurrentTime(0);
@@ -286,14 +282,9 @@ export default function NavigatorItemViewer() {
     const item_audio = currentItem?.audio || currentItem?.audioUrl;
 
     if (item_audio) {
+      // 1. Se l'opera ha una traccia registrata, usa l'elemento Audio classico
       console.log("[AUDIO LOG] Uso il file audio statico:", item_audio);
       audio.src = item_audio;
-    } else if (currentItem?.descrizione) {
-      console.log("[AUDIO LOG] Genero via EdgeTTS dal testo.");
-      audio.src = `/api/tts?text=${encodeURIComponent(currentItem.descrizione)}`;
-    }
-
-    if (audio.src) {
       audio.currentTime = 0;
 
       audio
@@ -316,9 +307,52 @@ export default function NavigatorItemViewer() {
         audio.removeEventListener("timeupdate", upTime);
         audio.removeEventListener("ended", onEnd);
       };
+    } else if (currentItem?.descrizione) {
+      // 2. FALLBACK TOTALE SUL TELEFONO: Se l'audio va generato, usa window.speechSynthesis
+      console.log(
+        "[AUDIO LOG] Genero via SpeechSynthesis nativa del dispositivo.",
+      );
+
+      // Resettiamo l'audio HTML5 per evitare sovrapposizioni
+      audio.pause();
+      audio.src = "";
+
+      const utterance = new SpeechSynthesisUtterance(currentItem.descrizione);
+      utterance.lang = "it-IT";
+
+      // Simulazione avanzamento barra di riproduzione per il testo sintetizzato
+      const parole = currentItem.descrizione.split(/\s+/).length;
+      const durataStimata = (parole / 130) * 60; // Stima media di 130 parole al minuto per la sintesi vocale
+      setDuration(durataStimata);
+
+      let tempoTrascorso = 0;
+      ttsIntervalRef.current = setInterval(() => {
+        if (window.speechSynthesis.speaking) {
+          tempoTrascorso += 0.2;
+          setCurrentTime(Math.min(tempoTrascorso, durataStimata));
+        }
+      }, 200);
+
+      utterance.onend = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+        clearInterval(ttsIntervalRef.current);
+      };
+
+      utterance.onerror = (e) => {
+        console.error("Errore sintesi vocale del browser:", e);
+        setIsPlaying(false);
+        clearInterval(ttsIntervalRef.current);
+      };
+
+      window.speechSynthesis.speak(utterance);
+
+      return () => {
+        clearInterval(ttsIntervalRef.current);
+        window.speechSynthesis.cancel();
+      };
     }
   }, [currentItem, isPlaying]);
-
   // ---------- NAVIGAZIONE ----------
   const changeItem = (newIndex) => {
     const v = visitRef.current;
