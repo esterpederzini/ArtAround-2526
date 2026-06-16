@@ -150,7 +150,6 @@ async function popolaSelectOpere() {
     return;
   }
 
-  // Raggruppiamo gli item per operaId così da avere un'unica voce nella tendina per opera
   mappaOpereLocali = {};
   data.items.forEach((item) => {
     if (item.operaId && !mappaOpereLocali[item.operaId]) {
@@ -158,13 +157,11 @@ async function popolaSelectOpere() {
     }
   });
 
-  // Genera le opzioni nel menu a tendina
   Object.keys(mappaOpereLocali).forEach((operaId) => {
     const opera = mappaOpereLocali[operaId];
     const opt = document.createElement("option");
     opt.value = operaId;
-    // Mostra il titolo ufficiale dell'opera ereditato dal seed
-    opt.textContent = `${opera.titoloOpera || opera.titolo || "Opera senza titolo"} [${operaId}]`;
+    opt.textContent = `${opera.titoloOpera || opera.titolo || "Opera senza titolo"}`;
     select.appendChild(opt);
   });
 }

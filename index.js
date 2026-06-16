@@ -62,26 +62,45 @@ app.get("/api/config", (req, res) => {
 
 const say = require("say");
 
-// Rotta TTS con la libreria "say"
+const crypto = require("crypto"); // Modulo nativo di Node, non serve installarlo
+
+// Assicuriamoci che la cartella per i file temporanei esista all'avvio del server
+const ttsCacheDir = path.join(__dirname, "tts_cache");
+if (!fs.existsSync(ttsCacheDir)) {
+  fs.mkdirSync(ttsCacheDir);
+}
+
+// Nuova Rotta TTS ottimizzata per Mobile
 app.get("/api/tts", (req, res) => {
   const text = req.query.text;
   if (!text) return res.status(400).send("Missing text parameter");
 
-  // Esporta temporaneamente l'audio in un file wav e lo spedisce al client
-  const tempFilePath = path.join(__dirname, "temp_audio.wav");
+  // 1. Generiamo un nome file univoco basato sul testo (MD5 hash)
+  const hash = crypto.createHash("md5").update(text).digest("hex");
+  const fileName = `tts_${hash}.wav`;
+  const cachedFilePath = path.join(ttsCacheDir, fileName);
 
-  // Su Windows puoi usare voci come "Cosimo" o "Elsa" se installate,
-  // oppure lasciarlo nullo per usare la voce italiana di default del sistema.
-  say.export(text, null, 1.0, tempFilePath, (err) => {
+  // 2. Se l'audio di questo testo è già stato generato in precedenza, servilo subito!
+  if (fs.existsSync(cachedFilePath)) {
+    console.log(`[TTS] Servito dalla cache: ${fileName}`);
+    return res.sendFile(cachedFilePath); // Express gestisce nativamente il Partial Content (206) su file persistenti
+  }
+
+  // 3. Se non esiste, lo generiamo con say
+  console.log(
+    `[TTS] Generazione nuovo file audio per: "${text.substring(0, 20)}..."`,
+  );
+
+  // Lasciamo null per usare la voce di default, oppure forza una voce se sai che c'è
+  say.export(text, null, 1.0, cachedFilePath, (err) => {
     if (err) {
       console.error("Errore Say TTS:", err);
       return res.status(500).send("Errore generazione audio");
     }
 
-    // Inviamo il file generato al frontend e lo cancelliamo subito dopo l'invio
-    res.sendFile(tempFilePath, () => {
-      fs.unlinkSync(tempFilePath);
-    });
+    // 4. Inviamo il file SENZA cancellarlo subito.
+    // Ora lo smartphone può fare tutte le richieste Range che vuole.
+    res.sendFile(cachedFilePath);
   });
 });
 
