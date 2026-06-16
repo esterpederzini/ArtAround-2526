@@ -304,15 +304,11 @@ export default function NavigatorItemViewer() {
 
     if (item_audio) {
       if (isPlaying) {
-        audio.play().catch((e) => console.log("Autoplay bloccato", e));
-      } else {
-        audio.pause();
-      }
-    } else if (currentItem?.descrizione) {
-      if (isPlaying) {
-        if (window.speechSynthesis.paused) {
-          window.speechSynthesis.resume();
-        } else {
+        audio.play().catch((e) => {
+          console.warn(
+            "[AUDIO WARNING] File statico fallito, avvio fallback TTS nativo:",
+            e,
+          );
           window.speechSynthesis.cancel();
           const utterance = new SpeechSynthesisUtterance(
             currentItem.descrizione,
@@ -323,16 +319,25 @@ export default function NavigatorItemViewer() {
           const durataStimata = (parole / 130) * 60;
           setDuration(durataStimata);
 
-          let tempoTrascorso = currentTime;
-          ttsIntervalRef.current = setInterval(() => {
-            if (
-              window.speechSynthesis.speaking &&
-              !window.speechSynthesis.paused
-            ) {
-              tempoTrascorso += 0.2;
-              setCurrentTime(Math.min(tempoTrascorso, durataStimata));
-            }
-          }, 200);
+          window.speechSynthesis.speak(utterance);
+        });
+      } else {
+        audio.pause();
+      }
+    } else if (currentItem?.descrizione) {
+      if (isPlaying) {
+        if (window.speechSynthesis.speaking && window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        } else if (!window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(
+            currentItem.descrizione,
+          );
+          utterance.lang = "it-IT";
+
+          const parole = currentItem.descrizione.split(/\s+/).length;
+          const durataStimata = (parole / 130) * 60;
+          setDuration(durataStimata);
 
           utterance.onend = () => {
             setIsPlaying(false);
@@ -342,8 +347,23 @@ export default function NavigatorItemViewer() {
 
           window.speechSynthesis.speak(utterance);
         }
+
+        clearInterval(ttsIntervalRef.current);
+        ttsIntervalRef.current = setInterval(() => {
+          if (
+            window.speechSynthesis.speaking &&
+            !window.speechSynthesis.paused
+          ) {
+            setCurrentTime((prevTime) => {
+              const parole = currentItem.descrizione.split(/\s+/).length;
+              const durataStimata = (parole / 130) * 60;
+              return Math.min(prevTime + 0.2, durataStimata);
+            });
+          }
+        }, 200);
       } else {
-        if (window.speechSynthesis.speaking) {
+        clearInterval(ttsIntervalRef.current);
+        if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
           window.speechSynthesis.pause();
         }
       }
