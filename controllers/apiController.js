@@ -273,22 +273,67 @@ exports.getVisite = async (req, res) => {
     }
 
     const skip = (Number(pagina) - 1) * Number(limite);
-    const [visite, totale] = await Promise.all([
+
+    // Sostituiamo la query con una versione .lean() per poter manipolare liberamente l'output
+    const [visiteDocs, totale] = await Promise.all([
       Visita.find(filtro)
         .populate("creatorId", "username")
-        .populate({
-          path: "tappe.item_default",
-          select: "titolo operaId lunghezza linguaggio url autore audioUrl",
-        })
         .populate({
           path: "logAdozioni.adottanteId",
           select: "username",
         })
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(Number(limite)),
+        .limit(Number(limite))
+        .lean(),
       Visita.countDocuments(filtro),
     ]);
+
+    // 🌟 AGGANCIO DINAMICO DELLE OPERE DEL SEED DATA
+    // Scorriamo le visite ed eseguiamo una ricerca sul database per riempire item_default al volo
+    const visite = await Promise.all(
+      visiteDocs.map(async (v) => {
+        if (v.tappe && Array.isArray(v.tappe)) {
+          v.tappe = await Promise.all(
+            v.tappe.map(async (tappa) => {
+              // Se la relazione nativa ObjectId manca (situazione del seed data), cerchiamo l'item per operaId e lingua
+              if (
+                !tappa.item_default ||
+                typeof tappa.item_default !== "object"
+              ) {
+                const codiceCercato = tappa.operaId || "";
+                const linguaggioVisita = v.livello_base || "medio"; // Accoppia "infantile", "medio", "avanzato"
+
+                const itemReale = await Item.findOne({
+                  operaId: codiceCercato,
+                  museo: v.museo,
+                  linguaggio: linguaggioVisita,
+                }).lean();
+
+                if (itemReale) {
+                  tappa.item_default = itemReale;
+                } else {
+                  // Fallback se non trova la combinazione lingua/codice: prende il primo item disponibile per quell'opera
+                  const fallbackItem = await Item.findOne({
+                    operaId: codiceCercato,
+                  }).lean();
+                  tappa.item_default = fallbackItem || {
+                    titolo: tappa.logistica
+                      ? tappa.logistica.substring(0, 45) + "..."
+                      : `Tappa ${tappa.ordine}`,
+                    operaId: codiceCercato || `OP-${tappa.ordine}`,
+                    lunghezza: "15s",
+                    linguaggio: "medio",
+                  };
+                }
+              }
+              return tappa;
+            }),
+          );
+        }
+        return v;
+      }),
+    );
 
     risposta(res, 200, {
       visite,

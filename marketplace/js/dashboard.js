@@ -336,7 +336,7 @@ async function apriItemModal(id) {
           <div class="row g-2">
             <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Opera ID</span><div class="fw-semibold text-charcoal">${item.operaId || "–"}</div></div>
             <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Museo</span><div class="fw-semibold text-charcoal">${item.museo || "–"}</div></div>
-            <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Autore</span><div class="text-taupe fw-semibold">${item.creatorId?.username || "–"}</div></div>
+            <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Autore</span><div class="text-taupe fw-semibold">${item.creatorId?.username || item.autore || item.autore_visita || "–"}</div></div>
             <div class="col-6"><span class="aa-label m-0" style="font-size:0.7rem;">Licenza</span><div class="text-slate fw-semibold">${item.licenza?.tipo || item.licenza || "–"}</div></div>
           </div>
         </div>
