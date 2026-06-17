@@ -109,6 +109,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const tabParam = params.get("tab");
   const visitaIdParam = params.get("visitaId");
 
+  //  INCOLLA QUESTO NUOVO BLOCCO REVISIONATO:
   if (tabParam === "visite") {
     const btnVisiteTab = document.querySelector('.aa-tab[onclick*="visite"]');
     if (btnVisiteTab) {
@@ -116,9 +117,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else {
       caricaVisiteTab();
     }
-    if (visitaIdParam) {
+
+    const visitaIdDaAprire = sessionStorage.getItem("apriVisitaId");
+    if (visitaIdDaAprire) {
+      sessionStorage.removeItem("apriVisitaId");
       setTimeout(() => {
-        apriVisitaModal(visitaIdParam);
+        apriVisitaModal(visitaIdDaAprire);
       }, 300);
     }
   }

@@ -434,7 +434,7 @@
           .map(
             (v) => `
           <div class="col-md-4">
-            <div class="aa-visita-card d-flex flex-column h-100" style="cursor:pointer" onclick="window.location='/dashboard?tab=visite&visitaId=${v._id}'">
+            <div class="aa-visita-card d-flex flex-column h-100" style="cursor:pointer" onclick="sessionStorage.setItem('apriVisitaId', '${v._id}'); window.location='/dashboard?tab=visite';">
               <div class="vcard-header">
                 <h5>${v.titolo || v.title || "Visita senza nome"}</h5>
                 <small style="opacity:0.65">${v.museo}</small>
