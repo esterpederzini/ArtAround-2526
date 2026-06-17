@@ -58,8 +58,19 @@ exports.create = async (credentials) => {
     }
 
     if (fullData.items) {
-      await Item.insertMany(fullData.items);
-      debug.push(`🖼️ Inseriti ${fullData.items.length} items`);
+      const itemsMescolati = [...fullData.items];
+      for (let i = itemsMescolati.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [itemsMescolati[i], itemsMescolati[j]] = [
+          itemsMescolati[j],
+          itemsMescolati[i],
+        ];
+      }
+
+      await Item.insertMany(itemsMescolati);
+      debug.push(
+        `🖼️ Inseriti ${fullData.items.length} items in ordine casuale!`,
+      );
     }
 
     if (fullData.visits) {

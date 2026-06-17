@@ -14,7 +14,6 @@
   --error: #e05c5c;
 }
 
-/* ── OVERLAY FIX: Copre interamente la viewport in primo piano ── */
 .navigator-modal-overlay {
   position: fixed !important;
   inset: 0 !important;
@@ -31,7 +30,6 @@
   font-family: "DM Sans", sans-serif;
 }
 
-/* ── Struttura Card del Modal (Eredita il vecchio stile) ── */
 .navigator-modal-card {
   position: relative;
   width: 100%;
@@ -46,7 +44,6 @@
   animation: modalScaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Linea superiore d'accento in oro */
 .navigator-modal-card::before {
   content: "";
   position: absolute;
@@ -59,7 +56,6 @@
   border-radius: 1px;
 }
 
-/* ── Header Interno ── */
 .navigator-modal-header {
   padding: 24px 28px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -92,7 +88,6 @@
   color: var(--text);
 }
 
-/* ── Corpo e Campi Input (Sbiancati e Leggibili) ── */
 .navigator-modal-body {
   padding: 24px 28px;
 }
@@ -128,7 +123,6 @@
   outline: none;
 }
 
-/* FIX CRITICO: Placeholder bianchi opachi, perfetti sullo sfondo scuro */
 .login-modal-field input::placeholder {
   color: rgba(255, 255, 255, 0.35) !important;
   opacity: 1 !important;
@@ -140,7 +134,6 @@
   box-shadow: 0 0 0 3px var(--gold-glow) !important;
 }
 
-/* Gestione posizionamento icona occhio */
 .password-input-wrapper {
   position: relative;
   display: flex;
@@ -166,7 +159,6 @@
   color: var(--gold);
 }
 
-/* Errori */
 .modal-error-msg {
   color: var(--error);
   font-size: 0.82rem;
@@ -176,7 +168,6 @@
   font-weight: 500;
 }
 
-/* ── Footer e Bottoni ── */
 .navigator-modal-footer {
   padding: 16px 28px 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
@@ -225,7 +216,6 @@
   transform: scale(0.97);
 }
 
-/* Animazione di ingresso */
 @keyframes modalScaleIn {
   from {
     opacity: 0;

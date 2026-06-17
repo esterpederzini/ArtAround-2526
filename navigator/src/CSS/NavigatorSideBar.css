@@ -1,8 +1,8 @@
-/* Definiamo delle variabili per gestire le larghezze in un unico punto */
+
 :root {
-  --sidebar-collapsed-width: 3.75rem; /* Circa 60px */
-  --sidebar-expanded-width-mobile: 14rem; /* Larghezza ottimale per smartphone */
-  --sidebar-expanded-width-desktop: 17.5rem; /* Più larga su schermi grandi */
+  --sidebar-collapsed-width: 3.75rem; 
+  --sidebar-expanded-width-mobile: 14rem; 
+  --sidebar-expanded-width-desktop: 17.5rem; 
 }
 
 .sidebar {
@@ -21,7 +21,6 @@
   background-color: red !important;
 }
 
-/* Stato Espanso (Mobile di base) */
 .sidebar.expanded {
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
@@ -30,12 +29,10 @@
   background-image: linear-gradient(to right, #ffecd2 0%, #dbb280 100%);
 }
 
-/* Stato Contratto (Identico su tutti i dispositivi) */
 .sidebar.collapsed {
   width: var(--sidebar-collapsed-width);
 }
 
-/* HEADER E BOTTONE HAMBURGER */
 .sidebar-header {
   padding: 0.75rem;
   display: flex;
@@ -59,7 +56,6 @@
   justify-content: center;
 }
 
-/* ICONE E TESTO SEMPRE BIANCHI */
 .sidebar i,
 .link-text {
   color: #ffffff !important;
@@ -74,7 +70,6 @@
   margin: 0;
 }
 
-/* VOCI DEL MENU RESPONSIVE */
 .nav-item {
   display: flex;
   align-items: center;
@@ -107,24 +102,20 @@
   transition: opacity 0.2s ease;
 }
 
-/* ─── MEDIA QUERIES (ADATTAMENTO DISPOSITIVI) ─── */
-
-/* Tablet e schermi intermedi (MD) */
 @media (min-width: 768px) {
   .sidebar.expanded {
     width: var(--sidebar-expanded-width-desktop);
   }
   .nav-item {
-    padding: 1rem 1.25rem; /* Più respiro sui tablet */
+    padding: 1rem 1.25rem;
   }
   .link-text {
     font-size: 1rem;
   }
 }
 
-/* Schermi Desktop molto grandi (XL) */
 @media (min-width: 1200px) {
   .nav-item {
-    padding: 1.1rem 1.4rem; /* Ottimizzazione per monitor grandi */
+    padding: 1.1rem 1.4rem; 
   }
 }

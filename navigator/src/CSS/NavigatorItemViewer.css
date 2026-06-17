@@ -1,4 +1,4 @@
-/* --- GLOBAL LAYOUT --- */
+
 .navigator-viewer-layout {
   display: flex;
   flex-direction: column;
@@ -11,23 +11,19 @@
 
 .viewer-bottom-spacer {
   height: 5vh;
-  /* Altezza della barra di navigazione inferiore */
 }
 
 .scrollable-viewer-content {
   flex: 1;
   overflow-y: auto;
   scrollbar-width: none;
-  /* Firefox */
   padding-bottom: 15vh;
 }
 
 .scrollable-viewer-content::-webkit-scrollbar {
   display: none;
-  /* Chrome/Safari */
 }
 
-/* --- NAVIGATION HEADER --- */
 .top-nav-viewer {
   position: absolute;
   top: 0;
@@ -63,7 +59,6 @@
   cursor: pointer;
 }
 
-/* --- HERO SECTION --- */
 .hero-image-container {
   position: relative;
   width: 100%;
@@ -114,8 +109,6 @@
   margin: 0;
 }
 
-/* --- CONTENT CARDS --- */
-/* --- MUSEUM LOGISTICS CARD --- */
 .museum-logistics-card {
   background: rgba(255, 255, 255, 0.03) !important;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
@@ -142,15 +135,14 @@
   margin-bottom: 0 !important;
 }
 
-/* Adattamento specifico per la visualizzazione Split-Screen (Desktop) */
 @media (min-width: 769px) {
   .museum-logistics-card {
     width: 100%;
-    max-width: 520px; /* Si allinea perfettamente alla larghezza degli altri box */
+    max-width: 520px; 
     margin-left: 0 !important;
     margin-right: 0 !important;
     margin-top: 0 !important;
-    margin-bottom: 1.2rem !important; /* Mantiene lo stesso distanziamento regolare */
+    margin-bottom: 1.2rem !important; 
   }
 }
 .card-viewer {
@@ -158,7 +150,6 @@
   border: none !important;
 }
 
-/* Descrizione Scrollabile */
 .description-quote {
   border-left: 0.2rem solid #e18f37;
   padding: 0.5rem 1.2rem;
@@ -167,22 +158,15 @@
   color: #ccc;
   line-height: 1.6;
   max-height: 25vh;
-  /* Altezza basata sulla vista dispositivo */
   overflow-y: auto;
-
-  /* Nascondi scrollbar */
   scrollbar-width: none;
-  /* Firefox */
   -ms-overflow-style: none;
-  /* IE/Edge */
 }
 
 .description-quote::-webkit-scrollbar {
   display: none;
-  /* Chrome/Safari */
 }
 
-/* --- CONFIG BOX (RICHIUDIBILE) --- */
 .config-box {
   background: rgba(255, 255, 255, 0.03);
   padding: 1.2rem;
@@ -221,7 +205,6 @@
   font-size: 1.2rem;
 }
 
-/* --- BUTTONS --- */
 .btn-difficolta-custom {
   background: rgba(255, 255, 255, 0.08);
   color: #888;
@@ -256,13 +239,11 @@
   color: #e18f37;
 }
 
-/* --- AUDIO PLAYER --- */
 .integrated-player-static {
   background: #1a1a1d;
   padding: 1.5rem 1.2rem;
   border-radius: 1.5rem;
   margin-top: 0;
-  /* Eliminato margine superiore per attaccarlo alla descrizione */
 }
 
 .player-controls-row {
@@ -390,8 +371,6 @@
   opacity: 0.6;
 }
 
-/* --- MODAL DI CONFERMA USCITA (REPLICATO) --- */
-
 .museum-modal-overview .modal-content {
   background: rgba(36, 35, 38, 0.8) !important;
   backdrop-filter: blur(12px) !important;
@@ -467,7 +446,6 @@
   color: #ffffff !important;
 }
 
-/* --- BOTTOM NAVIGATION BAR --- */
 .bottom-nav-viewer {
   position: fixed;
   bottom: 0;
@@ -482,7 +460,6 @@
   border-top: 0.06rem solid rgba(255, 255, 255, 0.05);
   z-index: 1100;
   padding-bottom: env(safe-area-inset-bottom);
-  /* Supporto per iPhone */
 }
 
 .nav-item {
@@ -500,10 +477,8 @@
 
 .nav-item.central {
   flex: 1.2;
-  /* Diamo leggermente più spazio al centro */
 }
 
-/* STILE MICROFONO INTEGRATO NELLA NAV */
 .btn-mic-nav {
   width: 3.5rem;
   height: 3.5rem;
@@ -521,7 +496,6 @@
 
 .btn-mic-nav.is-listening {
   background: #e18f37;
-  /* Rosso per indicare l'ascolto attivo */
   color: white;
   border-color: #e18f37;
   box-shadow: 0 0 1.5rem #e18f37;
@@ -546,12 +520,9 @@
   color: #e18f37;
 }
 
-/* --- MAP MODAL RESPONSIVE --- */
 .museum-map-modal .modal-dialog {
   margin: 0.5rem;
-  /* Margine minimo dai bordi dello schermo */
   max-width: 95vw;
-  /* Larghezza massima quasi a tutto schermo */
 }
 
 .museum-map-modal .modal-content {
@@ -568,7 +539,6 @@
   padding: 0.75rem;
   gap: 0.5rem;
   overflow-x: auto;
-  /* Permette lo scorrimento orizzontale se i tasti non ci stanno */
 }
 
 .map-floor-selector .btn {
@@ -576,7 +546,6 @@
   padding: 0.4rem 1rem;
   font-size: 0.85rem;
   min-width: 3.5rem;
-  /* Garantisce che il tasto sia cliccabile */
   border-color: #e18f37;
   color: #e18f37;
 }
@@ -586,7 +555,6 @@
   color: #1a1a1d;
 }
 
-/* --- CONTENITORE MAPPA RESPONSIVE --- */
 .map-container {
   background-color: #000;
   width: 100%;
@@ -595,7 +563,6 @@
   align-items: center;
   justify-content: center;
   min-height: 40vh;
-  /* Altezza minima basata sulla visuale */
 }
 
 .map-container img {
@@ -605,15 +572,11 @@
   object-fit: contain;
 }
 
-/* --- PALLINO MAPPA (USA PERCENTUALI) --- */
 .map-marker-ping {
   position: absolute;
-  /* La posizione left/top viene gestita inline nel JSX in % */
   width: 5vw;
-  /* Dimensione basata sulla larghezza schermo */
   height: 5vw;
   max-width: 25px;
-  /* Ma con un limite per schermi giganti */
   max-height: 25px;
   background-color: #ff0000;
   border: 2px solid white;
@@ -682,14 +645,13 @@
     --right-column-width: 55vw;
   }
 
-  /* ── LEFT COLUMN: full-height artwork image, fixed ── */
   .hero-image-container {
     position: relative;
-    width: var(--left-column-width); /* Dinamico basato sul dispositivo */
+    width: var(--left-column-width); 
     height: 100vh !important;
     flex-shrink: 0;
     overflow: hidden;
-    border: none; /* Rimosso il bordo rosso di test */
+    border: none;
   }
 
   .hero-image {
@@ -710,7 +672,6 @@
     }
   }
 
-  /* Gradient on the image: fluid integration */
   .hero-overlay-gradient {
     background:
       linear-gradient(
@@ -722,7 +683,6 @@
       linear-gradient(to top, #1a1a1d 0%, transparent 35%);
   }
 
-  /* Top navigation bar */
   .top-nav-viewer {
     position: fixed;
     top: 0;
@@ -733,7 +693,7 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    padding: 0 1.5rem; /* Un po' più di respiro sui tablet */
+    padding: 0 1.5rem;
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -752,7 +712,6 @@
     opacity: 0.5;
   }
 
-  /* Scrollable content panel */
   .scrollable-viewer-content {
     position: absolute;
     top: 0;
@@ -760,7 +719,6 @@
     width: var(--right-column-width);
     height: 100vh;
     overflow-y: auto;
-    /* Utilizzo delle funzioni clamp e dei padding fluidi per non schiacciare i testi su iPad */
     padding: 80px max(1.5rem, 3vw) 13vh max(1.5rem, 3vw) !important;
     background-color: #1a1a1d;
     box-sizing: border-box;
@@ -784,12 +742,11 @@
     margin-bottom: 0;
   }
 
-  /* I box interni non superano una larghezza ottimale di lettura */
   .config-box,
   .description-quote,
   .integrated-player-static {
     width: 100%;
-    max-width: 520px; /* Perfetto sia per la larghezza iPad che per PC */
+    max-width: 520px;
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
@@ -804,7 +761,7 @@
   .description-quote {
     max-height: none;
     overflow-y: visible;
-    font-size: clamp(0.95rem, 1.2vw, 1.05rem); /* Testo scalabile */
+    font-size: clamp(0.95rem, 1.2vw, 1.05rem); 
     line-height: 1.7;
     margin-bottom: 0;
     border-left-width: 3px;
@@ -826,7 +783,6 @@
     font-size: 1.8rem;
   }
 
-  /* ── Bottom navigation bar — docked to the right panel ── */
   .bottom-nav-viewer {
     position: fixed;
     bottom: 0;
@@ -846,7 +802,7 @@
     padding-bottom: max(
       0.8rem,
       env(safe-area-inset-bottom)
-    ); /* Gestione zone sicure iPad */
+    ); 
   }
 
   .nav-item {
@@ -886,14 +842,12 @@
     font-size: 1.2rem;
   }
 
-  /* ── Logistics toast: centred within the right panel ── */
   .logistics-toast {
     left: calc(var(--left-column-width) + (var(--right-column-width) / 2));
     transform: translate(-50%, -50%);
     width: clamp(260px, 35vw, 380px);
   }
 
-  /* ── Map modal: sized for desktop ── */
   .museum-map-modal .modal-dialog {
     max-width: 600px;
     margin: auto;
@@ -902,15 +856,13 @@
 
 .museum-map-modal .btn-close {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23e18f37'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") !important;
-  opacity: 1 !important; /* Evita l'effetto sbiadito di default di Bootstrap */
+  opacity: 1 !important; 
 }
 
-/* Opzionale: aggiunge un leggero effetto feedback al passaggio del mouse */
 .museum-map-modal .btn-close:hover {
   opacity: 0.8 !important;
 }
 
-/* ── DESKTOP (≥1200px): layout a tutto schermo, nessuno split ── */
 @media (min-width: 1200px) {
   .navigator-viewer-layout {
     flex-direction: column !important;
@@ -918,7 +870,6 @@
     overflow: hidden;
   }
 
-  /* Hero: banner orizzontale in cima a tutta larghezza */
   .hero-image-container {
     position: relative;
     width: 100% !important;
@@ -943,7 +894,6 @@
     animation: none;
   }
 
-  /* Gradient: overlay assoluto che sfuma solo in basso */
   .hero-overlay-gradient {
     position: absolute;
     inset: 0;
@@ -956,7 +906,6 @@
     z-index: 2;
   }
 
-  /* Top nav: a tutto schermo */
   .top-nav-viewer {
     position: fixed;
     top: 0;
@@ -980,7 +929,6 @@
     margin-left: 0;
   }
 
-  /* Pannello scrollabile: a tutto schermo */
   .scrollable-viewer-content {
     position: static !important;
     left: auto !important;
@@ -993,7 +941,6 @@
     box-sizing: border-box;
   }
 
-  /* Box interni centrati */
   .config-box,
   .description-quote,
   .integrated-player-static {
@@ -1013,12 +960,10 @@
     margin-right: auto !important;
   }
 
-  /* Nasconde il titolo duplicato (già visibile nell'hero) su desktop */
   .scrollable-viewer-content .d-none.d-md-block {
     display: none !important;
   }
 
-  /* Bottom nav: a tutto schermo */
   .bottom-nav-viewer {
     position: fixed;
     bottom: 0;
@@ -1036,7 +981,6 @@
     gap: 0.6rem;
   }
 
-  /* Toast centrato a schermo intero */
   .logistics-toast {
     left: 50% !important;
     transform: translate(-50%, -50%);
@@ -1044,7 +988,6 @@
   }
 }
 
-/* --- MODAL INDICAZIONI LOGISTICHE --- */
 .custom-viewer-modal .modal-content {
   background: rgba(26, 26, 29, 0.85) !important;
   backdrop-filter: blur(16px) !important;
@@ -1062,7 +1005,6 @@
   padding: 0 1.5rem 1.5rem 1.5rem !important;
 }
 
-/* Scatola interna del testo delle indicazioni */
 .logistics-text-container {
   background: rgba(255, 255, 255, 0.03) !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
@@ -1077,7 +1019,6 @@
   margin-bottom: 0 !important;
 }
 
-/* Stile uniforme per i pulsanti minimali dell'intestazione dell'opera */
 .btn-hero-minimal {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -1086,7 +1027,7 @@
   padding: 4px 15px;
   font-size: 0.8rem;
   backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px); /* Supporto per Safari */
+  -webkit-backdrop-filter: blur(5px);
   transition:
     background 0.2s ease,
     border-color 0.2s ease;
@@ -1129,19 +1070,16 @@
   font-size: 1rem !important;
 }
 
-/* Pulsante di chiusura (X) reso bianco e semi-trasparente */
 .museum-modal .btn-close {
   filter: invert(1) grayscale(1) brightness(2) !important;
   opacity: 0.6 !important;
 }
 
-/* Corpo del modal e allineamento testi */
 .museum-modal .modal-body {
   padding: 1.5rem !important;
   color: rgba(255, 255, 255, 0.9) !important;
 }
 
-/* Box interno per i dati tecnici (uguale a .logistics-text-container) */
 .details-text-container {
   background: rgba(255, 255, 255, 0.03) !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
@@ -1149,9 +1087,8 @@
   padding: 1.2rem !important;
 }
 
-/* Etichette dei metadati (es. "Artista:", "Stile:") */
 .details-text-container strong {
-  color: #e18f37 !important; /* Richiama l'arancione del brand */
+  color: #e18f37 !important; 
 }
 
 .details-text-container p {
@@ -1165,7 +1102,6 @@
   margin-bottom: 0 !important;
 }
 
-/* --- PULSANTI ASSISTENTE --- */
 .btn-museum-outline {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.15);

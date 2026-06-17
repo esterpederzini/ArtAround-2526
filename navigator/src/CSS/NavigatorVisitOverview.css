@@ -2,19 +2,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap");
 
-/* --- CONTAINER GENERALE --- */
 .full-container {
   min-height: 100vh;
   background-color: #242326;
-  /* Mantenuto il tuo colore */
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   padding-bottom: 10vh;
-  /* Spazio per non finire sotto eventuali menu */
 }
 
-/* --- LOGICA TIMELINE (Numeri e Linea) --- */
 .itinerary-row {
   cursor: pointer;
   transition: opacity 0.2s;
@@ -26,11 +22,8 @@
 
 .list-num-circle {
   background-color: #3a3a3c;
-  /* Grigio scuro per i passi non attivi */
   width: 10vw;
-  /* Responsive */
   height: 10vw;
-  /* Responsive */
   max-width: 40px;
   max-height: 40px;
   display: flex;
@@ -40,40 +33,31 @@
   font-weight: 400;
   color: white;
   border-radius: 50% !important;
-  /* Trasformati in tondi perfetti */
   z-index: 2;
   position: relative;
 }
 
-/* Classe per evidenziare il numero attivo/corrente */
 .list-num-circle.active {
   background-color: #e18f37;
-  /* Il tuo arancio */
 }
 
-/* La linea verticale che collega i numeri */
 .timeline-line {
   position: absolute;
   top: 47px;
-  /* Inizia sotto il cerchio */
   bottom: 10px;
-  /* Si allunga verso il basso */
   width: 2px;
   background-color: #3a3a3c;
   z-index: 1;
 }
 
-/* --- CARD ITINERARIO --- */
 .itinerary-card {
   background-color: #2c2c2e !important;
-  /* Leggermente più chiaro dello sfondo per profondità */
   border-radius: 15px !important;
   margin-left: 0.5rem;
   overflow: hidden;
   border: 1px solid #3a3a3c !important;
 }
 
-/* --- IMMAGINI --- */
 .img-list-new {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -81,7 +65,6 @@
   border-radius: 12px;
 }
 
-/* Mantenuta la tua originale per compatibilità */
 .img-list {
   width: 27vh !important;
   aspect-ratio: 1 / 1;
@@ -90,7 +73,6 @@
   display: block;
 }
 
-/* --- TESTI --- */
 .author {
   font-family: "Rubik", sans-serif;
   font-weight: 400;
@@ -106,7 +88,6 @@
   color: #e0e0e0 !important;
 }
 
-/* Nuove classi per testi più simili allo screenshot */
 .opera-title {
   color: #faf7f1 !important;
   font-weight: 700;
@@ -122,7 +103,6 @@
   align-items: center;
 }
 
-/* Header della sezione itinerario */
 .itinerary-header {
   padding-left: 1vw;
   margin-bottom: 2vh;
@@ -135,7 +115,6 @@
   font-size: 1.2rem;
 }
 
-/* --- TASTO START VISIT --- */
 .start-visit-btn {
   background-color: #e18f37 !important;
   border: none !important;
@@ -152,7 +131,6 @@
   background-color: #e18f37 !important;
 }
 
-/* Cerchio bianco intorno all'icona play */
 .play-icon-circle {
   background-color: white;
   color: #e18f37;
@@ -167,12 +145,8 @@
 .play-icon-circle i {
   font-size: 1.2rem;
   margin-left: 2px;
-  /* Allineamento ottico dell'icona play */
 }
 
-/* --- MODAL DI CONFERMA USCITA --- */
-
-/* Forza lo sfondo scuro trasparente e l'effetto sfocato sulla card del modal */
 .museum-modal-overview .modal-content {
   background: rgba(36, 35, 38, 0.8) !important;
   backdrop-filter: blur(12px) !important;
@@ -182,22 +156,19 @@
   padding: 1.5rem !important;
 }
 
-/* Corpo del modal */
 .museum-modal-content-overview {
-  background: transparent !important; /* Evita che il body sovrascriva lo sfondo */
+  background: transparent !important;
   text-align: center;
   color: #ffffff !important;
   padding: 0 !important;
 }
 
-/* Icona di esclamazione */
 .museum-modal-icon-overview {
   font-size: 3rem;
-  color: #e18f37; /* Il tuo arancione */
+  color: #e18f37;
   margin-bottom: 1rem;
 }
 
-/* Titolo del Modal */
 .museum-modal-title-overview {
   font-family: "Rubik", sans-serif;
   font-weight: 700;
@@ -206,7 +177,6 @@
   color: #ffffff !important;
 }
 
-/* Testo del Modal */
 .museum-modal-text-overview {
   font-family: "Rubik", sans-serif;
   font-size: 0.95rem;
@@ -214,14 +184,12 @@
   margin-bottom: 1.5rem;
 }
 
-/* Contenitore dei bottoni */
 .museum-modal-actions-overview {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-/* Bottone di Conferma Uscita */
 .btn-overview-confirm {
   background-color: #e18f37 !important;
   color: #ffffff !important;
@@ -236,7 +204,6 @@
   background-color: #c9792c !important;
 }
 
-/* Bottone Annulla */
 .btn-overview-cancel {
   background-color: transparent !important;
   color: rgba(255, 255, 255, 0.6) !important;
@@ -258,50 +225,41 @@
     0 0 0 6px rgba(225, 143, 55, 0.15);
 }
 
-/* Timeline line segment turns orange for completed segments */
 .timeline-line.reached {
   background-color: #e18f37;
 }
 
-/* --- TRASFORMAZIONI E ADATTAMENTO PC / TABLET --- */
-
-/* Wrapper per centrare e snellire il layout su PC */
 .content-wrapper {
   width: 100%;
   margin-left: auto;
   margin-right: auto;
 }
 
-/* DESKTOP MEDIA QUERY (Da tablet orizzontale / PC in su) */
 @media (min-width: 769px) {
   .content-wrapper {
-    max-width: 720px; /* Impedisce l'effetto ciccione limitando la larghezza del blocco */
+    max-width: 720px;
     padding-top: 1.5rem;
   }
 
-  /* Rimpiccioliamo proporzionalmente i cerchi numerici senza romperli */
   .list-num-circle {
     width: 2.5rem !important;
     height: 2.5rem !important;
     font-size: 0.95rem !important;
   }
 
-  /* Correzione millimetrica della linea verticale sotto il cerchio più piccolo */
   .timeline-line {
     top: 2.5rem;
   }
 
-  /* Rimpiccioliamo l'impatto visivo del bottone "Inizia visita" per non farlo sembrare un blocco gigante */
   .btn-container-desktop {
     max-width: 320px;
-    margin: 0 auto 2rem auto; /* Centrato con margine inferiore */
+    margin: 0 auto 2rem auto;
   }
 
   .start-visit-btn {
     padding: 12px 20px !important;
   }
 
-  /* Animazione elegante di rollover sulla card solo su PC */
   .itinerary-card {
     transition:
       transform 0.2s ease,
@@ -311,18 +269,12 @@
 
   .itinerary-card:hover {
     transform: translateX(6px);
-    border-color: rgba(
-      225,
-      143,
-      55,
-      0.4
-    ) !important; /* Illumina leggermente il bordo d'arancione */
-    background-color: #323235 !important; /* Schiarisce leggermente lo sfondo */
+    border-color: rgba(225, 143, 55, 0.4) !important;
+    background-color: #323235 !important;
   }
 
-  /* Compattiamo la colonna dell'immagine dentro la card su schermi larghi */
   .img-list-new {
-    max-width: 90px; /* Evita che l'immagine occupi troppo spazio orizzontale */
+    max-width: 90px;
     border-radius: 8px;
   }
 }
