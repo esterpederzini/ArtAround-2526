@@ -2310,78 +2310,76 @@
       "livello_base": "medio",
       "autore": "autore1",
       "pubblica": false,
-      "licenza": {
-        "tipo": "proprietario"
-      },
+      "licenza": { "tipo": "proprietario" },
       "info_generale": "Percorso personale di autore1. Accesso riservato.",
       "tappe": [
         {
           "ordine": 1,
           "operaId": "ME-001",
-          "logistica": "Inicia dalla Galleria dei Re: fermati davanti a Ramesse II.",
+          "logistica": "Entra dall'ingresso principale al piano terra, supera i tornelli e gira subito a destra. Cammina dritto fino in fondo alla galleria: la Statua di Ramesse II si trova al centro della sala.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 2,
           "operaId": "ME-004",
-          "logistica": "Raggiungi la Sfinge monumentale nella sala successiva.",
+          "logistica": "Dalla statua di Ramesse II, dai le spalle al trono e prendi il corridoio sulla tua sinistra. Oltrepassa l'arco di pietra: la Sfinge monumentale è sul lato destro della stanza.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 3,
           "operaId": "ME-009",
-          "logistica": "Sali al piano 1 e trova la Cappella di Maia.",
+          "logistica": "Torna indietro verso l'atrio principale e prendi la scala mobile per salire al Primo Piano. Appena arrivi in cima, svolta a sinistra, attraversa la prima porta a vetri e troverai la Cappella di Maia alla tua destra.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 4,
           "operaId": "ME-008",
-          "logistica": "Cerca l'Ostrakon della Ballerina nella stessa sala.",
+          "logistica": "Rimani all'interno della stessa sala. Spostati di tre passi verso la bacheca di vetro situata sul muro di sinistra: l'Ostrakon della Ballerina è esposto sul ripiano centrale.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 5,
           "operaId": "ME-005",
-          "logistica": "Fermati davanti al Libro dei Morti di Iuefankh.",
+          "logistica": "Esci dalla sala della cappella proseguendo dritto verso la galleria dei papiri. Costeggia la parete destra per circa 10 metri finché non incontri la lunga teca illuminata che contiene il Libro dei Morti di Iuefankh.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 6,
           "operaId": "ME-003",
-          "logistica": "Scendi al piano interrato: il Papiro dei Re ti aspetta.",
+          "logistica": "Adesso dobbiamo cambiare piano. Torna alle scale mobili centrali e scendi fino al piano interrato (-1). Svolta a destra all'altezza del guardaroba e segui il corridoio fino alla sala d'angolo: il Papiro dei Re si trova nella bacheca retroilluminata.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 7,
           "operaId": "ME-002",
-          "logistica": "Sali al piano 2: i sarcofagi di Kha e Merit ti attendono.",
+          "logistica": "Prendi l'ascensore vicino alla sala e clicca sul pulsante del Secondo Piano (Piano 2). All'uscita dell'ascensore, gira a sinistra ed entra nella grande sala della Tomba di Kha: i sarcofagi dorati sono posizionati esattamente al centro.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 8,
           "operaId": "ME-006",
-          "logistica": "Trova la Tela di Gebelein sullo stesso piano.",
+          "logistica": "Dai sarcofagi di Kha, prosegui dritto verso l'uscita posteriore della sala. Svolta subito a destra nel piccolo corridoio laterale; la Tela di Gebelein è protetta all'interno della prima teca verticale sulla sinistra.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 9,
           "operaId": "ME-010",
-          "logistica": "Pochi passi e sei davanti alla Tomba di Iti e Neferu.",
+          "logistica": "Fai dietrofront, torna nel corridoio principale e cammina dritto superando due sale espositive. Gira a sinistra all'altezza del cartello informativo: ti troverai direttamente all'interno della ricostruzione della Tomba di Iti e Neferu.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 10,
           "operaId": "ME-007",
-          "logistica": "Concludi davanti alle Mummie di Gebelein.",
+          "logistica": "Esci dalla Tomba di Iti, svolta a sinistra e percorri l'ultimo corridoio fino in fondo, prestando attenzione al gradino di passaggio. La Statua della Principessa Redit chiude il percorso nell'angolo destro della nicchia terminale.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         }
@@ -2406,70 +2404,70 @@
         {
           "ordine": 1,
           "operaId": "ME-005",
-          "logistica": "Comincia dal grande rotolo colorato: è il Libro dei Morti!",
+          "logistica": "Sali subito al Primo Piano usando la grande scala mobile. Appena arrivi in cima, gira a sinistra ed entra nella stanza con le luci soffuse: cammina dritto fino alla bacheca di vetro più lunga del muro per trovare il grande rotolo del Libro dei Morti!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 2,
           "operaId": "ME-009",
-          "logistica": "Entra nella piccola cappella coloratissima di Maia.",
+          "logistica": "Fai dietrofront e cammina verso il corridoio colorato che vedi sulla destra. Segui i disegni sul pavimento ed entra nella porticina sulla sinistra: sei dentro la piccola cappella coloratissima di Maia!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 3,
           "operaId": "ME-001",
-          "logistica": "Vai a salutare the grande re Ramesse II sul suo trono!",
+          "logistica": "Ora scendiamo di un piano! Prendi la scala mobile per tornare al Piano Terra, gira a destra ed entra nel salone gigante con le statue scure. Cammina fino al centro della stanza: vai a salutare il grande re Ramesse II sul suo trono!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 4,
           "operaId": "ME-006",
-          "logistica": "Trova la strana stoffa con i disegni: è la Tela di Gebelein!",
+          "logistica": "Fai un salto all'indietro e prendi l'ascensore vicino alla porta blindata. Clicca sul bottone del Secondo Piano! Quando si aprono le porte, vai a sinistra ed entra nella prima saletta: cerca la teca sul muro con la strana stoffa a disegni della Tela di Gebelein!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 5,
           "operaId": "ME-004",
-          "logistica": "Trova il leone con la testa di uomo: la Sfinge ti aspetta!",
+          "logistica": "Esci da questa stanza e torna indietro verso l'ascensore, ma superalo e vai dritto nella Galleria dei Re. Guarda a destra, vicino alla grande colonna: il leone con la testa di uomo, la Sfinge, ti aspetta proprio lì!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 6,
           "operaId": "ME-002",
-          "logistica": "Raggiungi le grandi casse dorate di Kha e Merit.",
+          "logistica": "Dalla Sfinge, fai dieci passi in avanti verso il centro esatto della stanza successiva. Cerca con gli occhi le luci più brillanti: raggiungi le grandi casse dorate e luccicanti di Kha e Merit!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 7,
           "operaId": "ME-008",
-          "logistica": "Cerca il sassolino con la ballerina disegnata sopra!",
+          "logistica": "Girati a sinistra e cammina verso la parete piena di piccoli oggetti. Guarda in basso nel secondo ripiano della vetrina numero 4: cerca il sassolino con la ballerina disegnata sopra!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 8,
           "operaId": "ME-007",
-          "logistica": "Ecco le antichissime mummie di Gebelein: sembrano dormire!",
+          "logistica": "Prosegui dritto superando la vetrina della ballerina e gira subito l'angolo a destra. In fondo alla nicchia illuminata, troverai una teca speciale: ecco le antichissime mummie di Gebelein che sembrano dormire!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 9,
           "operaId": "ME-003",
-          "logistica": "Trova il lunghissimo papiro con i nomi dei re!",
+          "logistica": "Adesso facciamo un lungo viaggio in basso! Prendi le scale mobili e scendi fino al Piano Interrato (-1). Svolta a sinistra superando i bagni e cammina fino alla fine del corridoio: troverai il lunghissimo papiro con i nomi dei re all'interno della teca orizzontale!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 10,
           "operaId": "ME-010",
-          "logistica": "Concludi davanti alle pitture vivaci della Tomba di Iti e Neferu!",
+          "logistica": "Torna indietro di pochi passi lungo il corridoio e gira a sinistra dentro la grande sala quadrata. Cammina dritto verso le pareti decorate: concludi il tuo viaggio davanti alle pitture vivaci della Tomba di Iti e Neferu!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         }
@@ -2486,78 +2484,76 @@
       "livello_base": "avanzato",
       "autore": "museo",
       "pubblica": true,
-      "licenza": {
-        "tipo": "CC-BY"
-      },
+      "licenza": { "tipo": "CC-BY" },
       "info_generale": "Percorso istituzionale del Museo Egizio. Prenotazione consigliata. Guardaroba gratuito al piano interrato.",
       "tappe": [
         {
           "ordine": 1,
           "operaId": "ME-004",
-          "logistica": "Il percorso inizia dall'androsfinge monumentale al piano terra.",
+          "logistica": "Il percorso comincia nell'atrio monumentale del piano terra. Superati i controlli di sicurezza, procedete dritti superando la scalinata e svoltate a sinistra: l'androsfinge vi accoglie all'ingresso della prima galleria.",
           "linguaggio_default": "avanzato",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 2,
           "operaId": "ME-001",
-          "logistica": "Proseguite verso il simulacro in diorite di Ramesse II.",
+          "logistica": "Dall'androsfinge, avanzate lungo la navata centrale della Galleria dei Re per circa quindici metri. Il maestoso simulacro in diorite di Ramesse II si erge sul podio centrale, visibile sul lato sinistro della corsia.",
           "linguaggio_default": "avanzato",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 3,
           "operaId": "ME-003",
-          "logistica": "Scendete al piano interrato per il Canone Reale di Torino.",
+          "logistica": "Voltatevi di 180 gradi rispetto all'opera precedente e dirigetevi verso l'estremità opposta della sala. Utilizzate la scala di servizio o l'ascensore per scendere al livello ipogeo (Piano -1). Il Canone Reale di Torino è custodito nella prima sala espositiva a sinistra.",
           "linguaggio_default": "avanzato",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 4,
           "operaId": "ME-005",
-          "logistica": "Salite al piano 1: il Libro dei Morti di Iuefankh vi attende.",
+          "logistica": "Ritornate al blocco ascensori e selezionate il Primo Piano (Piano 1). All'uscita, superate la porta blindata a sinistra e camminate lungo il corridoio principale. Il Libro dei Morti di Iuefankh si sviluppa lungo la grande teca lineare sulla parete di fondo.",
           "linguaggio_default": "avanzato",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 5,
           "operaId": "ME-008",
-          "logistica": "Esaminate l'Ostrakon della Ballerina nella stessa sala.",
+          "logistica": "Senza abbandonare l'ambiente espositivo corrente, ruotate verso destra. L'Ostrakon della Ballerina è collocato all'interno della vetrina isolata posizionata sul lato opposto rispetto al papiro.",
           "linguaggio_default": "avanzato",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 6,
           "operaId": "ME-009",
-          "logistica": "Raggiungete la Cappella funeraria di Maia.",
+          "logistica": "Uscite dalla sala svoltando a sinistra nel corridoio di raccordo e avanzate fino all'indicazione 'Necropoli Tebe'. La Cappella funeraria di Maia si trova immediatamente alla vostra destra, accessibile tramite l'apertura protetta.",
           "linguaggio_default": "avanzato",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 7,
           "operaId": "ME-002",
-          "logistica": "Salite al piano 2: esaminate i sarcofagi di Kha e Merit.",
+          "logistica": "Uscite dalla struttura della cappella, svoltate a destra e raggiungete le scale mobili principali per salire al Secondo Piano (Piano 2). Immettetevi nella galleria centrale svoltando a sinistra: i sarcofagi di Kha e Merit occupano lo spazio centrale della sala d'onore.",
           "linguaggio_default": "avanzato",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 8,
           "operaId": "ME-006",
-          "logistica": "Analizzate la Tela di Gebelein, il più antico tessuto dipinto noto.",
+          "logistica": "Dai sarcofagi di Kha, avanzate verso la fine della sala e imboccate l'uscita sul lato sinistro. Procedete lungo il camminamento protetto: la Tela di Gebelein è esposta all'interno della prima bacheca a muro climatizzata sulla destra.",
           "linguaggio_default": "avanzato",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 9,
           "operaId": "ME-010",
-          "logistica": "Proseguite verso il ciclo pittorico della Tomba di Iti e Neferu.",
+          "logistica": "Continuate lungo il percorso obbligato, superando l'arco di transizione e svoltando a destra all'altezza della seconda arcata. Sarete guidati direttamente all'interno del vano che ospita il ciclo pittorico della Tomba di Iti e Neferu.",
           "linguaggio_default": "avanzato",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 10,
           "operaId": "ME-007",
-          "logistica": "Conclusione del percorso davanti alle Mummie predinastiche di Gebelein.",
+          "logistica": "Oltrepassate l'uscita della tomba di Iti, svoltate immediatamente a sinistra e percorri l'ultimo rettilineo espositivo. La statua in granodiorite della Principessa Redit conclude l'itinerario, posizionata nella nicchia monumentale di fronte all'uscita di sicurezza.",
           "linguaggio_default": "avanzato",
           "lunghezza_default": "15s"
         }
@@ -2582,70 +2578,70 @@
         {
           "ordine": 1,
           "operaId": "ME-001",
-          "logistica": "Benvenuti! Cercate il grande re seduto: è Ramesse II!",
+          "logistica": "Benvenuti al museo! Entrate dall'ingresso principale al Piano Terra, passate i controlli e andate dritti fino in fondo al corridoio delle grandi statue scure. Guardate a sinistra: cercate il grande re seduto sul suo trono, è Ramesse II!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 2,
           "operaId": "ME-004",
-          "logistica": "Trovate il guardiano con il corpo di leone: la Sfinge!",
+          "logistica": "Giratevi di spalle rispetto a Ramesse II e camminate verso la parete di sinistra. Attraversate la porta ad arco ed entrate nella sala successiva: proprio vicino all'ingresso, trovate il guardiano con il corpo di leone e la testa di uomo, la Sfinge!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 3,
           "operaId": "ME-007",
-          "logistica": "Venite a vedere le mummie più antiche del mondo!",
+          "logistica": "Adesso prendete l'ascensore vicino alla porta blindata e salite fino al Secondo Piano (Piano 2). Quando uscite, girate a sinistra, camminate dritti superando i primi pannelli e guardate nella nicchia in fondo a destra: venite a vedere la statua della Principessa Redit!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 4,
           "operaId": "ME-006",
-          "logistica": "Guardate questa strana stoffa con i disegni antichissimi!",
+          "logistica": "Dalla statua della principessa, fate pochi passi indietro ed entrate nella porticina che vedete sulla sinistra. Avvicinatevi alla vetrina di vetro posizionata sul muro lungo: guardate questa strana stoffa con i disegni antichissimi della Tela di Gebelein!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 5,
           "operaId": "ME-002",
-          "logistica": "Ecco le grandi scatole dorate di Kha e Merit!",
+          "logistica": "Esci dalla saletta della tela, gira a sinistra e cammina dritto fino ad entrare nel grande salone centrale illuminato. Vai proprio al centro della stanza, dove ci sono le luci più forti: ecco le grandi scatole dorate e luccicanti di Kha e Merit!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 6,
           "operaId": "ME-009",
-          "logistica": "Entrate nella cappella coloratissima di Maia.",
+          "logistica": "Ora scendiamo di un piano! Prendi la scala mobile e scendi al Primo Piano (Piano 1). Appena arrivi, gira a sinistra, attraversa il corridoio e segui le indicazioni per la sala delle tombe: entra nella cappella coloratissima di Maia!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 7,
           "operaId": "ME-008",
-          "logistica": "Cercate il sassolino con la ballerina: l'Ostrakon!",
+          "logistica": "Esci dalla cappella di Maia e rimani nella stessa grande sala. Cammina verso la parete opposta e cerca la vetrina con i piccoli reperti di pietra. Guarda nel ripiano di mezzo: cercate il sassolino con la ballerina disegnata sopra, l'Ostrakon!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 8,
           "operaId": "ME-005",
-          "logistica": "Trovate il lunghissimo rotolo dei segreti: il Libro dei Morti!",
+          "logistica": "Girati a sinistra e segui la bacheca di vetro che corre lungo tutto il muro della stanza. Spostati verso la fine della vetrina: trovate il lunghissimo rotolo pieno di disegni e segreti magici, il Libro dei Morti!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 9,
           "operaId": "ME-003",
-          "logistica": "Trovate il quaderno magico con i nomi di tutti i re!",
+          "logistica": "Facciamo un salto in basso! Torna alle scale mobili centrali e scendi fino al Piano Interrato (-1). Svolta subito a destra all'altezza del guardaroba dei passeggini e segui il corridoio dritto fino in fondo: trovate il quaderno magico di papiro con i nomi di tutti i re!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 10,
           "operaId": "ME-010",
-          "logistica": "Concludete davanti alle pitture vivaci della Tomba di Iti e Neferu!",
+          "logistica": "Torna indietro lungo il corridoio per qualche metro e gira a destra nella sala quadrata con le luci calde. Cammina verso le pareti dipinte di giallo e marrone: concludete il percorso davanti alle pitture vivaci della Tomba di Iti e Neferu!",
           "linguaggio_default": "infantile",
           "lunghezza_default": "15s"
         }
@@ -2670,70 +2666,70 @@
         {
           "ordine": 1,
           "operaId": "ME-003",
-          "logistica": "Iniziate dalla sala dei papiri: il Canone di Torino è il documento più prezioso.",
+          "logistica": "Il percorso comincia al Piano Interrato (-1). Superate la biglietteria e svoltate subito a destra seguendo i cartelli per la sala dei manoscritti. Il Canone di Torino si trova esposto all'interno della bacheca centrale retroilluminata.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 2,
           "operaId": "ME-010",
-          "logistica": "Salite al piano 2 verso la Tomba di Iti e Neferu.",
+          "logistica": "Uscite dalla sala dei papiri e prendete l'ascensore principale per salire direttamente al Secondo Piano (Piano 2). All'uscita, svoltate a sinistra, oltrepassate il corridoio principale ed entrate nella prima sala quadrata sulla destra per accedere alla Tomba di Iti e Neferu.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 3,
           "operaId": "ME-006",
-          "logistica": "Fermatevi davanti alla Tela di Gebelein.",
+          "logistica": "Uscite dalla struttura della Tomba di Iti, svoltate a destra e prendete il corridoio laterale imboccando la prima porta a vetri a sinistra. Fermatevi davanti alla vetrina verticale climatizzata: siete di fronte alla Tela di Gebelein.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 4,
           "operaId": "ME-002",
-          "logistica": "Spostatevi verso i sarcofagi di Kha e Merit.",
+          "logistica": "Fai dietrofront, rientrate nel corridoio principale e avanzate dritti fino a immettervi nel grande salone monumentale del piano. Spostatevi verso il centro esatto della stanza: i grandi sarcofagi dorati di Kha e Merit sono posizionati sulla pedana rialzata.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 5,
           "operaId": "ME-007",
-          "logistica": "Avvicinatevi alle antiche mummie naturali di Gebelein.",
+          "logistica": "Dai sarcofagi di Kha, proseguite dritto verso il fondo della sala superando i pannelli espositivi intermedi. Svoltate a destra nella nicchia terminale e avvicinatevi alla vetrina ad angolo che ospita la statua in pietra scura della Principessa Redit.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 6,
           "operaId": "ME-001",
-          "logistica": "Scendete al piano terra verso la maestosa statua di Ramesse II.",
+          "logistica": "Adesso scendiamo di due livelli. Ritornate verso il blocco scale mobili centrali e scendete fino al Piano Terra (Piano 0). Svoltate a destra ed entrate nella monumentale Galleria dei Re: la maestosa statua di Ramesse II si trova al centro della galleria.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 7,
           "operaId": "ME-004",
-          "logistica": "Fermatevi davanti all'androsfinge: simbolo di protezione e potere.",
+          "logistica": "Voltate le spalle alla statua di Ramesse II e camminate verso l'uscita posteriore della galleria. Attraversate l'arcata che porta alla sala adiacente e guardate immediatamente alla vostra sinistra: fermatevi davanti alla scultura dell'androsfinge.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 8,
           "operaId": "ME-009",
-          "logistica": "Salite al piano 1 per la Cappella funeraria di Maia.",
+          "logistica": "Tornate verso l'atrio dei tornelli e prendete la scala mobile per salire al Primo Piano (Piano 1). Giunti in cima, svoltate a sinistra ed entrate nella prima sala dedicata alle necropoli tebane: la Cappella funeraria di Maia si trova sulla destra.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 9,
           "operaId": "ME-008",
-          "logistica": "Osservate l'Ostrakon della Ballerina nella stessa sala.",
+          "logistica": "Uscite dalla cappella di Maia restando all'interno dello stesso salone espositivo. Spostatevi verso il lato sinistro della stanza e osservate le piccole teche dedicate agli oggetti quotidiani degli artigiani: l'Ostrakon della Ballerina è esposto nella bacheca centrale.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         },
         {
           "ordine": 10,
           "operaId": "ME-005",
-          "logistica": "Chiudete il percorso davanti al Libro dei Morti di Iuefankh.",
+          "logistica": "Dalla teca dell'ostrakon, ruotate verso destra e costeggiate il grande espositore di vetro che occupa l'intera lunghezza del muro laterale della sala. Chiudete il percorso esaminando i fogli di papiro del Libro dei Morti di Iuefankh.",
           "linguaggio_default": "medio",
           "lunghezza_default": "15s"
         }
