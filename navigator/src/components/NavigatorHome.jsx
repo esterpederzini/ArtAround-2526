@@ -10,13 +10,11 @@ const NavigatorHome = () => {
   const [config, setConfig] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // UNICO STATO NECCESSARIO: controlla l'apertura del file login importato
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [heroImageReady, setHeroImageReady] = useState(false);
 
   const navigate = useNavigate();
 
-  // ─── GESTIONE AUTENTICAZIONE CONDIVISA ───────────────────
   const token =
     localStorage.getItem("aa_token") ||
     JSON.parse(localStorage.getItem("user_session") || "{}")?.token;
@@ -85,8 +83,6 @@ const NavigatorHome = () => {
     config?.defaultCardImage ||
     "/img/default_item_image.jpg";
 
-  // Precarica l'immagine hero in memoria prima di applicarla allo sfondo,
-  // così non appare mai il fallback per un frame
   useEffect(() => {
     if (!config) return;
     const url = config.heroImage || config.defaultCardImage;
@@ -110,7 +106,6 @@ const NavigatorHome = () => {
         onClose={() => setSidebarOpen(false)}
       />
 
-      {/* HEADER PRINCIPALE CON CENTRATURA ASSOLUTA */}
       <header
         className="home-header d-flex align-items-center px-3"
         style={{ position: "relative" }}
@@ -144,7 +139,7 @@ const NavigatorHome = () => {
                 padding: "4px 12px",
                 whiteSpace: "nowrap",
               }}
-              onClick={() => setIsLoginOpen(true)} // <-- CAMERA LO STATO LOCALE PER APRIRE IL MODAL IMPORTATO
+              onClick={() => setIsLoginOpen(true)} 
             >
               Accedi
             </button>
@@ -225,8 +220,6 @@ const NavigatorHome = () => {
           )}
         </div>
       </section>
-
-      {/* ─── 🏛️ COMPONENTE LOGIN REALE UTILIZZATO COME MODAL ─── */}
       <NavigatorLogin
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}

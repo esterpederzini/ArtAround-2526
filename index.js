@@ -49,10 +49,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 1. ROTTE API (Sempre per prime)
 app.use("/api", apiRouter);
 
-// In index.js hai già questo, assicurati che il file config.json esista:
 app.get("/api/config", (req, res) => {
   const configPath = path.join(__dirname, "config.json");
   if (fs.existsSync(configPath)) {

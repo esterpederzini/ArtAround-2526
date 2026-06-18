@@ -4,8 +4,6 @@ import { useNavigate } from "react-router-dom";
 
 export default function FloorMap({ config, currentItem }) {
   const navigate = useNavigate();
-
-  // Funzione per trovare le coordinate cliccando sulla mappa
   const handleMapClick = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;

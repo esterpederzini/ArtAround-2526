@@ -73,7 +73,6 @@ export default function NavigatorItemViewer() {
     }
   }, [safeIndex, id]);
 
-  // ---------- LOGISTICS ----------
   const handleLogistics = (msg) => {
     if (!msg) return;
 
@@ -157,7 +156,6 @@ export default function NavigatorItemViewer() {
       );
   }, [currentItem]);
 
-  // ---------- FETCH INIZIALE ----------
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
@@ -170,7 +168,6 @@ export default function NavigatorItemViewer() {
       })
       .catch(() => {});
 
-    // Recupera la visita corrente
     fetch(`/api/visite/${id}`)
       .then((res) => res.json())
       .then(async (json) => {
@@ -822,7 +819,7 @@ export default function NavigatorItemViewer() {
         </Container>
       </div>
 
-      {/* TOAST LOGISTICA */}
+      {/*LOGISTICA */}
       {logisticsMsg && (
         <div className="logistics-toast">
           <i className="bi bi-info-circle-fill me-2"></i>
@@ -1191,7 +1188,7 @@ export default function NavigatorItemViewer() {
             />
             {currentItem &&
               (() => {
-                // Il pallino rosso usa sempre l'item corrente visualizzato a schermo caricate dal server
+            
                 const currentFloor =
                   currentItem?.piano !== undefined
                     ? String(currentItem.piano)
@@ -1229,34 +1226,24 @@ export default function NavigatorItemViewer() {
           <div className="px-3 py-2" style={{ background: "#1a1a1a" }}>
             {visit?.tappe?.map((tappa, idx) => {
               const dbItem = tappa.item_default;
-
-              // 1. Identifica l'operaId in modo ibrido (da stringa manuale o da oggetto DB)
               const rowOperaId =
                 tappa.operaId?.operaId || tappa.operaId || dbItem?.operaId;
 
-              // 2. Cerca comunque nel file di configurazione per i percorsi pre-popolati
               const configArtwork =
                 museumConfig?.posizione_opere?.find(
                   (o) => String(o.operaId) === String(rowOperaId),
                 ) || {};
-
-              // 3. Estrazione Sicura del Piano: priorità al DB, fallback sul config se è un JSON manuale
               const rowFloor =
                 dbItem?.piano !== undefined
                   ? String(dbItem.piano)
                   : configArtwork.piano || "0";
-
-              // 4. Estrazione Sicura del Titolo: priorità al DB, altrimenti usa l'anagrafica ufficiale
               const rowTitle =
                 dbItem?.titoloOpera ||
                 dbItem?.titolo ||
                 configArtwork.titoloOpera ||
                 `Tappa ${idx + 1}`;
 
-              // Filtra l'elenco testuale in base al piano della mappa selezionato
               if (String(rowFloor) !== String(selectedMapFloor)) return null;
-
-              // L'evidenziazione gialla si attiva se l'operaId coincide con l'item attivo nel Navigator
               const isCurrent =
                 currentItem &&
                 rowOperaId &&
@@ -1412,7 +1399,7 @@ export default function NavigatorItemViewer() {
         </Modal.Body>
       </Modal>
 
-      {/* MODAL DELLE INDICAZIONI LOGISTICHE */}
+      {/* MODAL INDICAZIONI LOGISTICHE */}
       <Modal
         show={showLogisticsModal}
         onHide={() => setShowLogisticsModal(false)}

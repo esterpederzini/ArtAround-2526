@@ -17,7 +17,7 @@ function NavigatorVisitOverview() {
   const navigate = useNavigate();
 
   const [visit, setVisit] = useState(null);
-  const [allItems, setAllItems] = useState([]); // Database di ripiego client-side per proteggere i testi
+  const [allItems, setAllItems] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [showExitModal, setShowExitModal] = useState(false);
 
@@ -36,7 +36,6 @@ function NavigatorVisitOverview() {
     let isMounted = true;
     setLoading(true);
 
-    // Scarichiamo prima il catalogo degli item per avere un fallback sicuro sui testi delle opere
     fetch("/api/items?limite=200")
       .then((res) => res.json())
       .then((itemsJson) => {
@@ -46,7 +45,6 @@ function NavigatorVisitOverview() {
       })
       .catch((err) => console.error("Errore recupero catalogo fallback:", err));
 
-    // Carichiamo la visita corrente
     fetch(`/api/visite/${id}`)
       .then((res) => res.json())
       .then((json) => {
@@ -160,8 +158,6 @@ function NavigatorVisitOverview() {
 
           {visit.tappe &&
             visit.tappe.map((tappa, index) => {
-              // 🏛️ STRATEGIA DI RECOVERY DIFENSIVA SUI METADATI DELLE OPERE
-              // Se item_default è un oggetto popolato lo usiamo, altrimenti cerchiamo per operaId nel catalogo globale
               let opera = {};
               if (
                 tappa.item_default &&
@@ -188,13 +184,12 @@ function NavigatorVisitOverview() {
                 opera.titolo ||
                 `Tappa dell'opera ${tappa.operaId || index + 1}`;
 
-              // Controllo a cascata robusto su ogni possibile variante di nome del campo
               const urlImmagine =
                 tappa.item_default?.immagine ||
                 tappa.item_default?.url ||
                 opera.immagine ||
                 opera.url ||
-                "/img/default_item_image.jpg"; // Fallback coerente con l'editor visita e item
+                "/img/default_item_image.jpg"; 
 
               const stringaDurata = opera.durata_reale
                 ? `${opera.durata_reale}s`

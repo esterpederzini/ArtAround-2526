@@ -13,7 +13,6 @@ const NavigatorLogin = ({ isOpen, onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
-  // Se la prop isOpen è false, il componente si smonta e non occupa spazio
   if (!isOpen) return null;
 
   const handleLogin = async (e) => {
@@ -53,12 +52,10 @@ const NavigatorLogin = ({ isOpen, onClose }) => {
 
   return (
     <div className="navigator-modal-overlay" onClick={onClose}>
-      {/* stopPropagation evita che il modal si chiuda cliccando al suo interno */}
       <div
         className="navigator-modal-card"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header del Modal */}
         <div className="navigator-modal-header d-flex justify-content-between align-items-center">
           <h4 className="m-0 d-flex align-items-center">
             <FontAwesomeIcon
@@ -76,10 +73,8 @@ const NavigatorLogin = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* Form di Accesso */}
         <form onSubmit={handleLogin}>
           <div className="navigator-modal-body">
-            {/* Campo Username */}
             <div className="login-modal-field">
               <label htmlFor="modal-identifier">Username</label>
               <input
@@ -93,7 +88,6 @@ const NavigatorLogin = ({ isOpen, onClose }) => {
               />
             </div>
 
-            {/* Campo Password */}
             <div className="login-modal-field">
               <label htmlFor="modal-password">Password</label>
               <div className="password-input-wrapper">
@@ -117,8 +111,6 @@ const NavigatorLogin = ({ isOpen, onClose }) => {
 
             {error && <p className="modal-error-msg">⚠️ {error}</p>}
           </div>
-
-          {/* Footer Azioni */}
           <div className="navigator-modal-footer d-flex justify-content-end gap-2">
             <button
               type="button"

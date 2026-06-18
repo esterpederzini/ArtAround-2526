@@ -1,12 +1,11 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import "../CSS/NavigatorHome.css"; // Riutilizziamo le classi della Sidebar nativa
+import "../CSS/NavigatorHome.css"; 
 
 const NavigatorSideBar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ── GESTIONE AUTENTICAZIONE CONDIVISA ──
   const token =
     localStorage.getItem("aa_token") ||
     JSON.parse(localStorage.getItem("user_session") || "{}")?.token;
@@ -19,7 +18,7 @@ const NavigatorSideBar = ({ isOpen, onClose }) => {
   const userName = isLoggato ? utenteObj?.username || "Utente" : null;
 
   const handleNav = (path) => {
-    onClose(); // Chiude la sidebar prima di navigare
+    onClose(); 
     if (path === "/marketplace") {
       window.location.replace(window.location.origin + "/");
     } else {
@@ -37,13 +36,10 @@ const NavigatorSideBar = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Sfondo scuro che si attiva quando la barra è aperta */}
       <div
         className={`sidebar-overlay ${isOpen ? "visible" : ""}`}
         onClick={onClose}
       />
-
-      {/* Pannello Laterale della Sidebar */}
       <aside className={`side-bar ${isOpen ? "open" : ""}`}>
         <div className="side-bar-header">
           <div className="profile-thumb">
@@ -77,8 +73,6 @@ const NavigatorSideBar = ({ isOpen, onClose }) => {
               <span>Le mie Visite</span>
             </div>
           )}
-
-          {/* Voce Marketplace */}
           <div
             className="side-nav-item"
             onClick={() => handleNav("/marketplace")}
@@ -87,8 +81,6 @@ const NavigatorSideBar = ({ isOpen, onClose }) => {
             <span>Marketplace</span>
           </div>
         </nav>
-
-        {/* Footer Sidebar per il Logout */}
         <div className="side-bar-footer">
           {isLoggato && (
             <button

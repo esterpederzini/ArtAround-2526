@@ -9,7 +9,6 @@ const NavigatorLibrary = () => {
   const [config, setConfig] = useState(null);
   const navigate = useNavigate();
 
-  // Recupero sessione condivisa
   const token =
     localStorage.getItem("aa_token") ||
     JSON.parse(localStorage.getItem("user_session") || "{}")?.token;
@@ -28,14 +27,10 @@ const NavigatorLibrary = () => {
       .then((res) => res.json())
       .then((data) => setConfig(data))
       .catch((err) => console.warn("Config non trovato:", err));
-
-    // Carichiamo le visite e filtriamo basandoci su logAdozioni (ID utente)
     if (isLoggato && utenteStabileId) {
-      // Usiamo lo stesso parametro query del Marketplace per chiedere al server le tue visite
       fetch("/api/visite?soloMie=true&limite=100")
         .then((res) => res.json())
         .then((json) => {
-          // Legge le visite sia se l'API risponde con un oggetto diretto che se usa json.data
           const tutteLeVisite =
             json.visite ||
             (json.successo && json.data?.visite) ||
@@ -44,7 +39,6 @@ const NavigatorLibrary = () => {
 
           if (Array.isArray(tutteLeVisite)) {
             const mieVisiteFiltrate = tutteLeVisite.filter((visita) => {
-              // 1. Controlliamo se sei il creatore/autore originario della visita
               const autoreId =
                 visita.autore ||
                 visita.userId ||
@@ -55,8 +49,6 @@ const NavigatorLibrary = () => {
                 (autoreId === utenteObj.username ||
                   autoreId === utenteObj._id ||
                   autoreId === utenteObj.id);
-
-              // 2. SINCRO MARKETPLACE: Controlliamo se il tuo ID è dentro l'array logAdozioni
               const eAdottataOAcquistata =
                 Array.isArray(visita.logAdozioni) &&
                 visita.logAdozioni.some((log) => {
@@ -65,7 +57,7 @@ const NavigatorLibrary = () => {
                   return utenteObj && idAdottante === utenteObj._id;
                 });
 
-              // REGOLA HARD SULLE VISITE PRIVATE: Se è privata ma non l'hai adottata e non sei il creatore, la scartiamo
+             
               if (
                 visita.pubblica === false &&
                 !eCreatore &&
@@ -74,7 +66,6 @@ const NavigatorLibrary = () => {
                 return false;
               }
 
-              // La visita deve comparire in Libreria se l'hai adottata/acquistata dal Marketplace o se l'hai creata tu
               return eAdottataOAcquistata || eCreatore;
             });
 
@@ -112,7 +103,6 @@ const NavigatorLibrary = () => {
         onClose={() => setSidebarOpen(false)}
       />
 
-      {/* HEADER PRINCIPALE */}
       <header
         className="home-header d-flex align-items-center px-3"
         style={{ position: "relative" }}
@@ -130,7 +120,6 @@ const NavigatorLibrary = () => {
         <div style={{ width: "80px" }}></div>
       </header>
 
-      {/* CORPO DELLA PAGINA CONTROLLATO */}
       <section
         className="visits-section"
         style={{ paddingTop: "2rem", minHeight: "60vh" }}

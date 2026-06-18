@@ -4,16 +4,12 @@
   position: relative;
   width: 100vw;
   height: 100vh;
-  overflow: hidden; /* Fondamentale per nascondere le icone fuori schermo */
+  overflow: hidden;
   background: linear-gradient(
     90deg,
     hsla(40, 63%, 85%, 1) 0%,
     hsla(22, 94%, 79%, 1) 100%
   );
-  /* background-image: url("./Img/bg-intro.jpg");
-  background-size: cover; 
-  background-position: center; 
-  background-repeat: no-repeat; */
 }
 
 .bounce-text {

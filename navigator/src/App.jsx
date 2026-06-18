@@ -10,11 +10,9 @@ import NavigatorLibrary from "./components/NavigatorLibrary";
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
-  // 1. Initialize showIntro by checking if the session flag already exists
   const [showIntro, setShowIntro] = useState(() => {
     const hasSeenIntro = sessionStorage.getItem("artaround_intro_seen");
-    return !hasSeenIntro; // If it doesn't exist, returns true (shows intro)
+    return !hasSeenIntro; 
   });
 
   useEffect(() => {
@@ -27,7 +25,6 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // 2. If the intro needs to be shown, start the timer and save the state in the session
     if (showIntro) {
       const timer = setTimeout(() => {
         sessionStorage.setItem("artaround_intro_seen", "true");
