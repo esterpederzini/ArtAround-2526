@@ -1,10 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════
-   ArtAround – Custom Design System
-   Palette: Grigio Ardesia · Tortora · Bianco Panna · Ombreggiature
-   ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Palette primaria */
   --aa-cream: #faf8f5;
   --aa-cream-dark: #f2ede7;
   --aa-stone: #e8e0d5;
@@ -14,21 +9,15 @@
   --aa-slate-dark: #4a5568;
   --aa-charcoal: #2d3748;
   --aa-ink: #1a202c;
-
-  /* Accenti */
   --aa-gold: #b8962e;
   --aa-gold-light: #d4af5a;
   --aa-gold-pale: #f0e6c8;
   --aa-terracotta: #a0522d;
   --aa-sage: #6b7c6e;
-
-  /* Funzionali */
   --aa-success: #4a7c59;
   --aa-warning: #b8962e;
   --aa-danger: #9b4444;
   --aa-info: #4a6b8a;
-
-  /* Ombre */
   --aa-shadow-sm:
     0 1px 3px rgba(45, 55, 72, 0.08), 0 1px 2px rgba(45, 55, 72, 0.04);
   --aa-shadow-md:
@@ -36,19 +25,13 @@
   --aa-shadow-lg:
     0 10px 30px rgba(45, 55, 72, 0.12), 0 4px 8px rgba(45, 55, 72, 0.06);
   --aa-shadow-xl: 0 20px 50px rgba(45, 55, 72, 0.15);
-
-  /* Raggio */
   --aa-radius-sm: 6px;
   --aa-radius-md: 10px;
   --aa-radius-lg: 16px;
   --aa-radius-xl: 24px;
-
-  /* Tipografia */
   --aa-font-serif: "Garamond", "Georgia", serif;
   --aa-font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
   --aa-font-mono: "JetBrains Mono", "Fira Code", monospace;
-
-  /* Override Bootstrap */
   --bs-primary: #4a5568;
   --bs-primary-rgb: 74, 85, 104;
   --bs-body-bg: #faf8f5;
@@ -57,7 +40,6 @@
   --bs-border-radius: 10px;
 }
 
-/* ─── BASE ─────────────────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -107,7 +89,6 @@ a:hover {
   flex-direction: column !important;
 }
 
-/* ─── NAVBAR ───────────────────────────────────────────────── */
 .aa-navbar {
   background: var(--aa-ink) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -154,7 +135,6 @@ a:hover {
   color: var(--aa-ink) !important;
 }
 
-/* ─── HERO ─────────────────────────────────────────────────── */
 .aa-hero {
   background: linear-gradient(
     135deg,
@@ -209,7 +189,6 @@ a:hover {
   margin-bottom: 16px;
 }
 
-/* ─── CARDS ────────────────────────────────────────────────── */
 .aa-card {
   background: #ffffff;
   border: 1px solid var(--aa-stone);
@@ -238,15 +217,12 @@ a:hover {
   padding: 1.25rem;
 }
 
-/* Card item catalogo */
 .aa-item-card {
 border: 1px solid var(--aa-stone) !important;
   border-radius: var(--aa-radius-md) !important;
   background: #fff !important;
   box-shadow: var(--aa-shadow-sm) !important;
   transition: all 0.2s !important;
-  
-  /* Struttura interna Flexbox tridimensionale */
   display: flex !important;
   flex-direction: column !important;
   width: 100% !important;
@@ -262,8 +238,8 @@ border: 1px solid var(--aa-stone) !important;
 .aa-item-card .card-img-top {
   width: 100% !important;
   height: 160px !important;
-  object-fit: contain !important; /* Mantiene le proporzioni native adagiando l'opera dentro la card */
-  background-color: var(--aa-cream-dark) !important; /* Sfondo neutro per riempire le bande laterali vuote dell'opera */
+  object-fit: contain !important; 
+  background-color: var(--aa-cream-dark) !important; 
   border-bottom: 1px solid var(--aa-stone) !important;
   padding: 6px !important;
 }
@@ -310,13 +286,12 @@ font-size: 0.8rem !important;
 background: none !important;
   border-top: 1px solid var(--aa-stone) !important;
   padding: 0.7rem 1rem !important;
-  margin-top: auto !important; /* Calcola lo spazio residuo e si incolla alla base della card */
+  margin-top: auto !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
 }
 
-/* ─── BADGE & TAGS ─────────────────────────────────────────── */
 .aa-badge {
   display: inline-flex;
   align-items: center;
@@ -370,7 +345,6 @@ background: none !important;
   font-weight: 600;
 }
 
-/* ─── MUSEO SELECTOR ───────────────────────────────────────── */
 .aa-museo-card {
   border: 2px solid var(--aa-stone);
   border-radius: var(--aa-radius-lg);
@@ -427,7 +401,6 @@ background: none !important;
   font-size: 0.8rem;
 }
 
-/* ─── VISITA CARD ──────────────────────────────────────────── */
 .aa-visita-card {
 border: 1px solid var(--aa-stone) !important;
   border-radius: var(--aa-radius-lg) !important;
@@ -493,11 +466,10 @@ border: 1px solid var(--aa-stone) !important;
 }
 
 .aa-visita-card .d-flex.justify-content-between.align-items-center {
-  margin-top: auto !important; /* Allineamento geometrico perfetto al footer degli item */
+  margin-top: auto !important; 
   padding: 0 1.5rem 1.25rem !important;
 }
 
-/* ─── DRAG & DROP EDITOR ───────────────────────────────────── */
 .aa-dnd-list {
   min-height: 80px;
   border: 2px dashed var(--aa-stone);
@@ -574,7 +546,6 @@ border: 1px solid var(--aa-stone) !important;
   background: var(--aa-cream);
 }
 
-/* ─── FORM ELEMENTS ────────────────────────────────────────── */
 .aa-form-group {
   margin-bottom: 1.25rem;
 }
@@ -647,7 +618,6 @@ border: 1px solid var(--aa-stone) !important;
   border-radius: 0 var(--aa-radius-sm) var(--aa-radius-sm) 0;
 }
 
-/* ─── BUTTONS ──────────────────────────────────────────────── */
 .btn-aa-primary {
   background: var(--aa-charcoal);
   color: var(--aa-cream);
@@ -726,21 +696,17 @@ border: 1px solid var(--aa-stone) !important;
   border-color: var(--aa-danger);
 }
 
-/* ─── FILTRI SIDEBAR (STATICA E NATURALE) ───────────────────── */
 .aa-sidebar-wrapper {
   background: #fff;
   border: 1px solid var(--aa-stone);
   border-radius: var(--aa-radius-lg);
   padding: 1.25rem;
   box-shadow: var(--aa-shadow-sm);
-
-  /* Nessun posizionamento fisso: la barra si muove naturalmente con la pagina */
   position: relative;
   width: 100%;
   height: auto;
 }
 
-/* Sotto-sezioni interne per dare respiro ai blocchi di filtri e log */
 .aa-sidebar-section {
   display: flex;
   flex-direction: column;
@@ -780,7 +746,6 @@ border: 1px solid var(--aa-stone) !important;
   font-weight: 600;
 }
 
-/* ─── STATS BAR ────────────────────────────────────────────── */
 .aa-stats-bar {
   background: var(--aa-charcoal);
   color: var(--aa-cream);
@@ -812,7 +777,6 @@ border: 1px solid var(--aa-stone) !important;
   margin-top: 4px;
 }
   
-  /* 🛡️ BLOCCO DI SICUREZZA PER TUTTA LA VIEWPORT MOBILE */
   html, body {
     max-width: 100% !important;
     overflow-x: hidden !important;
@@ -826,11 +790,11 @@ border: 1px solid var(--aa-stone) !important;
     margin-bottom: 1.5rem;
     display: flex;
     gap: 4px;
-    width: auto; /* <-- SISTEMATO: Impedisce alla barra di sbordare a destra */
+    width: auto; 
   }
 
   .aa-tab {
-    flex: 1; /* Divide lo schermo in 3 parti perfettamente uguali */
+    flex: 1; 
     text-align: center;
     justify-content: center;
     padding: 0.6rem 0.4rem;
@@ -862,13 +826,11 @@ border: 1px solid var(--aa-stone) !important;
     border-bottom: none;
   }
 
-  /* Impedisce che testi eccessivamente lunghi deformino il layout del tavolo */
   .aa-card-body {
     overflow-x: auto !important;
   }
-}
 
-/* COMPORTAMENTO SU PC DESKTOP (Da 768px in su) - RIMANE TUTTO ORIGINALE E NORMALE */
+
 @media (min-width: 768px) {
   .aa-tabs {
     border-bottom: 2px solid var(--aa-stone);
@@ -915,19 +877,16 @@ border: 1px solid var(--aa-stone) !important;
   }
 }
 
-/* Animazione per l'effetto cliccato della riga solo su mobile */
 @media (max-width: 767.98px) {
   .aa-row-clickable-mobile:active td {
     background-color: var(--aa-cream-dark) !important;
   }
 }
 
-/* Effetto di transizione per la freccia dei filtri mobile */
 .transition-transform {
   transition: transform 0.25s ease-in-out;
 }
 
-/* ─── SEARCH BAR ───────────────────────────────────────────── */
 .aa-search-wrap {
   position: relative;
 }
@@ -943,7 +902,6 @@ border: 1px solid var(--aa-stone) !important;
   padding-left: 36px;
 }
 
-/* ─── TOAST ────────────────────────────────────────────────── */
 .aa-toast-container {
   position: fixed;
   bottom: 24px;
@@ -996,7 +954,6 @@ border: 1px solid var(--aa-stone) !important;
   }
 }
 
-/* ─── MODAL ────────────────────────────────────────────────── */
 .aa-modal-overlay {
   position: fixed;
   inset: 0;
@@ -1085,7 +1042,6 @@ border: 1px solid var(--aa-stone) !important;
   }
 }
 
-/* ─── SPINNER ──────────────────────────────────────────────── */
 .aa-spinner {
   display: inline-block;
   width: 20px;
@@ -1113,7 +1069,6 @@ border: 1px solid var(--aa-stone) !important;
   z-index: 10;
 }
 
-/* ─── LOG TABLE ────────────────────────────────────────────── */
 .aa-table {
   width: 100%;
   border-collapse: collapse;
@@ -1145,7 +1100,6 @@ border: 1px solid var(--aa-stone) !important;
   background: var(--aa-cream);
 }
 
-/* ─── SECTION HEADER ───────────────────────────────────────── */
 .aa-section-header {
   display: flex;
   align-items: center;
@@ -1163,7 +1117,6 @@ border: 1px solid var(--aa-stone) !important;
   margin: 0;
 }
 
-/* ─── PAGINATION ───────────────────────────────────────────── */
 .aa-pagination {
   display: flex;
   gap: 4px;
@@ -1201,7 +1154,6 @@ border: 1px solid var(--aa-stone) !important;
   cursor: not-allowed;
 }
 
-/* ─── EMPTY STATE ──────────────────────────────────────────── */
 .aa-empty {
   text-align: center;
   padding: 3rem 1rem;
@@ -1221,7 +1173,6 @@ border: 1px solid var(--aa-stone) !important;
   font-size: 0.9rem;
 }
 
-/* ─── FOOTER ───────────────────────────────────────────────── */
 .aa-footer {
   background: var(--aa-ink);
   color: rgba(255, 255, 255, 0.5);
@@ -1235,7 +1186,6 @@ border: 1px solid var(--aa-stone) !important;
   color: var(--aa-gold-light);
 }
 
-/* ─── UTILITY ──────────────────────────────────────────────── */
 .text-gold {
   color: var(--aa-gold);
 }
@@ -1263,41 +1213,34 @@ border: 1px solid var(--aa-stone) !important;
   margin: 1.25rem 0;
 }
 
-/* ─── RESPONSIVE ───────────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* 1. Icona del menu (Hamburger) color Gold e senza bordi al click */
   .aa-navbar .navbar-toggler {
-    border: none !important;          /* Rimuove il bordo nativo di Bootstrap */
-    outline: none !important;         /* Rimuove la linea di focus */
-    box-shadow: none !important;      /* Rimuove l'alone azzurro/grigio di Bootstrap al click */
+    border: none !important;          
+    outline: none !important;        
+    box-shadow: none !important;     
     padding: 0.25rem;
   }
 
-  /* Cambia il colore delle tre lineette dell'hamburger in Gold */
   .aa-navbar .navbar-toggler-icon {
     filter: invert(74%) sepia(43%) saturate(541%) hue-rotate(11deg) brightness(96%) contrast(89%);
-    /* Nota: questo filtro ricrea esattamente la tonalità del tuo --aa-gold-light su SVG */
   }
 
-  /* 2. Nasconde il testo "visitatore 3 (visitatore)" per salvare spazio sulla barra */
   #utenteInfo {
     display: none !important;
   }
 
-  /* 3. Posiziona il tasto Logout in modo pulito sotto le voci del menu */
   #btnLogout {
     display: block;
     width: 100%;
     text-align: left;
     padding: 0.6rem 1rem;
-    color: var(--aa-gold-light) !important; /* Testo color oro per evidenziare l'azione */
+    color: var(--aa-gold-light) !important; 
     background: transparent;
     border: none;
     font-weight: 600;
     font-size: 0.9rem;
   }
   
-  /* Se nel tuo HTML il logout è un bottone arrotondato stile desktop, azzeriamo l'estetica su mobile */
   .aa-navbar .btn-login[onclick*="logout"] {
     border: none !important;
     background: transparent !important;
@@ -1340,7 +1283,6 @@ border: 1px solid var(--aa-stone) !important;
   }
 }
 
-/* ─── SCROLLBAR ────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -1361,12 +1303,6 @@ border: 1px solid var(--aa-stone) !important;
   display: inline-block;
 }
 
-
-
-/* ─── TOOLBAR AUTORE: SECONDA RIGA SU MOBILE ───────────────── */
-
-/* Su desktop i bottoni autore stanno inline nella stessa riga.
-   Su mobile il wrapper occupa tutta la larghezza → va automaticamente a capo. */
 .aa-author-actions {
   display: flex;
   align-items: center;
@@ -1379,10 +1315,6 @@ border: 1px solid var(--aa-stone) !important;
   }
 }
 
-/* ─────────────────────────────────────────────────────────────
-   🎨 PERSONALIZZAZIONE COLORE RADIO BUTTON (TEMA GOLD)
-   ───────────────────────────────────────────────────────────── */
-/* Colore di sfondo quando il radio button è selezionato */
 .form-check-input:checked {
   background-color: var(--aa-gold) !important;
   border-color: var(--aa-gold) !important;

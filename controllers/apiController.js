@@ -274,7 +274,6 @@ exports.getVisite = async (req, res) => {
 
     const skip = (Number(pagina) - 1) * Number(limite);
 
-    // Sostituiamo la query con una versione .lean() per poter manipolare liberamente l'output
     const [visiteDocs, totale] = await Promise.all([
       Visita.find(filtro)
         .populate("creatorId", "username")
@@ -289,20 +288,20 @@ exports.getVisite = async (req, res) => {
       Visita.countDocuments(filtro),
     ]);
 
-    // 🌟 AGGANCIO DINAMICO DELLE OPERE DEL SEED DATA
-    // Scorriamo le visite ed eseguiamo una ricerca sul database per riempire item_default al volo
+   
+ 
     const visite = await Promise.all(
       visiteDocs.map(async (v) => {
         if (v.tappe && Array.isArray(v.tappe)) {
           v.tappe = await Promise.all(
             v.tappe.map(async (tappa) => {
-              // Se la relazione nativa ObjectId manca (situazione del seed data), cerchiamo l'item per operaId e lingua
+          
               if (
                 !tappa.item_default ||
                 typeof tappa.item_default !== "object"
               ) {
                 const codiceCercato = tappa.operaId || "";
-                const linguaggioVisita = v.livello_base || "medio"; // Accoppia "infantile", "medio", "avanzato"
+                const linguaggioVisita = v.livello_base || "medio";  
 
                 const itemReale = await Item.findOne({
                   operaId: codiceCercato,
@@ -313,7 +312,7 @@ exports.getVisite = async (req, res) => {
                 if (itemReale) {
                   tappa.item_default = itemReale;
                 } else {
-                  // Fallback se non trova la combinazione lingua/codice: prende il primo item disponibile per quell'opera
+                 
                   const fallbackItem = await Item.findOne({
                     operaId: codiceCercato,
                   }).lean();
@@ -484,7 +483,6 @@ exports.adottaVisita = async (req, res) => {
   }
 };
 
-// ─── UTENTI ─────────────────────────────────────────────────
 exports.getUtenti = async (req, res) => {
   try {
     const utenti = await User.find({}, "-password");
@@ -529,13 +527,10 @@ exports.loginUtente = async (req, res) => {
 exports.registraUtente = async (req, res) => {
   try {
     const { username, email, password, ruolo } = req.body;
-
-    // 1. Verifica preliminare della presenza dei dati obbligatori
     if (!username || !email || !password) {
       return risposta(res, 400, null, "Parametri di registrazione incompleti");
     }
 
-    // 2. Controllo duplicati (Evita eccezioni Mongo per violazione di vincoli univoci)
     const utenteEsistente = await User.findOne({
       $or: [
         { username: username.trim() },
@@ -551,26 +546,21 @@ exports.registraUtente = async (req, res) => {
       return risposta(res, 400, null, messaggioErrore);
     }
 
-    // 🛠️ VALIDAZIONE SICURA DEL RUOLO RICHIESTO
-    // Accetta solo "visitatore" o "autore". Qualsiasi altro valore (o se omesso) diventa "visitatore"
+  
     const ruoloValido = ["visitatore", "autore"].includes(ruolo)
       ? ruolo
       : "visitatore";
 
-    // 3. Creazione del nuovo record con il ruolo dinamico validato
     const nuovoUtente = new User({
       username: username.trim(),
       email: email.toLowerCase().trim(),
-      password: password, // Mongoose eseguirà l'hashing nel pre-save hook
+      password: password, 
       ruolo: ruoloValido,
     });
 
     await nuovoUtente.save();
 
-    // 4. Generazione del token d'autenticazione immediato per automatizzare l'accesso
     const token = createAuthToken(nuovoUtente);
-
-    // Escludiamo la password dall'output per sicurezza
     const utenteOutput = nuovoUtente.toJSON();
 
     return res.status(201).json({
@@ -583,7 +573,7 @@ exports.registraUtente = async (req, res) => {
     return risposta(res, 500, null, err.message);
   }
 };
-// ─── LOG & STATS ────────────────────────────────────────────
+
 exports.getLogVendite = async (req, res) => {
   try {
     const items = await Item.find({ "logVendite.0": { $exists: true } })

@@ -18,7 +18,7 @@ const itemSchema = new mongoose.Schema(
     piano: {
       type: String,
       default: "0",
-      enum: ["-1", "0", "1", "2"], // Coerente con il tuo config.json
+      enum: ["-1", "0", "1", "2"], 
     },
     mappa_x: {
       type: Number,

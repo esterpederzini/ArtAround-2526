@@ -45,12 +45,8 @@ const userSchema = new mongoose.Schema(
   },
 );
 
-// Hash password prima del salvataggio.
-// NOTA: questo hook viene eseguito solo su .save() e .create(), NON su insertMany().
-// Per il seeding (scripts/mongo.js) le password vengono hashate manualmente prima di insertMany().
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  // Evitiamo di hashare una password già hashata (es. dopo migrazione automatica in loginUtente)
   if (this.password && this.password.startsWith("$2")) return next();
   this.password = await bcrypt.hash(this.password, 12);
   next();
@@ -60,7 +56,6 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Non restituire la password nelle query
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;
