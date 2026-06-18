@@ -1,4 +1,5 @@
 
+
 :root {
   --aa-cream: #faf8f5;
   --aa-cream-dark: #f2ede7;
@@ -88,7 +89,6 @@ a:hover {
   display: flex !important;
   flex-direction: column !important;
 }
-
 .aa-navbar {
   background: var(--aa-ink) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -286,7 +286,7 @@ font-size: 0.8rem !important;
 background: none !important;
   border-top: 1px solid var(--aa-stone) !important;
   padding: 0.7rem 1rem !important;
-  margin-top: auto !important;
+  margin-top: auto !important; 
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
@@ -408,8 +408,6 @@ border: 1px solid var(--aa-stone) !important;
   box-shadow: var(--aa-shadow-sm) !important;
   transition: all 0.2s !important;
   overflow: hidden !important;
-  
-  /* Struttura interna speculare */
   display: flex !important;
   flex-direction: column !important;
   width: 100% !important;
@@ -776,7 +774,7 @@ border: 1px solid var(--aa-stone) !important;
   letter-spacing: 0.06em;
   margin-top: 4px;
 }
-  
+
   html, body {
     max-width: 100% !important;
     overflow-x: hidden !important;
@@ -825,11 +823,10 @@ border: 1px solid var(--aa-stone) !important;
     box-shadow: var(--aa-shadow-sm);
     border-bottom: none;
   }
-
   .aa-card-body {
     overflow-x: auto !important;
   }
-
+}
 
 @media (min-width: 768px) {
   .aa-tabs {
@@ -1042,6 +1039,7 @@ border: 1px solid var(--aa-stone) !important;
   }
 }
 
+
 .aa-spinner {
   display: inline-block;
   width: 20px;
@@ -1212,11 +1210,10 @@ border: 1px solid var(--aa-stone) !important;
   background: var(--aa-stone);
   margin: 1.25rem 0;
 }
-
 @media (max-width: 768px) {
   .aa-navbar .navbar-toggler {
-    border: none !important;          
-    outline: none !important;        
+    border: none !important;        
+    outline: none !important;         
     box-shadow: none !important;     
     padding: 0.25rem;
   }
@@ -1241,6 +1238,7 @@ border: 1px solid var(--aa-stone) !important;
     font-size: 0.9rem;
   }
   
+ 
   .aa-navbar .btn-login[onclick*="logout"] {
     border: none !important;
     background: transparent !important;
@@ -1302,6 +1300,7 @@ border: 1px solid var(--aa-stone) !important;
   transition: transform 0.2s ease-in-out;
   display: inline-block;
 }
+
 
 .aa-author-actions {
   display: flex;
